@@ -53,10 +53,10 @@ export default buildConfig({
 
   editor: lexicalEditor(),
 
-  // Production: POSTGRES_URI (Zeabur built-in PostgreSQL auto-injects this)
+  // Production: reads POSTGRES_URI or DATABASE_URL (Zeabur PostgreSQL)
   // Local dev: falls back to SQLite (no setup needed)
-  db: process.env.POSTGRES_URI
-    ? postgresAdapter({ pool: { connectionString: process.env.POSTGRES_URI } })
+  db: (process.env.POSTGRES_URI || process.env.DATABASE_URL)
+    ? postgresAdapter({ pool: { connectionString: process.env.POSTGRES_URI || process.env.DATABASE_URL } })
     : sqliteAdapter({ client: { url: 'file:./payload-dev.db' } }),
 
   secret: process.env.PAYLOAD_SECRET || '',
