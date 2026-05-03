@@ -16,6 +16,10 @@ COPY . .
 
 # Next.js collects telemetry - disable it
 ENV NEXT_TELEMETRY_DISABLED=1
+# Dummy secret so Payload config doesn't crash at build time
+# (real secret is injected at runtime via Zeabur env vars)
+ENV PAYLOAD_SECRET=build-time-placeholder
+ENV NEXT_PUBLIC_SITE_URL=https://asahihuuhu.zeabur.app
 
 RUN npm run build
 

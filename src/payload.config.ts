@@ -22,6 +22,8 @@ import { AboutPage } from './globals/AboutPage';
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
+const pgUri = process.env.POSTGRES_URI || process.env.DATABASE_URL || '';
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -36,6 +38,8 @@ export default buildConfig({
       },
     },
   },
+
+  serverURL: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
 
   collections: [Users, Media, News, FAQs, Products, Orders, ProductCategories, NewsCategories, Staff],
 
@@ -53,13 +57,17 @@ export default buildConfig({
 
   editor: lexicalEditor(),
 
-  // Production: reads POSTGRES_URI or DATABASE_URL (Zeabur PostgreSQL)
-  // Local dev: falls back to SQLite (no setup needed)
-  db: (process.env.POSTGRES_URI || process.env.DATABASE_URL)
-    ? postgresAdapter({ pool: { connectionString: process.env.POSTGRES_URI || process.env.DATABASE_URL } })
+  db: pgUri
+    ? postgresAdapter({
+        pool: {
+          connectionString: pgUri,
+          // Zeabur hosted PostgreSQL requires SSL
+          ssl: { rejectUnauthorized: false },
+        },
+      })
     : sqliteAdapter({ client: { url: 'file:./payload-dev.db' } }),
 
-  secret: process.env.PAYLOAD_SECRET || '',
+  secret: process.env.PAYLOAD_SECRET ?? 'dev-secret-change-in-production',
 
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
