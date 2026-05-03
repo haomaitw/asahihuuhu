@@ -1,5 +1,6 @@
 import { getAdminPayload } from '@/app/(payload)/admin/_lib/payload'
 import { MediaLibraryClient } from './MediaLibraryClient'
+// MediaLibraryClient handles its own empty state with inline JSX
 
 export const metadata = { title: '媒體庫' }
 export const dynamic = 'force-dynamic'

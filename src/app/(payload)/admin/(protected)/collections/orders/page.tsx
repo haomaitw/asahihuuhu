@@ -25,7 +25,7 @@ export default async function OrdersPage() {
 
       <Card>
         {docs.length === 0 ? (
-          <EmptyState icon={ShoppingBag} title="尚無訂單" description="顧客完成結帳後訂單將在此顯示" />
+          <EmptyState icon={<ShoppingBag className="h-6 w-6" />} title="尚無訂單" description="顧客完成結帳後訂單將在此顯示" />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">

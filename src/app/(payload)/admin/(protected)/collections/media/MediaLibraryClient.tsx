@@ -82,7 +82,7 @@ export function MediaLibraryClient({ docs: initial, total }: { docs: MediaDoc[];
 
       {docs.length === 0 ? (
         <div className="rounded-adm-2xl border border-adm-border-subtle bg-adm-bg-elevated">
-          <EmptyState icon={ImageIcon} title="媒體庫為空" description="點擊「上傳圖片」新增媒體檔案" />
+          <EmptyState icon={<ImageIcon className="h-6 w-6" />} title="媒體庫為空" description="點擊「上傳圖片」新增媒體檔案" />
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">

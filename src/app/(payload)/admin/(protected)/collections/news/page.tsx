@@ -34,7 +34,7 @@ export default async function NewsPage() {
 
       <Card>
         {docs.length === 0 ? (
-          <EmptyState icon={Newspaper} title="尚無消息" description="點擊「新增消息」發布第一則公告" />
+          <EmptyState icon={<Newspaper className="h-6 w-6" />} title="尚無消息" description="點擊「新增消息」發布第一則公告" />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">

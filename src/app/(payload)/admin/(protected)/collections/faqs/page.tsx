@@ -31,7 +31,7 @@ export default async function FAQsPage() {
 
       <Card>
         {docs.length === 0 ? (
-          <EmptyState icon={HelpCircle} title="尚無問答" description="點擊「新增問答」建立常見問題" />
+          <EmptyState icon={<HelpCircle className="h-6 w-6" />} title="尚無問答" description="點擊「新增問答」建立常見問題" />
         ) : (
           <div className="divide-y divide-adm-border-subtle">
             {docs.map((faq: any) => (

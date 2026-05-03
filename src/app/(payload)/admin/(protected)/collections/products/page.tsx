@@ -36,7 +36,7 @@ export default async function ProductsPage() {
       <Card>
         {docs.length === 0 ? (
           <EmptyState
-            icon={Package}
+            icon={<Package className="h-6 w-6" />}
             title="尚無商品"
             description="點擊「新增商品」建立第一件商品"
           />

@@ -24,7 +24,7 @@ export default async function UsersPage() {
 
       <Card>
         {docs.length === 0 ? (
-          <EmptyState icon={Users} title="尚無使用者" description="請透過 Payload 管理介面新增管理員帳號" />
+          <EmptyState icon={<Users className="h-6 w-6" />} title="尚無使用者" description="請透過 Payload 管理介面新增管理員帳號" />
         ) : (
           <div className="divide-y divide-adm-border-subtle">
             {docs.map((u: any) => {
