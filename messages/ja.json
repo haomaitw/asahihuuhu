@@ -1,0 +1,165 @@
+{
+  "nav": {
+    "news": "お知らせ",
+    "lineup": "メニュー",
+    "shop": "ショップ",
+    "about": "わたしたちについて",
+    "faq": "よくある質問",
+    "privacy": "プライバシーポリシー"
+  },
+  "common": {
+    "seeMore": "See More"
+  },
+  "badge": {
+    "seasonal": "季節限定",
+    "new": "NEW"
+  },
+  "home": {
+    "hero": {
+      "tagline1": "職人がつくる日本式かき氷",
+      "tagline2": "海辺で過ごす午後のひととき",
+      "lede": "トップビジュアルのサブタイトルをここに入力してください。"
+    },
+    "products": {
+      "eyebrow": "PRODUCTS",
+      "title": "メニュー"
+    },
+    "limited": {
+      "eyebrow": "LIMITED TIME",
+      "title": "季節・期間限定"
+    },
+    "news": {
+      "eyebrow": "NEWS",
+      "title": "お知らせ"
+    }
+  },
+  "lineup": {
+    "title": "メニュー",
+    "description": "メニューページのイントロをここに入力してください。",
+    "kakigori": { "title": "かき氷" },
+    "crepes": { "title": "クレープ" },
+    "drinks": { "title": "ドリンク" },
+    "goods": { "title": "グッズ" },
+    "addOns": { "title": "トッピング" },
+    "shavedIce": { "eyebrow": "SHAVED ICE", "title": "かき氷" }
+  },
+  "menu": {
+    "kakigori": {
+      "papaya": "パパイヤミルク",
+      "apple": "アールグレイ アップルパイ",
+      "espuma": "ESPUMA 宇治金時",
+      "tiramisu": "ティラミス",
+      "blueberry": "ブルーベリーヨーグルト",
+      "okinawa": "沖縄黒蜜きなこ"
+    },
+    "addon": {
+      "shiratama": "手作り白玉",
+      "condensed": "練乳",
+      "mascarpone": "マスカルポーネ"
+    },
+    "crepes": {
+      "plain": "プレーンバター",
+      "cinnamon": "シナモンバター",
+      "tiramisu": "ティラミス",
+      "strawberryHoney": "ストロベリー ハニーケーキ",
+      "muscat": "シャインマスカット",
+      "berryBrulee": "ベリー ブリュレ",
+      "whiteStrawberry": "白いちご",
+      "caramelCoffee": "キャラメルコーヒー",
+      "cinnamonApple": "シナモンアップル"
+    },
+    "drinks": {
+      "mixedBerry": "ミックスベリー ソーダ",
+      "grapefruit": "グレープフルーツ ソーダ",
+      "vinegar": "フルーツビネガー",
+      "hotTea": "各種ホットティー",
+      "barleyTea": "麦茶"
+    },
+    "goods": {
+      "cup": "朝日夫婦オリジナル カップ"
+    }
+  },
+  "shop": {
+    "title": "ショップ",
+    "description": "ショップページのイントロをここに入力してください。",
+    "goods": {
+      "eyebrow": "GOODS",
+      "title": "グッズ"
+    },
+    "comingSoon": "決済機能は次のフェーズで公開予定です"
+  },
+  "about": {
+    "title": "わたしたちについて",
+    "description": "アバウトページのイントロをここに入力してください。",
+    "story": {
+      "eyebrow": "OUR STORY",
+      "title": "ブランドストーリー",
+      "p1": "ブランドストーリーの段落 1 をここに入力してください。",
+      "p2": "ブランドストーリーの段落 2 をここに入力してください。",
+      "p3": "ブランドストーリーの段落 3 をここに入力してください。"
+    },
+    "location": {
+      "title": "店舗情報",
+      "body": "住所：\n連絡先："
+    },
+    "hours": {
+      "title": "営業時間",
+      "body": "火〜日 11:00–18:00\n月曜定休"
+    }
+  },
+  "faq": {
+    "title": "よくある質問",
+    "items": {
+      "q1": { "q": "予約は必要ですか？", "a": "管理画面で回答を入力してください。" },
+      "q2": { "q": "テイクアウトはできますか？", "a": "管理画面で回答を入力してください。" },
+      "q3": { "q": "支払い方法は？", "a": "管理画面で回答を入力してください。" },
+      "q4": { "q": "ペットの同伴は可能ですか？", "a": "管理画面で回答を入力してください。" },
+      "q5": { "q": "問い合わせ方法は？", "a": "管理画面で回答を入力してください。" }
+    }
+  },
+  "news": {
+    "title": "お知らせ",
+    "item1": "お知らせ 一（管理画面で編集）",
+    "item2": "お知らせ 二（管理画面で編集）",
+    "item3": "お知らせ 三（管理画面で編集）",
+    "placeholderBody": "お知らせ本文のプレースホルダーです。Phase 2 で Payload から読み込みます。"
+  },
+  "cart": {
+    "title": "カート",
+    "empty": "カートは空です",
+    "subtotal": "小計",
+    "checkout": "レジへ進む",
+    "addToCart": "カートに追加",
+    "added": "追加しました！"
+  },
+  "checkout": {
+    "title": "チェックアウト",
+    "customerInfo": "お客様情報",
+    "name": "お名前",
+    "email": "メールアドレス",
+    "phone": "電話番号",
+    "quantity": "数量",
+    "total": "合計",
+    "pay": "お支払いへ",
+    "processing": "処理中…",
+    "error": "エラーが発生しました。しばらくしてからもう一度お試しください。",
+    "emptyCart": "カートは空です",
+    "backToShop": "ショッピングを続ける",
+    "success": "お支払いが完了しました！",
+    "failed": "お支払いに失敗しました",
+    "successMessage": "ご購入ありがとうございます。できるだけ早くご注文を処理いたします。",
+    "failedMessage": "お支払いが完了しませんでした。ショップに戻ってもう一度お試しください。",
+    "orderNumber": "注文番号"
+  },
+  "product": {
+    "matcha": "ESPUMA 宇治金時",
+    "okinawa": "沖縄黒蜜きなこ",
+    "tiramisu": "ティラミス",
+    "berry": "ブルーベリーヨーグルト",
+    "matcha2": "宇治金時",
+    "okinawa2": "沖縄黒蜜きなこ",
+    "seasonal1": "パパイヤミルク（季節限定）",
+    "seasonal2": "シナモンアップル クレープ",
+    "seasonal3": "ベリー ブリュレ クレープ"
+  }
+}

@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 朝日夫婦 Admin Design Tokens */
+:root {
+  /* ── Backgrounds ── */
+  --adm-bg-base:     #FAF7F2;
+  --adm-bg-elevated: #FFFFFF;
+  --adm-bg-sunken:   #F5F0E8;
+  --adm-bg-overlay:  rgba(20, 18, 14, 0.45);
+
+  /* ── Borders ── */
+  --adm-border-subtle:  #EFEAE0;
+  --adm-border-default: #E5DFD2;
+  --adm-border-strong:  #D4CCB8;
+  --adm-border-focus:   #8B6F47;
+
+  /* ── Text ── */
+  --adm-text-primary:   #1A1614;
+  --adm-text-secondary: #5C544A;
+  --adm-text-tertiary:  #8B8275;
+  --adm-text-disabled:  #B8B0A1;
+  --adm-text-inverse:   #FAF7F2;
+
+  /* ── Brand (warm brown) ── */
+  --adm-brand-50:  #F9F4ED;
+  --adm-brand-100: #F1E5D2;
+  --adm-brand-200: #E5CFA8;
+  --adm-brand-300: #D4B07C;
+  --adm-brand-400: #BF8E54;
+  --adm-brand-500: #A67139;
+  --adm-brand-600: #8B5A2C;
+  --adm-brand-700: #704624;
+  --adm-brand-800: #56361D;
+  --adm-brand-900: #3D2715;
+
+  /* ── Semantic: Success (matcha green) ── */
+  --adm-success-50:  #F0F4EE;
+  --adm-success-500: #6B8E5A;
+  --adm-success-600: #577549;
+
+  /* ── Semantic: Warning (clay yellow) ── */
+  --adm-warning-50:  #FBF5E8;
+  --adm-warning-500: #C99846;
+  --adm-warning-600: #A87C30;
+
+  /* ── Semantic: Danger (muted red) ── */
+  --adm-danger-50:  #F9EEEA;
+  --adm-danger-500: #B85042;
+  --adm-danger-600: #963F33;
+
+  /* ── Semantic: Info (grey-teal) ── */
+  --adm-info-50:  #EDF1F4;
+  --adm-info-500: #4A6B7A;
+  --adm-info-600: #3A5560;
+
+  /* ── Typography ── */
+  --adm-font-sans:  Inter, "Noto Sans TC", system-ui, sans-serif;
+  --adm-font-serif: "Noto Serif TC", "Noto Serif JP", serif;
+  --adm-font-mono:  "JetBrains Mono", ui-monospace, monospace;
+
+  /* ── Radii ── */
+  --adm-radius-sm:  4px;
+  --adm-radius-md:  6px;
+  --adm-radius-lg:  8px;
+  --adm-radius-xl:  12px;
+  --adm-radius-2xl: 16px;
+
+  /* ── Shadows (minimal) ── */
+  --adm-shadow-sm:  0 1px 2px 0 rgba(20, 18, 14, 0.04);
+  --adm-shadow:     0 1px 3px 0 rgba(20, 18, 14, 0.06);
+  --adm-shadow-md:  0 4px 12px -2px rgba(20, 18, 14, 0.08);
+
+  /* ── Transitions ── */
+  --adm-t-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --adm-t-base:   200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --adm-t-slow:   300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Sidebar ── */
+  --adm-sidebar-width:      240px;
+  --adm-sidebar-collapsed:  64px;
+  --adm-topbar-height:      56px;
+}

@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #FBF8F3;
+  --foreground: #2A2A2A;
+  --radius-image: 12px;
+  --radius-card: 16px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Typography scale ─────────────────────────────────────────── */
+@layer components {
+  /* Eyebrow label above section headings */
+  .section-eyebrow {
+    @apply text-[10px] md:text-xs tracking-[0.35em] uppercase text-sea-500 font-medium font-sans;
+  }
+
+  /* Primary section heading — serif, generous tracking */
+  .section-heading {
+    @apply font-serif text-2xl md:text-3xl lg:text-4xl text-ink tracking-[0.15em] leading-snug;
+  }
+
+  /* Sub-heading inside sections (location, hours, etc.) */
+  .sub-heading {
+    @apply font-serif text-lg md:text-xl tracking-[0.2em] text-ink;
+  }
+
+  /* Body prose text */
+  .body-text {
+    @apply text-sm leading-loose tracking-wide text-ink/75 font-sans;
+  }
+
+  /* Caption / meta label (dates, categories) */
+  .caption-text {
+    @apply text-xs tracking-[0.25em] text-sea-500 font-medium font-sans tabular-nums;
+  }
+
+  /* ─── Layout ─────────────────────────────────────────────────── */
+  .container-content {
+    @apply mx-auto w-full max-w-content px-6 md:px-10;
+  }
+
+  /* ─── Buttons ─────────────────────────────────────────────────── */
+  .pill-button {
+    @apply inline-flex items-center gap-2 rounded-full bg-sea-400 px-7 py-3 text-xs tracking-[0.2em] text-white shadow-sm
+           transition-all duration-300 hover:bg-sea-500 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm;
+  }
+
+  /* ─── Product image frame ─────────────────────────────────────── */
+  .product-image-wrap {
+    @apply relative overflow-hidden bg-paper-100;
+    border-radius: var(--radius-image);
+    border: 1px solid rgba(42, 42, 42, 0.06);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  }
+
+  /* ─── Interactive card ────────────────────────────────────────── */
+  .interactive-card {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-md;
+  }
+
+  /* ─── Nav link with animated underline ───────────────────────── */
+  .nav-link {
+    @apply relative tracking-widest transition-opacity duration-200 hover:opacity-100;
+  }
+  .nav-link::after {
+    content: '';
+    @apply absolute -bottom-0.5 left-0 h-px w-full bg-current origin-left scale-x-0 transition-transform duration-300;
+  }
+  .nav-link:hover::after {
+    @apply scale-x-100;
+  }
+}

@@ -1,0 +1,479 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   朝日夫婦 — Admin Panel Theme
+   Japanese-minimalist, matching the public site's design system.
+   All overrides live inside @layer payload (wins over payload-default).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer payload {
+
+  /* ── 1. Design Tokens ─────────────────────────────────────────────────── */
+  :root {
+    /* Fonts */
+    --font-body:  var(--font-noto-tc-admin,    'Noto Sans TC'),  -apple-system, sans-serif;
+    --font-serif: var(--font-noto-serif-tc-admin, 'Noto Serif TC'), Georgia, serif;
+
+    /* Warm cream base scale */
+    --color-base-0:    #FBF8F3;
+    --color-base-50:   #F5EFE6;
+    --color-base-100:  #EBE1D0;
+    --color-base-150:  #DDD3BC;
+    --color-base-200:  #CFC5AB;
+    --color-base-250:  #C1B699;
+    --color-base-300:  #B2A787;
+    --color-base-350:  #A49876;
+    --color-base-400:  #968965;
+    --color-base-450:  #877A55;
+    --color-base-500:  #796B46;
+    --color-base-550:  #6B5D39;
+    --color-base-600:  #5D4F2D;
+    --color-base-650:  #4F4122;
+    --color-base-700:  #413417;
+    --color-base-750:  #33270D;
+    --color-base-800:  #261B04;
+    --color-base-850:  #1C1200;
+    --color-base-900:  #130C00;
+    --color-base-950:  #0A0700;
+    --color-base-1000: #040200;
+
+    /* Sea-blue primary */
+    --color-success-50:  #F2F8FB;
+    --color-success-100: #E4F0F6;
+    --color-success-150: #CCDFE9;
+    --color-success-200: #B3CEDB;
+    --color-success-250: #98BCCD;
+    --color-success-300: #7EABBE;
+    --color-success-350: #6FAEC5;
+    --color-success-400: #6FAEC5;
+    --color-success-450: #5AA1B9;
+    --color-success-500: #4D94B0;
+    --color-success-550: #3F83A0;
+    --color-success-600: #3A7892;
+    --color-success-650: #336B84;
+    --color-success-700: #2F6177;
+    --color-success-750: #295569;
+    --color-success-800: #274E60;
+    --color-success-850: #21424F;
+    --color-success-900: #1F3D4C;
+    --color-success-950: #152C37;
+
+    /* Theme elevation (light) */
+    --theme-elevation-0:    var(--color-base-0);
+    --theme-elevation-50:   var(--color-base-50);
+    --theme-elevation-100:  var(--color-base-100);
+    --theme-elevation-150:  var(--color-base-150);
+    --theme-elevation-200:  var(--color-base-200);
+    --theme-elevation-250:  var(--color-base-250);
+    --theme-elevation-300:  var(--color-base-300);
+    --theme-elevation-350:  var(--color-base-350);
+    --theme-elevation-400:  var(--color-base-400);
+    --theme-elevation-450:  var(--color-base-450);
+    --theme-elevation-500:  var(--color-base-500);
+    --theme-elevation-550:  var(--color-base-550);
+    --theme-elevation-600:  var(--color-base-600);
+    --theme-elevation-650:  var(--color-base-650);
+    --theme-elevation-700:  var(--color-base-700);
+    --theme-elevation-750:  var(--color-base-750);
+    --theme-elevation-800:  var(--color-base-800);
+    --theme-elevation-850:  var(--color-base-850);
+    --theme-elevation-900:  var(--color-base-900);
+    --theme-elevation-950:  var(--color-base-950);
+    --theme-elevation-1000: var(--color-base-1000);
+
+    --theme-bg:           var(--theme-elevation-0);
+    --theme-input-bg:     var(--color-base-0);
+    --theme-text:         var(--color-base-800);
+    --theme-border-color: rgba(42, 42, 42, 0.10);
+    --theme-overlay:      rgba(5, 5, 5, 0.4);
+
+    /* Radius — aligns with frontend card/image tokens */
+    --style-radius-s: 4px;
+    --style-radius-m: 8px;
+    --style-radius-l: 12px;
+  }
+
+  /* ── 2. Document foundation ───────────────────────────────────────────── */
+  html {
+    background: var(--theme-bg);
+    font-family: var(--font-body);
+    color: var(--theme-text);
+    -webkit-font-smoothing: antialiased;
+  }
+  body { font-family: var(--font-body); }
+
+  /* ── 3. Typography hierarchy ─────────────────────────────────────────── */
+
+  /* Page / doc titles → serif, matching site's section headings */
+  h1,
+  .document-header__title,
+  .collection-list__header h1,
+  .dashboard h2.section-card__title {
+    font-family: var(--font-serif) !important;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--color-base-800);
+  }
+
+  /* Section / group labels → small-caps style like frontend eyebrows */
+  .field-label,
+  .field-type > .label,
+  .group-field__title,
+  .collapsible__header,
+  .row-label,
+  .tabs-field__tab-button {
+    font-family: var(--font-body) !important;
+    font-size: 0.72rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    color: var(--color-base-500) !important;
+  }
+
+  /* Nav section labels */
+  .nav__label {
+    font-size: 0.65rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.16em !important;
+    text-transform: uppercase !important;
+    color: var(--color-base-400) !important;
+    padding: 1.2rem 1.2rem 0.3rem !important;
+  }
+
+  /* Breadcrumb / step-nav text */
+  .step-nav__label,
+  .step-nav a {
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--color-base-400);
+  }
+
+  /* ── 4. App header ───────────────────────────────────────────────────── */
+  .app-header {
+    background: var(--theme-elevation-0) !important;
+    border-bottom: 1px solid var(--theme-border-color) !important;
+    box-shadow: none !important;
+    height: calc(var(--base) * 2.6) !important;
+  }
+
+  /* ── 5. Nav sidebar ──────────────────────────────────────────────────── */
+  .nav {
+    background: var(--color-base-50) !important;
+    border-right: 1px solid var(--theme-border-color) !important;
+    box-shadow: none !important;
+  }
+
+  /* Nav brand / logo area */
+  .nav__brand {
+    border-bottom: 1px solid var(--theme-border-color);
+    padding: 1.1rem 1.2rem !important;
+    min-height: auto !important;
+  }
+
+  /* Nav links */
+  .nav__link {
+    border-radius: var(--style-radius-m) !important;
+    margin: 1px 8px !important;
+    padding: 0.45rem 0.75rem !important;
+    font-size: 0.82rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.02em !important;
+    transition: background 120ms ease, color 120ms ease !important;
+    color: var(--color-base-600) !important;
+  }
+  .nav__link:hover {
+    background: var(--color-base-100) !important;
+    color: var(--color-base-800) !important;
+  }
+  .nav__link--active,
+  .nav__link[aria-current] {
+    background: var(--color-success-100) !important;
+    color: var(--color-success-700) !important;
+    font-weight: 500 !important;
+  }
+  .nav__link--active::before {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 20%;
+    bottom: 20%;
+    width: 2px;
+    background: var(--color-success-500);
+    border-radius: 2px;
+  }
+  .nav__link { position: relative; }
+
+  /* ── 6. Tabs (Edit / API) ────────────────────────────────────────────── */
+  .tabs-field__tabs,
+  .doc-tab {
+    border-bottom: 1px solid var(--theme-border-color) !important;
+    background: transparent !important;
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+  .tabs-field__tab-button,
+  .doc-tab__link {
+    font-size: 0.78rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.10em !important;
+    text-transform: uppercase !important;
+    color: var(--color-base-400) !important;
+    padding: 0.65rem 1.2rem !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    background: transparent !important;
+    margin-bottom: -1px !important;
+    transition: color 120ms ease, border-color 120ms ease !important;
+  }
+  .tabs-field__tab-button:hover,
+  .doc-tab__link:hover {
+    color: var(--color-base-700) !important;
+    border-bottom-color: var(--color-base-200) !important;
+  }
+  .tabs-field__tab-button--active,
+  .doc-tab__link--active,
+  .doc-tab__link[aria-selected='true'] {
+    color: var(--color-success-600) !important;
+    border-bottom-color: var(--color-success-500) !important;
+  }
+
+  /* ── 7. Inputs & textarea ────────────────────────────────────────────── */
+  .field-type input[type='text'],
+  .field-type input[type='email'],
+  .field-type input[type='password'],
+  .field-type input[type='number'],
+  .field-type input[type='url'],
+  .field-type textarea,
+  .field-type select,
+  input.field-type,
+  textarea.field-type {
+    background: #FEFCF8 !important;
+    border: 1px solid rgba(42, 42, 42, 0.14) !important;
+    border-radius: var(--style-radius-m) !important;
+    color: var(--color-base-800) !important;
+    font-family: var(--font-body) !important;
+    font-size: 0.88rem !important;
+    padding: 0.6rem 0.85rem !important;
+    transition: border-color 150ms ease, box-shadow 150ms ease !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.03) !important;
+  }
+  .field-type input:focus,
+  .field-type textarea:focus,
+  .field-type select:focus {
+    border-color: var(--color-success-400) !important;
+    box-shadow: 0 0 0 3px rgba(77, 148, 176, 0.14), inset 0 1px 2px rgba(0,0,0,0.02) !important;
+    outline: none !important;
+  }
+  ::placeholder { color: var(--color-base-300) !important; }
+
+  /* ── 8. Buttons ──────────────────────────────────────────────────────── */
+
+  /* Primary: pill-shaped, sea blue — matches frontend .pill-button */
+  .btn.btn--style-primary,
+  .btn--style-primary {
+    background: var(--color-success-500) !important;
+    border: none !important;
+    border-radius: 100px !important;
+    padding: 0.5rem 1.4rem !important;
+    font-family: var(--font-body) !important;
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.06em !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(77, 148, 176, 0.25) !important;
+    transition: background 140ms ease, box-shadow 140ms ease, transform 80ms ease !important;
+  }
+  .btn.btn--style-primary:hover,
+  .btn--style-primary:hover {
+    background: var(--color-success-600) !important;
+    box-shadow: 0 4px 16px rgba(77, 148, 176, 0.30) !important;
+    transform: translateY(-1px) !important;
+  }
+  .btn.btn--style-primary:active,
+  .btn--style-primary:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 1px 4px rgba(77, 148, 176, 0.20) !important;
+  }
+
+  /* Secondary / ghost buttons */
+  .btn.btn--style-secondary,
+  .btn--style-secondary {
+    background: transparent !important;
+    border: 1px solid rgba(42, 42, 42, 0.18) !important;
+    border-radius: 100px !important;
+    font-size: 0.82rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.04em !important;
+    color: var(--color-base-600) !important;
+    transition: border-color 140ms ease, color 140ms ease, background 140ms ease !important;
+  }
+  .btn.btn--style-secondary:hover,
+  .btn--style-secondary:hover {
+    border-color: var(--color-success-400) !important;
+    color: var(--color-success-600) !important;
+    background: var(--color-success-50) !important;
+  }
+
+  /* ── 9. Doc controls bar (top of form) ───────────────────────────────── */
+  .doc-controls,
+  .doc-controls__controls {
+    background: var(--theme-elevation-0) !important;
+    border-bottom: 1px solid var(--theme-border-color) !important;
+    box-shadow: none !important;
+  }
+
+  /* ── 10. Dashboard cards ─────────────────────────────────────────────── */
+  .dashboard__card-list {
+    gap: 12px !important;
+  }
+  .card {
+    background: var(--color-base-0) !important;
+    border: 1px solid rgba(42, 42, 42, 0.08) !important;
+    border-radius: var(--style-radius-l) !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+    transition: box-shadow 180ms ease, transform 180ms ease, border-color 180ms ease !important;
+  }
+  .card:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08) !important;
+    transform: translateY(-3px) !important;
+    border-color: rgba(77, 148, 176, 0.20) !important;
+  }
+  .card__title {
+    font-family: var(--font-serif) !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    font-size: 1rem !important;
+  }
+
+  /* ── 11. Collection list / table ─────────────────────────────────────── */
+  .collection-list {
+    border-radius: var(--style-radius-l) !important;
+    border: 1px solid rgba(42, 42, 42, 0.07) !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
+  }
+  .table__header-wrap th,
+  .table tr th {
+    font-size: 0.70rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    color: var(--color-base-400) !important;
+    background: var(--color-base-50) !important;
+    border-bottom: 1px solid var(--theme-border-color) !important;
+    padding: 0.65rem 1rem !important;
+  }
+  .table tr td {
+    border-bottom: 1px solid rgba(42,42,42,0.05) !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.85rem !important;
+    transition: background 100ms ease !important;
+  }
+  .table tbody tr:hover td {
+    background: var(--color-success-50) !important;
+  }
+  .table tbody tr:last-child td {
+    border-bottom: none !important;
+  }
+
+  /* ── 12. Form panels / group fields ──────────────────────────────────── */
+  .render-fields,
+  .group-field__wrap,
+  .collapsible__content {
+    background: var(--color-base-0) !important;
+    border-radius: var(--style-radius-l) !important;
+    border: 1px solid rgba(42, 42, 42, 0.07) !important;
+    padding: 1.5rem !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03) !important;
+  }
+
+  /* ── 13. Rich text editor ────────────────────────────────────────────── */
+  .rich-text .editor-container,
+  .lexical-editor {
+    border: 1px solid rgba(42, 42, 42, 0.12) !important;
+    border-radius: var(--style-radius-m) !important;
+    background: #FEFCF8 !important;
+  }
+  .rich-text .editor-container:focus-within,
+  .lexical-editor:focus-within {
+    border-color: var(--color-success-400) !important;
+    box-shadow: 0 0 0 3px rgba(77, 148, 176, 0.12) !important;
+  }
+
+  /* ── 14. Breadcrumb / step nav ───────────────────────────────────────── */
+  .step-nav {
+    background: transparent !important;
+    border-bottom: 1px solid var(--theme-border-color) !important;
+    padding: 0.5rem var(--gutter-h) !important;
+  }
+  .step-nav__home img {
+    border-radius: 4px;
+  }
+
+  /* ── 15. Upload / Media field ────────────────────────────────────────── */
+  .file-details,
+  .upload-drop-zone {
+    border-radius: var(--style-radius-m) !important;
+    border: 1.5px dashed rgba(42, 42, 42, 0.14) !important;
+    background: var(--color-base-50) !important;
+    transition: border-color 150ms ease, background 150ms ease !important;
+  }
+  .upload-drop-zone:hover {
+    border-color: var(--color-success-400) !important;
+    background: var(--color-success-50) !important;
+  }
+
+  /* ── 16. Modals / drawers ────────────────────────────────────────────── */
+  .modal-item__header,
+  .drawer__header {
+    border-bottom: 1px solid var(--theme-border-color) !important;
+    font-family: var(--font-serif) !important;
+    font-weight: 500 !important;
+  }
+
+  /* ── 17. Select / relationship fields ───────────────────────────────── */
+  .react-select__control {
+    background: #FEFCF8 !important;
+    border: 1px solid rgba(42, 42, 42, 0.14) !important;
+    border-radius: var(--style-radius-m) !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.03) !important;
+    transition: border-color 150ms ease !important;
+  }
+  .react-select__control--is-focused {
+    border-color: var(--color-success-400) !important;
+    box-shadow: 0 0 0 3px rgba(77, 148, 176, 0.14) !important;
+  }
+  .react-select__option--is-selected {
+    background: var(--color-success-500) !important;
+  }
+  .react-select__option:hover {
+    background: var(--color-success-50) !important;
+    color: var(--color-success-700) !important;
+  }
+
+  /* ── 18. Status badge / pill ─────────────────────────────────────────── */
+  .pill {
+    border-radius: 100px !important;
+    font-size: 0.70rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    padding: 0.15rem 0.65rem !important;
+  }
+
+  /* ── 19. Toast notifications ─────────────────────────────────────────── */
+  [data-sonner-toast] {
+    border-radius: var(--style-radius-m) !important;
+    font-family: var(--font-body) !important;
+    font-size: 0.82rem !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10) !important;
+  }
+
+  /* ── 20. Scrollbar — thin, warm ─────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-base-200);
+    border-radius: 100px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-base-300); }
+}

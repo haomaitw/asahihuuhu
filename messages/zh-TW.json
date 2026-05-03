@@ -1,0 +1,165 @@
+{
+  "nav": {
+    "news": "最新消息",
+    "lineup": "產品介紹",
+    "shop": "周邊商品",
+    "about": "關於朝日",
+    "faq": "常見問題",
+    "privacy": "隱私權政策"
+  },
+  "common": {
+    "seeMore": "See More"
+  },
+  "badge": {
+    "seasonal": "季節限定",
+    "new": "NEW"
+  },
+  "home": {
+    "hero": {
+      "tagline1": "職人堅持的日式刨冰",
+      "tagline2": "午後與大自然的一場沁涼約會",
+      "lede": "請輸入首頁主視覺的副標說明文字。"
+    },
+    "products": {
+      "eyebrow": "PRODUCTS",
+      "title": "產品介紹"
+    },
+    "limited": {
+      "eyebrow": "LIMITED TIME",
+      "title": "季節 & 期間限定"
+    },
+    "news": {
+      "eyebrow": "NEWS",
+      "title": "最新消息"
+    }
+  },
+  "lineup": {
+    "title": "產品介紹",
+    "description": "請輸入產品介紹頁的引導文字。",
+    "kakigori": { "title": "日式刨冰" },
+    "crepes": { "title": "日式可麗餅" },
+    "drinks": { "title": "飲品" },
+    "goods": { "title": "週邊商品" },
+    "addOns": { "title": "加點項目" },
+    "shavedIce": { "eyebrow": "SHAVED ICE", "title": "刨冰系列" }
+  },
+  "menu": {
+    "kakigori": {
+      "papaya": "木瓜牛奶",
+      "apple": "伯爵的蘋果派",
+      "espuma": "ESPUMA 宇治金時",
+      "tiramisu": "巧克力提拉米蘇",
+      "blueberry": "藍莓優格",
+      "okinawa": "沖繩黑蜜黃豆粉"
+    },
+    "addon": {
+      "shiratama": "手工白玉",
+      "condensed": "煉乳",
+      "mascarpone": "馬仕卡朋乳酪"
+    },
+    "crepes": {
+      "plain": "原味奶油可麗餅",
+      "cinnamon": "肉桂奶油可麗餅",
+      "tiramisu": "巧克力提拉米蘇可麗餅",
+      "strawberryHoney": "草莓蜂蜜蛋糕可麗餅",
+      "muscat": "麝香葡萄可麗餅",
+      "berryBrulee": "莓果烤布蕾可麗餅",
+      "whiteStrawberry": "白草莓可麗餅",
+      "caramelCoffee": "焦糖咖啡可麗餅",
+      "cinnamonApple": "肉桂蘋果可麗餅"
+    },
+    "drinks": {
+      "mixedBerry": "綜合莓果",
+      "grapefruit": "葡萄柚",
+      "vinegar": "果醋",
+      "hotTea": "各式熱茶",
+      "barleyTea": "麥茶"
+    },
+    "goods": {
+      "cup": "朝日夫婦獨享杯"
+    }
+  },
+  "shop": {
+    "title": "周邊商品",
+    "description": "請輸入周邊商品頁的引導文字。",
+    "goods": {
+      "eyebrow": "GOODS",
+      "title": "周邊精選"
+    },
+    "comingSoon": "結帳功能將於下一階段上線"
+  },
+  "about": {
+    "title": "關於朝日",
+    "description": "請輸入關於頁的引導文字。",
+    "story": {
+      "eyebrow": "OUR STORY",
+      "title": "品牌故事",
+      "p1": "請輸入品牌故事第一段。",
+      "p2": "請輸入品牌故事第二段。",
+      "p3": "請輸入品牌故事第三段。"
+    },
+    "location": {
+      "title": "店鋪資訊",
+      "body": "地址：\n聯絡電話："
+    },
+    "hours": {
+      "title": "營業時間",
+      "body": "週二—週日 11:00–18:00\n週一公休"
+    }
+  },
+  "faq": {
+    "title": "常見問題",
+    "items": {
+      "q1": { "q": "請問需要預約嗎？", "a": "請於後台輸入答覆內容。" },
+      "q2": { "q": "可以外帶嗎？", "a": "請於後台輸入答覆內容。" },
+      "q3": { "q": "店內支付方式？", "a": "請於後台輸入答覆內容。" },
+      "q4": { "q": "可以攜帶寵物嗎？", "a": "請於後台輸入答覆內容。" },
+      "q5": { "q": "如何聯絡你們？", "a": "請於後台輸入答覆內容。" }
+    }
+  },
+  "news": {
+    "title": "最新消息",
+    "item1": "公告標題一（請於後台編輯）",
+    "item2": "公告標題二（請於後台編輯）",
+    "item3": "公告標題三（請於後台編輯）",
+    "placeholderBody": "這是公告內文的占位區塊，Phase 2 串接 Payload 後將從後台讀取。"
+  },
+  "cart": {
+    "title": "購物車",
+    "empty": "購物車是空的",
+    "subtotal": "小計",
+    "checkout": "前往結帳",
+    "addToCart": "加入購物車",
+    "added": "已加入！"
+  },
+  "checkout": {
+    "title": "結帳",
+    "customerInfo": "購買人資訊",
+    "name": "姓名",
+    "email": "電子郵件",
+    "phone": "電話",
+    "quantity": "數量",
+    "total": "合計",
+    "pay": "前往付款",
+    "processing": "處理中…",
+    "error": "發生錯誤，請稍後再試",
+    "emptyCart": "購物車是空的",
+    "backToShop": "繼續購物",
+    "success": "付款成功！",
+    "failed": "付款失敗",
+    "successMessage": "感謝您的購買，我們將盡快為您處理訂單。",
+    "failedMessage": "付款未完成，請返回商店重試。",
+    "orderNumber": "訂單編號"
+  },
+  "product": {
+    "matcha": "ESPUMA 宇治金時",
+    "okinawa": "沖繩黑蜜黃豆粉",
+    "tiramisu": "巧克力提拉米蘇",
+    "berry": "藍莓優格",
+    "matcha2": "宇治金時",
+    "okinawa2": "沖繩黑蜜黃豆粉",
+    "seasonal1": "木瓜牛奶（季節限定）",
+    "seasonal2": "肉桂蘋果可麗餅",
+    "seasonal3": "莓果烤布蕾可麗餅"
+  }
+}

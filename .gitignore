@@ -1,0 +1,42 @@
+
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+# debug
+# dependencies
+# editor
+# env files
+# misc
+# next.js
+# production
+# testing
+# typescript
+*.pem
+*.tsbuildinfo
+.DS_Store
+.env
+.env*.local
+.env.development
+.env.local
+.env.production
+.idea/
+.pnp.*
+.pnpm-debug.log*
+.vscode/
+.yarn/*
+/.next/
+/.pnp
+/build
+/coverage
+/node_modules
+/out/
+next-env.d.ts
+npm-debug.log*
+payload-dev.db
+src/payload-types.ts
+yarn-debug.log*
+yarn-error.log*
+
+# Claude settings
+.claude/settings.local.json

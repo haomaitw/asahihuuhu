@@ -1,0 +1,165 @@
+{
+  "nav": {
+    "news": "News",
+    "lineup": "Line Up",
+    "shop": "Shop",
+    "about": "About",
+    "faq": "FAQ",
+    "privacy": "Privacy"
+  },
+  "common": {
+    "seeMore": "See More"
+  },
+  "badge": {
+    "seasonal": "Seasonal",
+    "new": "NEW"
+  },
+  "home": {
+    "hero": {
+      "tagline1": "Handcrafted Japanese Shaved Ice",
+      "tagline2": "An afternoon by the sea",
+      "lede": "Enter the homepage hero subtitle here."
+    },
+    "products": {
+      "eyebrow": "PRODUCTS",
+      "title": "Our Products"
+    },
+    "limited": {
+      "eyebrow": "LIMITED TIME",
+      "title": "Seasonal & Limited"
+    },
+    "news": {
+      "eyebrow": "NEWS",
+      "title": "Latest News"
+    }
+  },
+  "lineup": {
+    "title": "Line Up",
+    "description": "Enter the line up intro copy here.",
+    "kakigori": { "title": "Kakigōri" },
+    "crepes": { "title": "Japanese Crepes" },
+    "drinks": { "title": "Drinks" },
+    "goods": { "title": "Goods" },
+    "addOns": { "title": "Add-ons" },
+    "shavedIce": { "eyebrow": "SHAVED ICE", "title": "Kakigōri" }
+  },
+  "menu": {
+    "kakigori": {
+      "papaya": "Papaya Milk",
+      "apple": "Earl Grey Apple Pie",
+      "espuma": "ESPUMA Uji Kintoki",
+      "tiramisu": "Chocolate Tiramisu",
+      "blueberry": "Blueberry Yogurt",
+      "okinawa": "Okinawa Kuromitsu Kinako"
+    },
+    "addon": {
+      "shiratama": "Handmade Shiratama",
+      "condensed": "Condensed Milk",
+      "mascarpone": "Mascarpone"
+    },
+    "crepes": {
+      "plain": "Plain Butter Crepe",
+      "cinnamon": "Cinnamon Butter Crepe",
+      "tiramisu": "Chocolate Tiramisu Crepe",
+      "strawberryHoney": "Strawberry Honey Cake Crepe",
+      "muscat": "Muscat Crepe",
+      "berryBrulee": "Berry Brûlée Crepe",
+      "whiteStrawberry": "White Strawberry Crepe",
+      "caramelCoffee": "Caramel Coffee Crepe",
+      "cinnamonApple": "Cinnamon Apple Crepe"
+    },
+    "drinks": {
+      "mixedBerry": "Mixed Berry Soda",
+      "grapefruit": "Grapefruit Soda",
+      "vinegar": "Fruit Vinegar Soda",
+      "hotTea": "Assorted Hot Tea",
+      "barleyTea": "Barley Tea"
+    },
+    "goods": {
+      "cup": "Asahi Huuhu Cup"
+    }
+  },
+  "shop": {
+    "title": "Shop",
+    "description": "Enter the shop page intro copy here.",
+    "goods": {
+      "eyebrow": "GOODS",
+      "title": "Goods & Merch"
+    },
+    "comingSoon": "Checkout coming in the next phase"
+  },
+  "about": {
+    "title": "About",
+    "description": "Enter the about page intro copy here.",
+    "story": {
+      "eyebrow": "OUR STORY",
+      "title": "Our Story",
+      "p1": "Enter paragraph one of the brand story.",
+      "p2": "Enter paragraph two of the brand story.",
+      "p3": "Enter paragraph three of the brand story."
+    },
+    "location": {
+      "title": "Visit Us",
+      "body": "Address:\nContact:"
+    },
+    "hours": {
+      "title": "Hours",
+      "body": "Tue–Sun 11:00–18:00\nClosed on Mondays"
+    }
+  },
+  "faq": {
+    "title": "FAQ",
+    "items": {
+      "q1": { "q": "Do I need a reservation?", "a": "Enter your answer in the admin panel." },
+      "q2": { "q": "Can I order takeaway?", "a": "Enter your answer in the admin panel." },
+      "q3": { "q": "What payment methods are accepted?", "a": "Enter your answer in the admin panel." },
+      "q4": { "q": "Are pets allowed?", "a": "Enter your answer in the admin panel." },
+      "q5": { "q": "How can I contact you?", "a": "Enter your answer in the admin panel." }
+    }
+  },
+  "news": {
+    "title": "News",
+    "item1": "News title one (edit in admin)",
+    "item2": "News title two (edit in admin)",
+    "item3": "News title three (edit in admin)",
+    "placeholderBody": "This is a placeholder for the news body — it will be loaded from Payload in Phase 2."
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty",
+    "subtotal": "Subtotal",
+    "checkout": "Proceed to Checkout",
+    "addToCart": "Add to Cart",
+    "added": "Added!"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "customerInfo": "Customer Info",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "quantity": "Qty",
+    "total": "Total",
+    "pay": "Pay Now",
+    "processing": "Processing…",
+    "error": "Something went wrong, please try again",
+    "emptyCart": "Your cart is empty",
+    "backToShop": "Continue Shopping",
+    "success": "Payment Successful!",
+    "failed": "Payment Failed",
+    "successMessage": "Thank you for your purchase. We'll process your order shortly.",
+    "failedMessage": "Payment was not completed. Please return to the shop and try again.",
+    "orderNumber": "Order Number"
+  },
+  "product": {
+    "matcha": "ESPUMA Uji Kintoki",
+    "okinawa": "Okinawa Kuromitsu Kinako",
+    "tiramisu": "Chocolate Tiramisu",
+    "berry": "Blueberry Yogurt",
+    "matcha2": "Uji Kintoki",
+    "okinawa2": "Okinawa Kuromitsu Kinako",
+    "seasonal1": "Papaya Milk (Seasonal)",
+    "seasonal2": "Cinnamon Apple Crepe",
+    "seasonal3": "Berry Brûlée Crepe"
+  }
+}
