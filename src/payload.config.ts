@@ -1,5 +1,5 @@
 import { buildConfig } from 'payload';
-import { mongooseAdapter } from '@payloadcms/db-mongodb';
+import { postgresAdapter } from '@payloadcms/db-postgres';
 import { sqliteAdapter } from '@payloadcms/db-sqlite';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import sharp from 'sharp';
@@ -53,9 +53,10 @@ export default buildConfig({
 
   editor: lexicalEditor(),
 
-  // Production: set MONGODB_URI; local dev falls back to SQLite (no DB setup required)
-  db: process.env.MONGODB_URI
-    ? mongooseAdapter({ url: process.env.MONGODB_URI })
+  // Production: POSTGRES_URI (Zeabur built-in PostgreSQL auto-injects this)
+  // Local dev: falls back to SQLite (no setup needed)
+  db: process.env.POSTGRES_URI
+    ? postgresAdapter({ pool: { connectionString: process.env.POSTGRES_URI } })
     : sqliteAdapter({ client: { url: 'file:./payload-dev.db' } }),
 
   secret: process.env.PAYLOAD_SECRET || '',
