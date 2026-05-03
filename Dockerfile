@@ -1,52 +1,56 @@
 FROM node:20-alpine AS base
 
-# Install dependencies only when needed
+# ── deps: install all node_modules ──────────────────────────────
 FROM base AS deps
-RUN apk add --no-cache libc6-compat python3 make g++
+# libc6-compat + build tools for native modules (sharp, pg, etc.)
+RUN apk add --no-cache libc6-compat python3 make g++ vips-dev
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Build the source code
+# ── builder: compile Next.js ─────────────────────────────────────
 FROM base AS builder
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat vips-dev
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Next.js collects telemetry - disable it
 ENV NEXT_TELEMETRY_DISABLED=1
-# Dummy secret so Payload config doesn't crash at build time
-# (real secret is injected at runtime via Zeabur env vars)
+# Placeholder values so Payload config doesn't crash at build time
 ENV PAYLOAD_SECRET=build-time-placeholder
 ENV NEXT_PUBLIC_SITE_URL=https://asahihuuhu.zeabur.app
 
 RUN npm run build
 
-# Production image
+# ── runner: minimal production image ────────────────────────────
 FROM base AS runner
+# Runtime deps for sharp (libvips) and native node modules
+RUN apk add --no-cache libc6-compat vips
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN adduser  --system --uid 1001 nextjs
 
-# Copy public assets and uploads
+# Public assets
 COPY --from=builder /app/public ./public
 
-# Create uploads directory with correct permissions
+# Uploads directory
 RUN mkdir -p ./public/uploads && chown nextjs:nodejs ./public/uploads
 
-# Copy Next.js build output
+# Standalone server
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static    ./.next/static
+
+# sharp must be available at runtime — copy from deps stage
+# (standalone output excludes native binaries from the trace)
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/sharp ./node_modules/sharp
 
 USER nextjs
 
 EXPOSE 3000
-
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
