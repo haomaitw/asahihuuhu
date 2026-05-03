@@ -33,7 +33,6 @@ export default async function DashboardPage() {
   }
 
   // Fetch recent orders
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let recentOrders: any[] = []
   try {
     const result = await payload.find({

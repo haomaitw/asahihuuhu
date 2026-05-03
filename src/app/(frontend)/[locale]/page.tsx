@@ -12,6 +12,8 @@ import {
   placeholderSeasonal,
   placeholderNews,
 } from '@/lib/placeholder-data';
+import { getProducts } from '@/lib/cms-products';
+import { getNewsItems, getHomePageGlobal } from '@/lib/cms';
 
 export async function generateMetadata({
   params,
@@ -33,28 +35,77 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <HomeContent />;
+
+  // Fetch CMS data in parallel, fall back to placeholder if unavailable
+  const [cmsProducts, cmsNews, homePage] = await Promise.all([
+    getProducts(locale).catch(() => null),
+    getNewsItems(locale, 3).catch(() => null),
+    getHomePageGlobal(locale).catch(() => null),
+  ]);
+
+  // Hero media from CMS (depth=1 populated objects)
+  const heroVideo  = (homePage as any)?.heroVideo?.url  ?? null
+  const heroPoster = (homePage as any)?.heroPoster?.url ?? null
+  const tagline1   = (homePage as any)?.tagline1  || null
+  const tagline2   = (homePage as any)?.tagline2  || null
+  const heroLede   = (homePage as any)?.heroLede  || null
+
+  // Products: split by category, or fall back to placeholder arrays
+  const goods    = cmsProducts?.filter((p) => p.category === 'goods') ?? null
+  const seasonal = cmsProducts?.filter((p) => p.category === 'seasonal') ?? null
+
+  return (
+    <HomeContent
+      heroVideo={heroVideo}
+      heroPoster={heroPoster}
+      tagline1={tagline1}
+      tagline2={tagline2}
+      heroLede={heroLede}
+      cmsGoods={goods}
+      cmsSeasonal={seasonal}
+      cmsNews={cmsNews}
+    />
+  );
 }
 
-function HomeContent() {
+type HomeContentProps = {
+  heroVideo: string | null
+  heroPoster: string | null
+  tagline1: string | null
+  tagline2: string | null
+  heroLede: string | null
+  cmsGoods: Array<{ id: string; name: string; image: string; price: number }> | null
+  cmsSeasonal: Array<{ id: string; name: string; image: string; price: number }> | null
+  cmsNews: Array<{ slug: string; date: string; title: string }> | null
+}
+
+function HomeContent({
+  heroVideo, heroPoster, tagline1, tagline2, heroLede,
+  cmsGoods, cmsSeasonal, cmsNews,
+}: HomeContentProps) {
   const t = useTranslations();
 
-  const products = placeholderProducts.map((p) => ({
-    ...p,
-    name: t(p.name),
-  }));
-  const seasonal = placeholderSeasonal.map((p) => ({
-    ...p,
-    name: t(p.name),
-  }));
-  const news = placeholderNews.map((n) => ({
-    ...n,
-    title: t(n.title),
-  }));
+  const products = cmsGoods?.length
+    ? cmsGoods
+    : placeholderProducts.map((p) => ({ ...p, name: t(p.name) }));
+
+  const seasonalProducts = cmsSeasonal?.length
+    ? cmsSeasonal
+    : placeholderSeasonal.map((p) => ({ ...p, name: t(p.name) }));
+
+  const news = cmsNews?.length
+    ? cmsNews
+    : placeholderNews.map((n) => ({ ...n, title: t(n.title) }));
 
   return (
     <>
-      <Hero />
+      <Hero
+        videoSrc={heroVideo ?? undefined}
+        poster={heroPoster ?? undefined}
+        tagline1={tagline1 ?? undefined}
+        tagline2={tagline2 ?? undefined}
+        lede={heroLede ?? undefined}
+      />
 
       <WaveDivider fill="#FBF8F3" />
 
@@ -80,7 +131,7 @@ function HomeContent() {
             eyebrow={t('home.limited.eyebrow')}
             title={t('home.limited.title')}
           />
-          <ProductCarousel products={seasonal} />
+          <ProductCarousel products={seasonalProducts} />
         </div>
       </section>
 

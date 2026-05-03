@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Newspaper, HelpCircle, Home, Info, Settings2,
   Package, ShoppingBag, Image as ImageIcon, Users,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Tag, FolderOpen, UserCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -15,11 +15,13 @@ type NavItem = {
   href: string
   icon: React.ComponentType<{ className?: string }>
   badge?: number
+  superAdminOnly?: boolean
 }
 
 type NavGroup = {
   group: string
   items: NavItem[]
+  superAdminOnly?: boolean
 }
 
 const NAV: NavGroup[] = [
@@ -47,6 +49,19 @@ const NAV: NavGroup[] = [
     ],
   },
   {
+    group: '分類管理',
+    items: [
+      { label: '商品分類', href: '/admin/collections/product-categories', icon: Tag },
+      { label: '文章分類', href: '/admin/collections/news-categories', icon: FolderOpen },
+    ],
+  },
+  {
+    group: '人員管理',
+    items: [
+      { label: '團隊成員', href: '/admin/collections/staff', icon: UserCircle },
+    ],
+  },
+  {
     group: '資產',
     items: [
       { label: '媒體庫', href: '/admin/collections/media', icon: ImageIcon },
@@ -54,8 +69,9 @@ const NAV: NavGroup[] = [
   },
   {
     group: '系統',
+    superAdminOnly: true,
     items: [
-      { label: '使用者', href: '/admin/collections/users', icon: Users },
+      { label: '使用者', href: '/admin/collections/users', icon: Users, superAdminOnly: true },
     ],
   },
 ]
@@ -65,6 +81,7 @@ type SidebarProps = {
   onCollapse: () => void
   mobileOpen: boolean
   onMobileClose: () => void
+  role?: string
 }
 
 function NavItemRow({
@@ -89,7 +106,6 @@ function NavItemRow({
       )}
       title={collapsed ? item.label : undefined}
     >
-      {/* Active left bar */}
       {active && (
         <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r bg-adm-brand-500" />
       )}
@@ -108,11 +124,15 @@ function SidebarContent({
   collapsed,
   onCollapse,
   pathname,
+  role,
 }: {
   collapsed: boolean
   onCollapse: () => void
   pathname: string
+  role?: string
 }) {
+  const isSuperAdmin = role === 'super-admin'
+
   return (
     <div className="flex h-full flex-col bg-adm-bg-base border-r border-adm-border-subtle">
       {/* Logo */}
@@ -130,31 +150,43 @@ function SidebarContent({
           className="shrink-0 object-contain"
           priority
         />
+        {!collapsed && (
+          <span className="ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded bg-adm-brand-100 text-adm-brand-700 shrink-0">
+            {isSuperAdmin ? '最高管理員' : '管理員'}
+          </span>
+        )}
       </div>
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-5">
-        {NAV.map((section) => (
-          <div key={section.group} className="space-y-0.5">
-            {!collapsed && (
-              <p className="mb-1.5 px-2.5 text-2xs uppercase tracking-wider font-medium text-adm-text-tertiary">
-                {section.group}
-              </p>
-            )}
-            {section.items.map((item) => {
-              const active =
-                pathname === item.href || pathname.startsWith(item.href + '/')
-              return (
-                <NavItemRow
-                  key={item.href}
-                  item={item}
-                  collapsed={collapsed}
-                  active={active}
-                />
-              )
-            })}
-          </div>
-        ))}
+        {NAV.map((section) => {
+          // Hide super-admin-only sections from regular admins
+          if (section.superAdminOnly && !isSuperAdmin) return null
+          const visibleItems = section.items.filter((item) => !item.superAdminOnly || isSuperAdmin)
+          if (!visibleItems.length) return null
+
+          return (
+            <div key={section.group} className="space-y-0.5">
+              {!collapsed && (
+                <p className="mb-1.5 px-2.5 text-2xs uppercase tracking-wider font-medium text-adm-text-tertiary">
+                  {section.group}
+                </p>
+              )}
+              {visibleItems.map((item) => {
+                const active =
+                  pathname === item.href || pathname.startsWith(item.href + '/')
+                return (
+                  <NavItemRow
+                    key={item.href}
+                    item={item}
+                    collapsed={collapsed}
+                    active={active}
+                  />
+                )
+              })}
+            </div>
+          )
+        })}
       </nav>
 
       {/* Collapse toggle */}
@@ -183,6 +215,7 @@ export function Sidebar({
   onCollapse,
   mobileOpen,
   onMobileClose,
+  role,
 }: SidebarProps) {
   const pathname = usePathname()
 
@@ -199,6 +232,7 @@ export function Sidebar({
           collapsed={collapsed}
           onCollapse={onCollapse}
           pathname={pathname}
+          role={role}
         />
       </div>
 
@@ -214,6 +248,7 @@ export function Sidebar({
               collapsed={false}
               onCollapse={onMobileClose}
               pathname={pathname}
+              role={role}
             />
           </div>
         </>

@@ -8,7 +8,6 @@ import { Toaster } from 'sonner'
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const headersList = await headers()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let user: any = null
   try {
     const payload = await getPayload({ config: configPromise })

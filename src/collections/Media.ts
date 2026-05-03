@@ -10,7 +10,7 @@ export const Media: CollectionConfig = {
       { name: 'og',   width: 1200, height: 630, position: 'centre' },
     ],
     adminThumbnail: 'card',
-    mimeTypes: ['image/*'],
+    mimeTypes: ['image/*', 'video/*'],
   },
   fields: [
     {

@@ -75,6 +75,7 @@ export async function getHomePageGlobal(locale: string) {
     return await payload.findGlobal({
       slug: 'home-page',
       locale: locale as SupportedLocale,
+      depth: 1,
     });
   } catch {
     return null;
@@ -87,6 +88,7 @@ export async function getAboutPageGlobal(locale: string) {
     return await payload.findGlobal({
       slug: 'about-page',
       locale: locale as SupportedLocale,
+      depth: 1,
     });
   } catch {
     return null;

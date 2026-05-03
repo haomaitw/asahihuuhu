@@ -52,6 +52,10 @@ function AboutContent({
     ? `${hoursWeekday}\n${hoursClosed}`.trim()
     : t('hours.body');
 
+  // Use CMS hero video if set, otherwise fall back to static files
+  const cmsVideoUrl  = (aboutData?.heroVideo  as any)?.url  as string | undefined
+  const cmsPosterUrl = (aboutData?.heroPoster as any)?.url as string | undefined
+
   return (
     <>
       <PageHero
@@ -60,9 +64,9 @@ function AboutContent({
         description={t('description')}
         media={{
           kind: 'video',
-          mp4: '/asahi/hero-about.mp4',
-          webm: '/asahi/hero-about.webm',
-          poster: '/asahi/hero-about-poster.jpg',
+          mp4: cmsVideoUrl ?? '/asahi/hero-about.mp4',
+          webm: cmsVideoUrl ? undefined : '/asahi/hero-about.webm',
+          poster: cmsPosterUrl ?? '/asahi/hero-about-poster.jpg',
         }}
       />
 

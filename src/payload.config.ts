@@ -12,6 +12,9 @@ import { News } from './collections/News';
 import { FAQs } from './collections/FAQs';
 import { Products } from './collections/Products';
 import { Orders } from './collections/Orders';
+import { ProductCategories } from './collections/ProductCategories';
+import { NewsCategories } from './collections/NewsCategories';
+import { Staff } from './collections/Staff';
 import { SiteSettings } from './globals/SiteSettings';
 import { HomePage } from './globals/HomePage';
 import { AboutPage } from './globals/AboutPage';
@@ -24,7 +27,7 @@ export default buildConfig({
     user: Users.slug,
     theme: 'light',
     meta: {
-      titleSuffix: '— 朝日夫婦',
+      titleSuffix: '— 異想天開影像 CMS',
     },
     components: {
       graphics: {
@@ -34,7 +37,7 @@ export default buildConfig({
     },
   },
 
-  collections: [Users, Media, News, FAQs, Products, Orders],
+  collections: [Users, Media, News, FAQs, Products, Orders, ProductCategories, NewsCategories, Staff],
 
   globals: [SiteSettings, HomePage, AboutPage],
 

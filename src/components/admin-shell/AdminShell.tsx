@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 
-type User = { id: string | number; name?: string; email?: string } | null
+type User = { id: string | number; name?: string; email?: string; role?: string } | null
 
 type Props = {
   children: React.ReactNode
@@ -23,6 +23,7 @@ export function AdminShell({ children, user }: Props) {
         onCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
+        role={user?.role}
       />
 
       {/* Main area */}

@@ -1,5 +1,6 @@
 'use client'
 import * as React from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Trash2, Upload, X, Plus } from 'lucide-react'
@@ -182,7 +183,7 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
             {isEdit ? '編輯商品' : '新增商品'}
           </h1>
           <p className="text-sm text-adm-text-tertiary mt-0.5">
-            <a href="/admin/collections/products" className="hover:underline">商品管理</a>
+            <Link href="/admin/collections/products" className="hover:underline">商品管理</Link>
             {' / '}{isEdit ? form.name['zh-TW'] || id : '新增'}
           </p>
         </div>
