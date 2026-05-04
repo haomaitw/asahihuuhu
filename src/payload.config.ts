@@ -65,7 +65,10 @@ export default buildConfig({
           ssl: { rejectUnauthorized: false },
         },
       })
-    : sqliteAdapter({ client: { url: 'file:./payload-dev.db' } }),
+    : sqliteAdapter({
+        // Use /tmp in Docker (always writable); fallback to local file in dev
+        client: { url: process.env.NODE_ENV === 'production' ? 'file:/tmp/payload.db' : 'file:./payload-dev.db' },
+      }),
 
   secret: process.env.PAYLOAD_SECRET ?? 'dev-secret-change-in-production',
 
