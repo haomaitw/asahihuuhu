@@ -61,8 +61,6 @@ export default buildConfig({
     ? postgresAdapter({
         pool: {
           connectionString: pgUri,
-          // Zeabur hosted PostgreSQL requires SSL
-          ssl: { rejectUnauthorized: false },
         },
       })
     : sqliteAdapter({
