@@ -1,6 +1,5 @@
 import { buildConfig } from 'payload';
 import { postgresAdapter } from '@payloadcms/db-postgres';
-import { sqliteAdapter } from '@payloadcms/db-sqlite';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import sharp from 'sharp';
 import path from 'path';
@@ -23,6 +22,10 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 const pgUri = process.env.POSTGRES_URI || process.env.DATABASE_URL || '';
+
+if (!pgUri && process.env.NODE_ENV === 'production') {
+  throw new Error('POSTGRES_URI or DATABASE_URL must be set in production');
+}
 
 export default buildConfig({
   admin: {
@@ -57,16 +60,11 @@ export default buildConfig({
 
   editor: lexicalEditor(),
 
-  db: pgUri
-    ? postgresAdapter({
-        pool: {
-          connectionString: pgUri,
-        },
-      })
-    : sqliteAdapter({
-        // Use /tmp in Docker (always writable); fallback to local file in dev
-        client: { url: process.env.NODE_ENV === 'production' ? 'file:/tmp/payload.db' : 'file:./payload-dev.db' },
-      }),
+  db: postgresAdapter({
+    pool: {
+      connectionString: pgUri || 'postgresql://localhost/asahi_dev',
+    },
+  }),
 
   secret: process.env.PAYLOAD_SECRET ?? 'dev-secret-change-in-production',
 
