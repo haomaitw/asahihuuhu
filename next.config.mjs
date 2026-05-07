@@ -12,9 +12,7 @@ const nextConfig = {
     'pg',
     'pg-native',
     '@payloadcms/db-postgres',
-    '@payloadcms/drizzle',
     'drizzle-orm',
-    'drizzle-kit',
     'sharp',
   ],
 
@@ -27,10 +25,6 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react'],
-    // Force drizzle-kit into the standalone output so requireDrizzleKit() works at runtime
-    outputFileTracingIncludes: {
-      '/api/push-schema': ['./node_modules/drizzle-kit/**'],
-    },
   },
   devIndicators: false,
 };
