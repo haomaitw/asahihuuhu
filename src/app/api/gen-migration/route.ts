@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createRequire } from 'module'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
@@ -12,11 +13,14 @@ export async function POST(request: Request) {
     const payload = await getPayload({ config })
     const db = payload.db as any
 
-    // Use db.requireDrizzleKit() which uses createRequire (CJS require).
-    // ESM dynamic import of drizzle-kit/api.mjs fails because it bundles CJS
-    // packages that call require('fs') internally.
-    // outputFileTracingIncludes ensures drizzle-kit is in the standalone output.
-    const { generateDrizzleJson, generateMigration } = db.requireDrizzleKit()
+    // Use createRequire to load drizzle-kit's CJS api.js directly by resolving
+    // the package root and appending /api.js — this bypasses the exports map
+    // condition lookup so Node always loads the CJS build (not api.mjs).
+    const cjsRequire = createRequire(import.meta.url)
+    // resolve drizzle-kit root (index.js), then swap to api.js
+    const indexPath: string = cjsRequire.resolve('drizzle-kit')
+    const apiPath = indexPath.replace(/[/\\]index\.js$/, '/api.js')
+    const { generateDrizzleJson, generateMigration } = cjsRequire(apiPath)
 
     const drizzleJsonAfter = generateDrizzleJson(db.schema)
     const drizzleJsonBefore = { ...db.defaultDrizzleSnapshot }
