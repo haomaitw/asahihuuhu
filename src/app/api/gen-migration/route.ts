@@ -9,13 +9,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Dynamic import so webpack doesn't try to statically bundle drizzle-kit
-    // (drizzle-kit uses CJS dynamic require('fs') which breaks webpack bundling).
-    // outputFileTracingIncludes ensures drizzle-kit is in the standalone output.
-    const { generateDrizzleJson, generateMigration } = await import('drizzle-kit/api')
-
     const payload = await getPayload({ config })
     const db = payload.db as any
+
+    // Use db.requireDrizzleKit() which uses createRequire (CJS require).
+    // ESM dynamic import of drizzle-kit/api.mjs fails because it bundles CJS
+    // packages that call require('fs') internally.
+    // outputFileTracingIncludes ensures drizzle-kit is in the standalone output.
+    const { generateDrizzleJson, generateMigration } = db.requireDrizzleKit()
 
     const drizzleJsonAfter = generateDrizzleJson(db.schema)
     const drizzleJsonBefore = { ...db.defaultDrizzleSnapshot }
