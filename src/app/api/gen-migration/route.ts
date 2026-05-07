@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+// Static import so nft includes drizzle-kit in standalone output
+import { generateDrizzleJson, generateMigration } from 'drizzle-kit/api'
 
 export async function POST(request: Request) {
   try {
@@ -11,8 +13,6 @@ export async function POST(request: Request) {
 
     const payload = await getPayload({ config })
     const db = payload.db as any
-
-    const { generateDrizzleJson, generateMigration } = db.requireDrizzleKit()
 
     const drizzleJsonAfter = generateDrizzleJson(db.schema)
     const drizzleJsonBefore = { ...db.defaultDrizzleSnapshot }

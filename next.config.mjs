@@ -13,8 +13,14 @@ const nextConfig = {
     'pg-native',
     '@payloadcms/db-postgres',
     'drizzle-orm',
+    'drizzle-kit',
     'sharp',
   ],
+
+  // Force nft to include drizzle-kit in standalone output for the gen-migration route
+  outputFileTracingIncludes: {
+    '/api/gen-migration': ['./node_modules/drizzle-kit/**'],
+  },
 
   images: {
     remotePatterns: [
