@@ -50,7 +50,8 @@ export function generateCheckMacValue(
 export function buildEcpayForm(
   cartItems: CartItem[],
   orderNumber: string,
-  locale: string
+  locale: string,
+  overrideTotal?: number
 ): { url: string; fields: Record<string, string> } {
   const merchantId = process.env.ECPAY_MERCHANT_ID ?? ''
   const hashKey = process.env.ECPAY_HASH_KEY ?? ''
@@ -62,7 +63,7 @@ export function buildEcpayForm(
     ? 'https://payment-stage.ecpay.com.tw/Checkout/AioCheckout'
     : 'https://payment.ecpay.com.tw/Checkout/AioCheckout'
 
-  const totalAmount = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
+  const totalAmount = overrideTotal ?? cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const itemName = cartItems.map((i) => `${i.name} x${i.quantity}`).join('#')
   const tradeDate = formatEcpayDate(new Date())
 

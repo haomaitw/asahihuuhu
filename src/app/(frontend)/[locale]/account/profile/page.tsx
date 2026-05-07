@@ -1,0 +1,135 @@
+'use client'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { useCustomerStore } from '@/store/customer'
+
+export default function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
+  const router = useRouter()
+  const { customer, fetchMe, updateProfile, isLoading } = useCustomerStore()
+  const [locale, setLocale] = useState('zh-TW')
+  const [form, setForm] = useState({ name: '', phone: '' })
+  const [addr, setAddr] = useState({ recipient: '', phone: '', zip: '', city: '', district: '', address: '' })
+  const [msg, setMsg] = useState('')
+  const [err, setErr] = useState('')
+
+  useEffect(() => {
+    params.then((p) => setLocale(p.locale)).catch(() => {})
+    fetchMe()
+  }, [fetchMe, params])
+
+  useEffect(() => {
+    if (!customer) { router.push(`/${locale}/account/login`); return }
+    setForm({ name: customer.name ?? '', phone: customer.phone ?? '' })
+    const da = customer.defaultAddress ?? {}
+    setAddr({
+      recipient: (da as any).recipient ?? '',
+      phone: (da as any).phone ?? '',
+      zip: (da as any).zip ?? '',
+      city: (da as any).city ?? '',
+      district: (da as any).district ?? '',
+      address: (da as any).address ?? '',
+    })
+  }, [customer, locale, router])
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMsg(''); setErr('')
+    const result = await updateProfile({ ...form, defaultAddress: addr } as any)
+    if (result.ok) setMsg('已成功更新')
+    else setErr(result.error ?? '更新失敗')
+  }
+
+  const f = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((p) => ({ ...p, [k]: e.target.value }))
+  const a = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setAddr((p) => ({ ...p, [k]: e.target.value }))
+
+  return (
+    <main className="min-h-dvh bg-paper-50 py-24 px-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="flex items-center gap-4 mb-8">
+          <Link href={`/${locale}/account`} className="text-ink/40 hover:text-ink text-sm">← 會員中心</Link>
+          <h1 className="font-serif text-2xl text-ink">個人資料</h1>
+        </div>
+
+        <form onSubmit={handleSave} className="space-y-6">
+          {/* Basic info */}
+          <div className="bg-white border border-sand-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <h2 className="text-sm font-medium text-ink/60 uppercase tracking-widest">基本資料</h2>
+            <div>
+              <label className="block text-xs text-ink/50 mb-1.5">姓名</label>
+              <input
+                value={form.name}
+                onChange={f('name')}
+                className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-ink/50 mb-1.5">電子郵件</label>
+              <input
+                value={customer?.email ?? ''}
+                disabled
+                className="w-full border border-sand-100 rounded-xl px-4 py-3 text-sm bg-sand-50 text-ink/40"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-ink/50 mb-1.5">手機號碼</label>
+              <input
+                type="tel"
+                value={form.phone}
+                onChange={f('phone')}
+                className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50"
+                placeholder="0912-345-678"
+              />
+            </div>
+          </div>
+
+          {/* Default address */}
+          <div className="bg-white border border-sand-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <h2 className="text-sm font-medium text-ink/60 uppercase tracking-widest">預設收件地址</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs text-ink/50 mb-1.5">收件人</label>
+                <input value={addr.recipient} onChange={a('recipient')} className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50" />
+              </div>
+              <div>
+                <label className="block text-xs text-ink/50 mb-1.5">收件電話</label>
+                <input value={addr.phone} onChange={a('phone')} className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50" />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs text-ink/50 mb-1.5">郵遞區號</label>
+                <input value={addr.zip} onChange={a('zip')} className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50" />
+              </div>
+              <div>
+                <label className="block text-xs text-ink/50 mb-1.5">縣市</label>
+                <input value={addr.city} onChange={a('city')} className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50" />
+              </div>
+              <div>
+                <label className="block text-xs text-ink/50 mb-1.5">區</label>
+                <input value={addr.district} onChange={a('district')} className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs text-ink/50 mb-1.5">詳細地址</label>
+              <input value={addr.address} onChange={a('address')} className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50" />
+            </div>
+          </div>
+
+          {msg && <p className="text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg px-4 py-3">✓ {msg}</p>}
+          {err && <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{err}</p>}
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-brand-700 hover:bg-brand-800 disabled:opacity-50 text-white font-serif tracking-widest py-3.5 rounded-xl transition-colors text-sm"
+          >
+            {isLoading ? '儲存中…' : '儲存變更'}
+          </button>
+        </form>
+      </div>
+    </main>
+  )
+}

@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { Users } from './collections/Users';
+import { Customers } from './collections/Customers';
 import { Media } from './collections/Media';
 import { News } from './collections/News';
 import { FAQs } from './collections/FAQs';
@@ -14,6 +15,8 @@ import { Orders } from './collections/Orders';
 import { ProductCategories } from './collections/ProductCategories';
 import { NewsCategories } from './collections/NewsCategories';
 import { Staff } from './collections/Staff';
+import { Coupons } from './collections/Coupons';
+import { PointTransactions } from './collections/PointTransactions';
 import { SiteSettings } from './globals/SiteSettings';
 import { HomePage } from './globals/HomePage';
 import { AboutPage } from './globals/AboutPage';
@@ -44,7 +47,14 @@ export default buildConfig({
 
   serverURL: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
 
-  collections: [Users, Media, News, FAQs, Products, Orders, ProductCategories, NewsCategories, Staff],
+  collections: [
+    Users, Customers,
+    Media,
+    Products, ProductCategories,
+    Orders, Coupons, PointTransactions,
+    News, NewsCategories,
+    FAQs, Staff,
+  ],
 
   globals: [SiteSettings, HomePage, AboutPage],
 

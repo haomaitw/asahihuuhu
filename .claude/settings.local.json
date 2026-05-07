@@ -63,7 +63,19 @@
       "Bash(git commit -m ' *)",
       "Bash(gh auth *)",
       "Bash(brew install *)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/admin/preview-all)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/admin/preview-all)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(mkdir -p /Users/howardhsu/Downloads/asahihuuhu/src/app/\\\\\\(payload\\\\\\)/admin/\\\\\\(protected\\\\\\)/collections/product-categories/\\\\[id\\\\])",
+      "Bash(mkdir -p /Users/howardhsu/Downloads/asahihuuhu/src/app/\\\\\\(payload\\\\\\)/admin/\\\\\\(protected\\\\\\)/collections/news-categories/\\\\[id\\\\])",
+      "Bash(mkdir -p /Users/howardhsu/Downloads/asahihuuhu/src/app/\\\\\\(payload\\\\\\)/admin/\\\\\\(protected\\\\\\)/collections/staff/\\\\[id\\\\])",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); deps={**d.get\\('dependencies',{}\\), **d.get\\('devDependencies',{}\\)}; [print\\(k,v\\) for k,v in deps.items\\(\\) if 'eslint' in k.lower\\(\\) or 'typescript-eslint' in k.lower\\(\\)]\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d['version']\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d['dependencies'].get\\('@payloadcms/db-postgres','not found'\\)\\)\")",
+      "Bash(git push *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); deps={**d.get\\('dependencies',{}\\), **d.get\\('devDependencies',{}\\)}; print\\('pg:', deps.get\\('pg','❌ 未安裝'\\)\\); print\\('@payloadcms/db-postgres:', deps.get\\('@payloadcms/db-postgres','❌ 未安裝'\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('pg:', d['dependencies'].get\\('pg','missing'\\)\\)\")",
+      "Bash(gunzip -c /Users/howardhsu/Downloads/runtime-log-20260503-000000-84e6c5f7-e4e5-4e7a-8465-300059327da3.log.gz)",
+      "Bash(git commit *)"
     ]
   }
 }
