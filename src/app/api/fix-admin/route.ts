@@ -21,20 +21,28 @@ export async function POST(request: Request) {
 
     const emails = users.docs.map((u: any) => ({ id: u.id, email: u.email, role: u.role }))
 
-    // If newPassword provided, reset first user's password
-    if (newPassword && newPassword.length >= 8 && users.docs.length > 0) {
+    // Always unlock the first user (clear loginAttempts + lockUntil)
+    if (users.docs.length > 0) {
       const userId = users.docs[0].id
+      const updateData: any = {
+        loginAttempts: 0,
+        lockUntil: null,
+      }
+      // Also reset password if provided
+      if (newPassword && newPassword.length >= 8) {
+        updateData.password = newPassword
+      }
       await payload.update({
         collection: 'users',
         id: userId,
-        data: { password: newPassword },
+        data: updateData,
         overrideAccess: true,
       })
       return NextResponse.json({
         ok: true,
         users: emails,
         resetEmail: (users.docs[0] as any).email,
-        action: 'password_reset',
+        action: newPassword ? 'unlocked_and_password_reset' : 'unlocked',
       })
     }
 
