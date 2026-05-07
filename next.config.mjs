@@ -12,7 +12,9 @@ const nextConfig = {
     'pg',
     'pg-native',
     '@payloadcms/db-postgres',
+    '@payloadcms/drizzle',
     'drizzle-orm',
+    'drizzle-kit',
     'sharp',
   ],
 
