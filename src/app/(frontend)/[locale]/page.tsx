@@ -74,8 +74,8 @@ type HomeContentProps = {
   tagline1: string | null
   tagline2: string | null
   heroLede: string | null
-  cmsGoods: Array<{ id: string; name: string; image: string; price: number }> | null
-  cmsSeasonal: Array<{ id: string; name: string; image: string; price: number }> | null
+  cmsGoods: Array<{ id: string; name: string; slug?: string; image: string; price: number; comparePrice?: number; shortDescription?: string; stock?: number; trackStock?: boolean }> | null
+  cmsSeasonal: Array<{ id: string; name: string; slug?: string; image: string; price: number; comparePrice?: number; shortDescription?: string; stock?: number; trackStock?: boolean }> | null
   cmsNews: Array<{ slug: string; date: string; title: string }> | null
 }
 

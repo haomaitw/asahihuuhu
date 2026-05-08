@@ -34,12 +34,41 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '購物車是空的' }, { status: 400 })
     }
 
+    const payload = await getPayload({ config: configPromise })
+
+    // 結帳前驗證庫存
+    for (const item of items) {
+      try {
+        const result = await payload.find({
+          collection: 'products',
+          where: { slug: { equals: item.id } },
+          limit: 1,
+          overrideAccess: true,
+        })
+        const product = result.docs[0] as any
+        if (!product) continue
+        if (!product.isAvailable) {
+          return NextResponse.json(
+            { error: `「${item.name}」目前無法購買` },
+            { status: 400 },
+          )
+        }
+        if (product.trackStock && (product.stock ?? 0) < item.quantity) {
+          const left = product.stock ?? 0
+          return NextResponse.json(
+            { error: left === 0 ? `「${item.name}」已售完` : `「${item.name}」庫存不足（剩 ${left} 件）` },
+            { status: 400 },
+          )
+        }
+      } catch {
+        // 查詢失敗不阻擋結帳
+      }
+    }
+
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
     const shippingFee = 120 // 黑貓宅急便冷凍宅配固定運費
     const totalAmount = Math.max(1, subtotal + shippingFee - couponDiscount - pointsRedeemed)
     const orderNumber = generateOrderNumber()
-
-    const payload = await getPayload({ config: configPromise })
 
     // Create order in Payload
     await payload.create({

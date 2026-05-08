@@ -76,6 +76,29 @@ export async function POST(req: NextRequest) {
         overrideAccess: true,
       })
 
+      // Decrement stock for each item (only if trackStock === true)
+      for (const item of order.items ?? []) {
+        if (!item.productId) continue
+        try {
+          const product = await payload.findByID({
+            collection: 'products',
+            id: String(item.productId),
+            overrideAccess: true,
+          }) as any
+          if (product?.trackStock) {
+            const newStock = Math.max(0, (product.stock ?? 0) - (item.quantity ?? 1))
+            await payload.update({
+              collection: 'products',
+              id: String(item.productId),
+              data: { stock: newStock },
+              overrideAccess: true,
+            })
+          }
+        } catch (e) {
+          console.error('[ecpay/callback] stock decrement failed for product', item.productId, e)
+        }
+      }
+
       // Award loyalty points to customer (if order is linked to a customer account)
       if (customerId) {
         const customerResult = await payload.findByID({
