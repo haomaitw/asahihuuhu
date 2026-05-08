@@ -1,12 +1,8 @@
 /**
  * POST /api/seed-admin
- *
- * 建立或重設管理員帳號。受 PAYLOAD_SECRET 保護。
+ * 建立或重設管理員帳號（受 PAYLOAD_SECRET 保護）
  *
  * Body: { "secret": "...", "email": "...", "password": "...", "name": "..." }
- *
- * - 若該 email 已存在 → 用 forgotPassword + resetPassword 確保密碼正確 hash
- * - 若不存在 → 建立新管理員
  */
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
@@ -30,7 +26,7 @@ export async function POST(request: Request) {
     const payload = await getPayload({ config })
     const normalEmail = email.toLowerCase().trim()
 
-    // 搜尋現有帳號
+    // 找出現有帳號並刪除（讓 create 重建，確保密碼正確 hash）
     const existing = await payload.find({
       collection: 'users',
       where: { email: { equals: normalEmail } },
@@ -40,57 +36,14 @@ export async function POST(request: Request) {
 
     if (existing.docs.length > 0) {
       const user = existing.docs[0] as any
-
-      // 使用 forgotPassword + resetPassword 確保密碼正確 hash
-      // disableEmail: true → 不發信，直接拿 token
-      const fpResult = await payload.forgotPassword({
+      await payload.delete({
         collection: 'users',
-        data: { email: normalEmail },
-        disableEmail: true,
-      }) as any
-
-      const token = fpResult?.token ?? fpResult
-
-      if (!token) {
-        // fallback: 直接 update（某些版本 forgotPassword 不回傳 token）
-        await payload.update({
-          collection: 'users',
-          id: user.id,
-          data: { password, ...(name ? { name } : {}) },
-          overrideAccess: true,
-        })
-        return NextResponse.json({
-          ok: true,
-          action: 'updated_fallback',
-          message: `已重設 ${normalEmail} 的密碼（fallback）`,
-          foundEmail: user.email,
-        })
-      }
-
-      await payload.resetPassword({
-        collection: 'users',
-        data: { token, password },
+        id: user.id,
         overrideAccess: true,
-      })
-
-      if (name) {
-        await payload.update({
-          collection: 'users',
-          id: user.id,
-          data: { name },
-          overrideAccess: true,
-        })
-      }
-
-      return NextResponse.json({
-        ok: true,
-        action: 'updated',
-        message: `已重設 ${normalEmail} 的密碼`,
-        foundEmail: user.email,
       })
     }
 
-    // 建立新管理員
+    // 重新建立（payload.create 的密碼一定會正確 hash）
     const created = await payload.create({
       collection: 'users',
       data: {
@@ -104,15 +57,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
-      action: 'created',
-      message: `已建立管理員帳號 ${normalEmail}`,
+      message: `帳號 ${normalEmail} 已建立，請至 /admin/login 登入`,
       id: created.id,
     })
   } catch (err: any) {
     console.error('[seed-admin]', err)
-    return NextResponse.json(
-      { error: err?.message ?? String(err) },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: err?.message ?? String(err) }, { status: 500 })
   }
 }
