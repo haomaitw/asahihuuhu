@@ -1,5 +1,4 @@
 import { useTranslations } from 'next-intl';
-import { BrandMark } from './BrandMark';
 
 type HeroProps = {
   videoSrc?: string
@@ -14,6 +13,7 @@ export function Hero({ videoSrc, poster, tagline1, tagline2, lede }: HeroProps =
 
   return (
     <section className="relative h-[100dvh] min-h-[640px] w-full overflow-hidden">
+
       {/* ── Video background ──────────────────────────────────────────── */}
       <video
         className="absolute inset-0 h-full w-full object-cover"
@@ -33,52 +33,93 @@ export function Hero({ videoSrc, poster, tagline1, tagline2, lede }: HeroProps =
         )}
       </video>
 
-      {/* ── Gradient: heavier top (header) + centre (text) ───────────── */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/50 to-black/20" />
+      {/*
+        ── Gradient layers ──────────────────────────────────────────────
+        Two overlaid gradients:
+        1. Diagonal bottom-left→top-right: dark lower-left (the harbour
+           shade where we stand), open upper-right (morning sun / sea)
+        2. Thin top bar so the transparent header stays legible
+      */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: [
+            'linear-gradient(to top right, rgba(8,6,4,0.84) 0%, rgba(8,6,4,0.50) 38%, rgba(8,6,4,0.14) 62%, transparent 78%)',
+            'linear-gradient(to bottom, rgba(0,0,0,0.40) 0%, transparent 26%)',
+          ].join(', '),
+        }}
+      />
 
-      {/* ── Centred hero content ──────────────────────────────────────── */}
-      <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+      {/* ── Main content — anchored bottom-left ───────────────────────── */}
+      <div className="relative z-10 h-full container-content flex flex-col justify-end pb-16 sm:pb-20 md:pb-24 lg:pb-28">
+        <div className="max-w-lg lg:max-w-xl">
 
-        {/* Large brand mark — the visual anchor */}
-        <div className="mb-6 md:mb-8">
-          <BrandMark variant="white" className="h-20 sm:h-24 md:h-28 lg:h-32 opacity-90" />
-        </div>
+          {/*
+            Eyebrow — a tiny brand sigil above the headline.
+            The leading dash echoes the horizon-rule motif.
+          */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-5 h-px bg-white/40" />
+            <span className="font-sans font-light text-[10px] tracking-[0.42em] uppercase text-white/45 select-none">
+              Asahi Huuhu · 朝日夫婦
+            </span>
+          </div>
 
-        {/* Thin rule */}
-        <div className="w-10 h-px bg-white/35 mb-7 md:mb-8" />
-
-        {/* Taglines */}
-        <div className="space-y-3 max-w-xl">
+          {/*
+            Main tagline — large, commanding.
+            Tracking kept tight (0.08em) so CJK characters read as a
+            cohesive mass; text-shadow diffuses the edges like morning
+            mist on water.
+          */}
           <h1
-            className="font-sans font-light text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-[0.1em] text-white leading-tight"
-            style={{ textShadow: '0 2px 28px rgba(0,0,0,0.6)' }}
+            className="font-sans font-light text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1] tracking-[0.07em] text-white"
+            style={{ textShadow: '0 3px 36px rgba(0,0,0,0.45)' }}
           >
             {tagline1 ?? t('tagline1')}
           </h1>
+
+          {/*
+            Horizon rule — the symbolic divide between Okinawa and Tamsui,
+            Pacific sea and Tamsui River. Two segments at different
+            opacity mimic a distant shoreline.
+          */}
+          <div className="flex items-center gap-1.5 mt-7 mb-6">
+            <div className="h-px w-10 bg-white/45" />
+            <div className="h-px w-5 bg-white/20" />
+          </div>
+
+          {/* Sub tagline */}
           <h2
-            className="font-sans font-light text-base sm:text-lg md:text-xl tracking-[0.1em] text-white/70 leading-snug"
-            style={{ textShadow: '0 1px 14px rgba(0,0,0,0.5)' }}
+            className="font-sans font-light text-base sm:text-lg md:text-xl tracking-[0.12em] text-white/70 leading-relaxed mb-5"
+            style={{ textShadow: '0 1px 18px rgba(0,0,0,0.40)' }}
           >
             {tagline2 ?? t('tagline2')}
           </h2>
-        </div>
 
-        {/* Lede — subtle, a step below */}
-        {(lede || t('lede')) && (
-          <p
-            className="font-sans font-light text-sm tracking-[0.1em] text-white/50 mt-5 max-w-md leading-loose"
-            style={{ textShadow: '0 1px 8px rgba(0,0,0,0.35)' }}
-          >
-            {lede ?? t('lede')}
-          </p>
-        )}
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-10 flex flex-col items-center gap-2 opacity-40 text-white">
-          <span className="font-sans font-light text-[10px] tracking-[0.35em] uppercase">scroll</span>
-          <div className="w-px h-8 bg-current animate-pulse" />
+          {/* Lede — whisper text, for those who linger */}
+          {(lede ?? t('lede')) && (
+            <p
+              className="font-sans font-light text-xs sm:text-sm tracking-[0.05em] text-white/40 leading-[1.9] max-w-sm"
+              style={{ textShadow: '0 1px 8px rgba(0,0,0,0.30)' }}
+            >
+              {lede ?? t('lede')}
+            </p>
+          )}
         </div>
       </div>
+
+      {/*
+        ── Scroll indicator — far right edge ────────────────────────────
+        Positioned as a counterweight to the left-anchored text block;
+        the vertical line echoes the mast of a fishing-harbour boat.
+      */}
+      <div className="absolute right-6 md:right-10 bottom-10 z-10 flex flex-col items-center gap-2 text-white/30 select-none">
+        <span className="font-sans font-light text-[9px] tracking-[0.45em] uppercase">
+          scroll
+        </span>
+        <div className="w-px h-14 bg-current animate-pulse" />
+      </div>
+
     </section>
   );
 }
