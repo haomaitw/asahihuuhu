@@ -117,7 +117,7 @@ function HomeContent({
             title={t('home.products.title')}
           />
           <ProductCarousel products={products} locale={locale} />
-          <Link href="/line-up" className="pill-button">
+          <Link href="/shop" className="pill-button">
             {t('common.seeMore')}
             <span aria-hidden>→</span>
           </Link>
@@ -133,6 +133,10 @@ function HomeContent({
             title={t('home.limited.title')}
           />
           <ProductCarousel products={seasonalProducts} locale={locale} />
+          <Link href="/shop" className="pill-button">
+            {t('common.seeMore')}
+            <span aria-hidden>→</span>
+          </Link>
         </div>
       </section>
 

@@ -75,7 +75,7 @@ export function ProductDetailClient({ product, locale }: Props) {
                 className="object-cover transition-opacity duration-300"
               />
               {discount && (
-                <span className="absolute top-4 left-4 bg-brand-700 text-white text-xs font-medium px-2.5 py-1 rounded-full">
+                <span className="absolute top-4 left-4 bg-sea-700 text-white text-xs font-medium px-2.5 py-1 rounded-full">
                   -{discount}%
                 </span>
               )}
@@ -89,7 +89,7 @@ export function ProductDetailClient({ product, locale }: Props) {
                     key={i}
                     onClick={() => setActiveImg(i)}
                     className={`relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-colors ${
-                      i === activeImg ? 'border-brand-500' : 'border-transparent hover:border-sand-300'
+                      i === activeImg ? 'border-sea-500' : 'border-transparent hover:border-paper-200'
                     }`}
                   >
                     <Image src={src} alt={`${product.name} ${i + 1}`} fill sizes="80px" className="object-cover" />
@@ -119,7 +119,7 @@ export function ProductDetailClient({ product, locale }: Props) {
 
             {/* Price */}
             <div className="flex items-baseline gap-3">
-              <span className="font-serif text-2xl text-brand-800">
+              <span className="font-serif text-2xl text-sea-800">
                 NT$ {product.price.toLocaleString()}
               </span>
               {product.comparePrice && product.comparePrice > product.price && (
@@ -151,10 +151,10 @@ export function ProductDetailClient({ product, locale }: Props) {
             {inStock && (
               <div className="flex items-center gap-3">
                 {/* Qty stepper */}
-                <div className="flex items-center border border-sand-200 rounded-xl overflow-hidden bg-white">
+                <div className="flex items-center border border-paper-200 rounded-xl overflow-hidden bg-white">
                   <button
                     onClick={() => setQty(q => Math.max(1, q - 1))}
-                    className="px-4 py-3 text-ink/60 hover:text-ink hover:bg-sand-50 transition-colors text-lg leading-none"
+                    className="px-4 py-3 text-ink/60 hover:text-ink hover:bg-paper-50 transition-colors text-lg leading-none"
                     aria-label="減少數量"
                   >
                     −
@@ -162,7 +162,7 @@ export function ProductDetailClient({ product, locale }: Props) {
                   <span className="w-10 text-center text-sm font-medium">{qty}</span>
                   <button
                     onClick={() => setQty(q => product.trackStock ? Math.min(product.stock, q + 1) : q + 1)}
-                    className="px-4 py-3 text-ink/60 hover:text-ink hover:bg-sand-50 transition-colors text-lg leading-none"
+                    className="px-4 py-3 text-ink/60 hover:text-ink hover:bg-paper-50 transition-colors text-lg leading-none"
                     aria-label="增加數量"
                   >
                     +
@@ -186,18 +186,18 @@ export function ProductDetailClient({ product, locale }: Props) {
 
             {/* Cart indicator */}
             {cartQty > 0 && (
-              <p className="text-xs text-brand-600">
+              <p className="text-xs text-sea-600">
                 購物車中已有 {cartQty} 件
-                <Link href={`/${locale}/checkout`} className="ml-2 underline hover:text-brand-800">
+                <Link href={`/${locale}/checkout`} className="ml-2 underline hover:text-sea-800">
                   前往結帳 →
                 </Link>
               </p>
             )}
 
             {/* Delivery info */}
-            <div className="border-t border-sand-100 pt-5 space-y-3">
+            <div className="border-t border-paper-100 pt-5 space-y-3">
               <div className="flex items-start gap-3 text-sm text-ink/70">
-                <Truck className="h-4 w-4 mt-0.5 shrink-0 text-brand-500" />
+                <Truck className="h-4 w-4 mt-0.5 shrink-0 text-sea-500" />
                 <div>
                   <p className="font-medium text-ink/80 mb-0.5">黑貓宅急便冷凍配送</p>
                   <p className="text-xs text-ink/50">運費 NT$120・全台宅配・約 1–3 個工作天</p>
@@ -216,7 +216,7 @@ export function ProductDetailClient({ product, locale }: Props) {
 
         {/* ── Description ─────────────────────────────────────────── */}
         {product.description && (
-          <div className="mt-16 lg:mt-24 border-t border-sand-100 pt-12">
+          <div className="mt-16 lg:mt-24 border-t border-paper-100 pt-12">
             <h2 className="font-serif text-2xl tracking-wider mb-8 text-center">商品詳情</h2>
             <div className="max-w-2xl mx-auto prose prose-sm prose-ink leading-relaxed">
               <RichText data={product.description} />

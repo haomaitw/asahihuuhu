@@ -80,13 +80,17 @@
     }
   },
   "shop": {
-    "title": "周邊商品",
-    "description": "請輸入周邊商品頁的引導文字。",
+    "title": "網路商城",
+    "description": "嚴選朝日夫婦職人商品，宅配到府，在家也能品嚐職人好味道。",
     "goods": {
       "eyebrow": "GOODS",
       "title": "周邊精選"
     },
-    "comingSoon": "結帳功能將於下一階段上線"
+    "seasonal": {
+      "eyebrow": "SEASONAL",
+      "title": "季節 & 期間限定"
+    },
+    "comingSoon": "商品即將上架，敬請期待"
   },
   "about": {
     "title": "關於朝日",

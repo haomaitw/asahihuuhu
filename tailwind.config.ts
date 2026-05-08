@@ -22,6 +22,27 @@ const config: Config = {
           100: '#F5EFE6',
           200: '#EBE1D0',
         },
+        // brand = alias for sea (teal accent used throughout ProductCard / ProductDetailClient)
+        brand: {
+          50:  '#F2F8FB',
+          100: '#E4F0F6',
+          200: '#C7E0EB',
+          300: '#9CC8DA',
+          400: '#6FAEC5',
+          500: '#4D94B0',
+          600: '#3A7892',
+          700: '#2F6177',
+          800: '#274E60',
+          900: '#1F3D4C',
+        },
+        // sand = warm neutral (used in ProductDetailClient quantity stepper / dividers)
+        sand: {
+          50:  '#FAF7F2',
+          100: '#F5EFE6',
+          200: '#EBE1D0',
+          300: '#DDD0BC',
+          400: '#CEBFA6',
+        },
         ink: '#2A2A2A',
         // Admin palette — hardcoded so Tailwind JIT can statically generate all classes
         'adm-bg': {

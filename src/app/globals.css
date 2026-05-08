@@ -66,6 +66,13 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
   }
 
+  /* ─── Primary button ─────────────────────────────────────────── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-sea-500 px-6 py-3 text-xs tracking-widest text-white
+           transition-all duration-200 hover:bg-sea-600 hover:-translate-y-px hover:shadow-md active:translate-y-0 active:shadow-sm
+           disabled:opacity-40 disabled:pointer-events-none;
+  }
+
   /* ─── Interactive card ────────────────────────────────────────── */
   .interactive-card {
     @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-md;

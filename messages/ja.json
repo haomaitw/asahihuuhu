@@ -80,13 +80,17 @@
     }
   },
   "shop": {
-    "title": "ショップ",
-    "description": "ショップページのイントロをここに入力してください。",
+    "title": "オンラインショップ",
+    "description": "朝日夫婦の職人商品を、ご自宅にお届けします。",
     "goods": {
       "eyebrow": "GOODS",
-      "title": "グッズ"
+      "title": "グッズ＆商品"
     },
-    "comingSoon": "決済機能は次のフェーズで公開予定です"
+    "seasonal": {
+      "eyebrow": "SEASONAL",
+      "title": "季節限定"
+    },
+    "comingSoon": "商品準備中です。お楽しみに"
   },
   "about": {
     "title": "わたしたちについて",

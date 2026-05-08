@@ -80,13 +80,17 @@
     }
   },
   "shop": {
-    "title": "Shop",
-    "description": "Enter the shop page intro copy here.",
+    "title": "Online Shop",
+    "description": "Artisan goods by Asahi Huuhu, delivered to your door.",
     "goods": {
       "eyebrow": "GOODS",
       "title": "Goods & Merch"
     },
-    "comingSoon": "Checkout coming in the next phase"
+    "seasonal": {
+      "eyebrow": "SEASONAL",
+      "title": "Seasonal Specials"
+    },
+    "comingSoon": "Products coming soon — stay tuned"
   },
   "about": {
     "title": "About",
