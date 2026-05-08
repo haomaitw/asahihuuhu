@@ -5,7 +5,9 @@
     "shop": "Shop",
     "about": "About",
     "faq": "FAQ",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "returns": "Returns"
   },
   "common": {
     "seeMore": "See More"

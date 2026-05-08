@@ -11,6 +11,8 @@ const footerLinks = [
   { key: 'shop',    href: '/shop'     },
   { key: 'faq',     href: '/faq'      },
   { key: 'privacy', href: '/privacy'  },
+  { key: 'terms',   href: '/terms'    },
+  { key: 'returns', href: '/returns'  },
 ] as const;
 
 type FooterProps = {

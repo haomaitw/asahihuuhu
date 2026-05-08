@@ -7,6 +7,28 @@ export const SiteSettings: GlobalConfig = {
     update: ({ req }) => !!req.user,
   },
   fields: [
+    // ── 維護模式 ──────────────────────────────────────────────────
+    {
+      name: 'maintenanceMode',
+      type: 'group',
+      label: '維護模式',
+      admin: { description: '開啟後，前台所有頁面將顯示維護中畫面（管理員仍可正常使用後台）' },
+      fields: [
+        {
+          name: 'enabled',
+          type: 'checkbox',
+          label: '開啟維護模式',
+          defaultValue: false,
+        },
+        {
+          name: 'message',
+          type: 'textarea',
+          label: '維護說明',
+          localized: true,
+          admin: { description: '顯示給訪客的說明文字' },
+        },
+      ],
+    },
     // ── 聯絡資訊 ──────────────────────────────────────────────────
     {
       name: 'address',

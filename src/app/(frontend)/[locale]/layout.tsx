@@ -7,6 +7,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { PageTransition } from '@/components/PageTransition';
 import { CartProvider } from '@/components/CartProvider';
+import { LoginModal } from '@/components/LoginModal';
 import { getSiteSettings } from '@/lib/cms';
 import '@/app/globals.css';
 
@@ -101,6 +102,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider>
             <PageTransition />
+            <LoginModal />
             <div className="flex min-h-dvh flex-col bg-paper-50 text-ink overflow-x-hidden">
               <Header facebookUrl={facebookUrl} instagramUrl={instagramUrl} />
               <main className="flex-1 overflow-x-hidden">{children}</main>
