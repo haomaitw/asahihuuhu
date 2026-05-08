@@ -16,13 +16,13 @@
   },
   "home": {
     "hero": {
-      "tagline1": "Handcrafted Japanese Shaved Ice",
-      "tagline2": "An afternoon by the sea",
-      "lede": "Enter the homepage hero subtitle here."
+      "tagline1": "A Morning Sun, Remembered",
+      "tagline2": "Reborn on the Tamsui Riverbank",
+      "lede": "A theater-view seat by the harbor. Every handcrafted bowl of Japanese shaved ice carries a love story born in Okinawa."
     },
     "products": {
       "eyebrow": "PRODUCTS",
-      "title": "Our Products"
+      "title": "Artisan Kakigōri"
     },
     "limited": {
       "eyebrow": "LIMITED TIME",
@@ -35,7 +35,7 @@
   },
   "lineup": {
     "title": "Line Up",
-    "description": "Enter the line up intro copy here.",
+    "description": "Each kakigori is crafted from whole-block ice, shaved by a Japanese artisan machine into crystals as fine as winter snow. Paired with handmade, additive-free sauces — a meeting of Okinawa technique and Taiwanese ingredients.",
     "kakigori": { "title": "Kakigōri" },
     "crepes": { "title": "Japanese Crepes" },
     "drinks": { "title": "Drinks" },
@@ -62,7 +62,7 @@
       "cinnamon": "Cinnamon Butter Crepe",
       "tiramisu": "Chocolate Tiramisu Crepe",
       "strawberryHoney": "Strawberry Honey Cake Crepe",
-      "muscat": "Muscat Crepe",
+      "muscat": "Muscat Grape Crepe",
       "berryBrulee": "Berry Brûlée Crepe",
       "whiteStrawberry": "White Strawberry Crepe",
       "caramelCoffee": "Caramel Coffee Crepe",
@@ -81,10 +81,10 @@
   },
   "shop": {
     "title": "Online Shop",
-    "description": "Artisan goods by Asahi Huuhu, delivered to your door.",
+    "description": "Artisan goods curated by Asahi Huuhu, delivered anywhere in Taiwan. A piece of the Tamsui harborside, coming to your door.",
     "goods": {
       "eyebrow": "GOODS",
-      "title": "Goods & Merch"
+      "title": "Artisan Goods"
     },
     "seasonal": {
       "eyebrow": "SEASONAL",
@@ -94,31 +94,46 @@
   },
   "about": {
     "title": "About",
-    "description": "Enter the about page intro copy here.",
+    "description": "From the morning sun rising over the Pacific to the golden dusk settling over the Tamsui River — one couple, one dream, one bowl of ice.",
     "story": {
       "eyebrow": "OUR STORY",
       "title": "Our Story",
-      "p1": "Enter paragraph one of the brand story.",
-      "p2": "Enter paragraph two of the brand story.",
-      "p3": "Enter paragraph three of the brand story."
+      "p1": "The story of Asahi Huuhu begins on an island morning in Okinawa. Our founder Wei-yu worked as a diving instructor there, driving to the ocean in complete darkness every day — and witnessing the sun rise over the Pacific long before anyone else was awake. His wife Mei-lin gave their little family a name: 朝日夫婦 (Asahi Huuhu) — the couple who greets the morning sun. It became, quietly, a lifelong promise.",
+      "p2": "On a trip to a small island near Okinawa, they tasted their first real kakigori — whole-block ice shaved into crystals as fine as winter snow, dissolving on the tongue in an instant, entirely unlike the coarser Taiwanese shaved ice they'd grown up with. That bowl planted a seed. When their daughter was born, they returned to Mei-lin's hometown of Tamsui, settled beside the Huwei First Fishing Harbor, and brought the Okinawa dream home with them. In the summer of 2017, Asahi Huuhu opened its doors.",
+      "p3": "We use only natural, additive-free ingredients — no artificial flavoring, no artificial coloring, ever. Every sauce, syrup, and jam is made in-house by hand. We source Kyoto Uji matcha, premium Taiwanese dairy, and whatever is ripest this season, then shave whole-block ice into a cloud of snow-fine crystals. Take a theater-view seat overlooking the Tamsui River and Guanyin Mountain, and let the afternoon slow all the way down. That is the gift we most want to give you."
     },
     "location": {
       "title": "Visit Us",
-      "body": "Address:\nContact:"
+      "body": "No. 233-3, Zhongzheng Rd, Tamsui District, New Taipei City"
     },
     "hours": {
       "title": "Hours",
-      "body": "Tue–Sun 11:00–18:00\nClosed on Mondays"
+      "body": "Tue – Sun　12:00 – 20:00 (or until sold out)\nClosed on Mondays"
     }
   },
   "faq": {
     "title": "FAQ",
     "items": {
-      "q1": { "q": "Do I need a reservation?", "a": "Enter your answer in the admin panel." },
-      "q2": { "q": "Can I order takeaway?", "a": "Enter your answer in the admin panel." },
-      "q3": { "q": "What payment methods are accepted?", "a": "Enter your answer in the admin panel." },
-      "q4": { "q": "Are pets allowed?", "a": "Enter your answer in the admin panel." },
-      "q5": { "q": "How can I contact you?", "a": "Enter your answer in the admin panel." }
+      "q1": {
+        "q": "Do I need a reservation?",
+        "a": "Asahi Huuhu is walk-in only — we do not take reservations. On weekends and during peak season, wait times can exceed 30 minutes. We recommend arriving early, especially in summer."
+      },
+      "q2": {
+        "q": "Can I order kakigori to go?",
+        "a": "Kakigori is designed to be enjoyed on the spot — the snow-fine ice crystals melt quickly outside the shop. Crepes and drinks are available for takeaway; please let us know when ordering."
+      },
+      "q3": {
+        "q": "What payment methods do you accept?",
+        "a": "We currently accept cash. For any updates to our payment options, please check our official Facebook or Instagram before your visit."
+      },
+      "q4": {
+        "q": "Are pets welcome?",
+        "a": "Furry friends are welcome in our outdoor seating area. To maintain a comfortable environment for all guests, pets are not permitted in the indoor air-conditioned area. Thank you for your understanding."
+      },
+      "q5": {
+        "q": "How can I get in touch?",
+        "a": "Please send us a message on Facebook or Instagram — we typically reply within 24 hours. You can also reach us by phone at 0903-290-575."
+      }
     }
   },
   "news": {
@@ -126,7 +141,7 @@
     "item1": "News title one (edit in admin)",
     "item2": "News title two (edit in admin)",
     "item3": "News title three (edit in admin)",
-    "placeholderBody": "This is a placeholder for the news body — it will be loaded from Payload in Phase 2."
+    "placeholderBody": "This is a placeholder for news body text. Please add your latest updates in the admin panel."
   },
   "cart": {
     "title": "Cart",
@@ -151,8 +166,8 @@
     "backToShop": "Continue Shopping",
     "success": "Payment Successful!",
     "failed": "Payment Failed",
-    "successMessage": "Thank you for your purchase. We'll process your order shortly.",
-    "failedMessage": "Payment was not completed. Please return to the shop and try again.",
+    "successMessage": "Thank you for your purchase. We'll process your order as soon as possible.",
+    "failedMessage": "Your payment was not completed. Please return to the shop and try again.",
     "orderNumber": "Order Number"
   },
   "product": {
