@@ -35,15 +35,17 @@ export function Header({ facebookUrl, instagramUrl }: HeaderProps = {}) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const textColor    = scrolled ? 'text-ink'       : 'text-white'
-  const textColorSub = scrolled ? 'text-ink/60'    : 'text-white/70'
-  const hoverColor   = scrolled ? 'hover:text-ink' : 'hover:text-white'
+  const textColor    = scrolled ? 'text-ink'        : 'text-white'
+  // When scrolled, use near-full opacity so icons/text don't disappear
+  // against the warm paper-50 background (#faf8f4)
+  const textColorSub = scrolled ? 'text-ink/75'    : 'text-white/70'
+  const hoverColor   = scrolled ? 'hover:text-sea-500' : 'hover:text-white'
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-30 transition-all duration-500 ${
         scrolled
-          ? 'bg-paper-50/95 backdrop-blur-md shadow-sm'
+          ? 'bg-paper-50/96 backdrop-blur-md shadow-sm border-b border-paper-200'
           : 'bg-transparent'
       }`}
     >
@@ -66,8 +68,10 @@ export function Header({ facebookUrl, instagramUrl }: HeaderProps = {}) {
             <Link
               key={item.key}
               href={item.href}
-              className={`nav-link font-sans font-light text-xs tracking-[0.28em] transition-colors duration-300 ${
-                scrolled ? 'opacity-70 hover:opacity-100' : 'opacity-80 hover:opacity-100'
+              className={`nav-link font-sans font-light text-xs tracking-[0.28em] transition-all duration-300 ${
+                scrolled
+                  ? 'text-ink hover:text-sea-500'
+                  : 'opacity-85 hover:opacity-100'
               }`}
             >
               {t(item.key)}

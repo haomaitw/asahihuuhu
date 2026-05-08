@@ -33,35 +33,41 @@ export function Hero({ videoSrc, poster, tagline1, tagline2, lede }: HeroProps =
         )}
       </video>
 
-      {/* ── Gradient overlay ─────────────────────────────────────────── */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/35" />
+      {/* ── Gradient overlay: stronger at top for text legibility ─────── */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/10 to-black/20" />
 
-      {/* ── Text content — bottom-left (matches original) ─────────────── */}
-      <div className="relative z-10 container-content h-full flex flex-col justify-end pb-16 md:pb-24">
-        <div className="text-white space-y-4 max-w-xl">
+      {/* ── Text content — top-right ──────────────────────────────────── */}
+      <div className="relative z-10 container-content h-full flex flex-col justify-start items-end pt-20 md:pt-24 lg:pt-28">
+        <div className="text-white text-right space-y-3 md:max-w-md lg:max-w-lg">
+          {/* Main tagline — large, light weight */}
           <h1
-            className="font-sans font-light text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-[0.14em] md:tracking-[0.18em] leading-tight"
-            style={{ textShadow: '0 2px 16px rgba(0,0,0,0.35)' }}
+            className="font-sans font-light text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-[0.1em] leading-tight"
+            style={{ textShadow: '0 2px 20px rgba(0,0,0,0.55)' }}
           >
             {tagline1 ?? t('tagline1')}
           </h1>
+          {/* Sub tagline — clearly smaller, de-emphasised */}
           <h2
-            className="font-sans font-light text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-[0.14em] md:tracking-[0.18em] leading-tight opacity-90"
-            style={{ textShadow: '0 1px 10px rgba(0,0,0,0.25)' }}
+            className="font-sans font-light text-sm sm:text-base md:text-lg lg:text-xl tracking-[0.1em] leading-snug opacity-75"
+            style={{ textShadow: '0 1px 12px rgba(0,0,0,0.45)' }}
           >
             {tagline2 ?? t('tagline2')}
           </h2>
+          {/* Lede — smallest, most subtle */}
           {(lede || t('lede')) && (
-            <p className="font-sans font-light text-sm md:text-base tracking-[0.18em] opacity-75 pt-2 leading-relaxed">
+            <p
+              className="font-sans font-light text-xs sm:text-sm tracking-[0.12em] opacity-60 pt-1 leading-relaxed"
+              style={{ textShadow: '0 1px 8px rgba(0,0,0,0.35)' }}
+            >
               {lede ?? t('lede')}
             </p>
           )}
         </div>
       </div>
 
-      {/* ── Brand mark — bottom-right (matches original) ───────────────── */}
-      <div className="absolute bottom-10 right-6 md:right-10 z-10 opacity-80">
-        <BrandMark variant="white" className="h-14 md:h-18" />
+      {/* ── Brand mark — bottom-left (balances top-right text) ────────── */}
+      <div className="absolute bottom-8 left-5 md:left-10 z-10 opacity-75">
+        <BrandMark variant="white" className="h-12 md:h-16" />
       </div>
     </section>
   );
