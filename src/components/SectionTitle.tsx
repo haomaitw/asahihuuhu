@@ -7,7 +7,7 @@
 export function SectionTitle({
   eyebrow,
   title,
-  align = 'center',
+  align = 'left',
 }: {
   eyebrow: string;
   title: string;

@@ -52,7 +52,7 @@ export function Hero({ videoSrc, poster, tagline1, tagline2, lede }: HeroProps =
 
       {/* ── Main content — anchored bottom-left ───────────────────────── */}
       <div className="relative z-10 h-full container-content flex flex-col justify-end pb-16 sm:pb-20 md:pb-24 lg:pb-28">
-        <div className="max-w-lg lg:max-w-xl">
+        <div className="max-w-xl lg:max-w-2xl">
 
           {/*
             Eyebrow — a tiny brand sigil above the headline.
@@ -72,7 +72,7 @@ export function Hero({ videoSrc, poster, tagline1, tagline2, lede }: HeroProps =
             mist on water.
           */}
           <h1
-            className="font-sans font-light text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1] tracking-[0.07em] text-white"
+            className="font-sans font-light text-4xl sm:text-5xl md:text-6xl leading-[1.1] tracking-[0.07em] text-white"
             style={{ textShadow: '0 3px 36px rgba(0,0,0,0.45)' }}
           >
             {tagline1 ?? t('tagline1')}
