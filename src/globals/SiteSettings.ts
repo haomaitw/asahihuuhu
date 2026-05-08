@@ -71,6 +71,12 @@ export const SiteSettings: GlobalConfig = {
       type: 'text',
       admin: { description: 'Instagram 帳號網址' },
     },
+    {
+      name: 'copyright',
+      type: 'text',
+      admin: { description: '版權聲明文字（不含年份），如：ASAHI HUUHU. All Rights Reserved.' },
+      defaultValue: 'ASAHI HUUHU. All Rights Reserved.',
+    },
     // ── 黑貓宅急便寄件人設定 ─────────────────────────────────────
     {
       name: 'tcat',

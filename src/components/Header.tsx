@@ -18,7 +18,12 @@ const navItems = [
   { key: 'faq',    href: '/faq'     },
 ] as const
 
-export function Header() {
+type HeaderProps = {
+  facebookUrl?: string | null
+  instagramUrl?: string | null
+}
+
+export function Header({ facebookUrl, instagramUrl }: HeaderProps = {}) {
   const t = useTranslations('nav')
   const [scrolled, setScrolled] = useState(false)
 
@@ -61,7 +66,7 @@ export function Header() {
             <Link
               key={item.key}
               href={item.href}
-              className={`nav-link font-averia text-xs tracking-[0.28em] transition-colors duration-300 ${
+              className={`nav-link font-sans font-light text-xs tracking-[0.28em] transition-colors duration-300 ${
                 scrolled ? 'opacity-70 hover:opacity-100' : 'opacity-80 hover:opacity-100'
               }`}
             >
@@ -74,24 +79,28 @@ export function Header() {
         <div className={`flex items-center gap-3 ${textColor}`}>
           {/* Social icons */}
           <div className={`hidden md:flex items-center gap-3 ${textColorSub}`}>
-            <a
-              href="https://www.facebook.com/asahihuuhu"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              className={`transition-all duration-300 ${hoverColor} hover:scale-110`}
-            >
-              <Facebook size={15} />
-            </a>
-            <a
-              href="https://www.instagram.com/asahihuuhu"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className={`transition-all duration-300 ${hoverColor} hover:scale-110`}
-            >
-              <Instagram size={15} />
-            </a>
+            {(facebookUrl ?? 'https://www.facebook.com/asahihuuhu') && (
+              <a
+                href={facebookUrl ?? 'https://www.facebook.com/asahihuuhu'}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className={`transition-all duration-300 ${hoverColor} hover:scale-110`}
+              >
+                <Facebook size={15} />
+              </a>
+            )}
+            {(instagramUrl ?? 'https://www.instagram.com/asahihuuhu') && (
+              <a
+                href={instagramUrl ?? 'https://www.instagram.com/asahihuuhu'}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className={`transition-all duration-300 ${hoverColor} hover:scale-110`}
+              >
+                <Instagram size={15} />
+              </a>
+            )}
           </div>
           <div className="hidden md:block">
             <LangSwitcher variant="header" />

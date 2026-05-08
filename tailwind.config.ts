@@ -86,13 +86,15 @@ const config: Config = {
       },
 
       fontFamily: {
+        // Primary font — Noto Sans TC covers all CJK + Latin
         sans:   ['var(--font-noto-tc)', 'var(--font-noto-jp)', 'system-ui', 'sans-serif'],
         serif:  ['var(--font-noto-serif-tc)', 'serif'],
-        averia: ['var(--font-averia)', 'cursive'],   // decorative EN headings / eyebrows
+        // Averia: Latin-only decorative, fallback to Noto (NOT cursive — cursive = 標楷體 on macOS)
+        averia: ['var(--font-averia)', 'var(--font-noto-tc)', 'sans-serif'],
       },
 
       fontSize: {
-        // ── Frontend scale (larger = more readable) ───────────────────
+        // ── Frontend scale ────────────────────────────────────────────
         '2xs': ['11px',  { lineHeight: '16px' }],
         'xs':  ['12px',  { lineHeight: '18px' }],
         'sm':  ['14px',  { lineHeight: '22px' }],
@@ -103,6 +105,9 @@ const config: Config = {
         '3xl': ['30px',  { lineHeight: '40px' }],
         '4xl': ['36px',  { lineHeight: '46px' }],
         '5xl': ['48px',  { lineHeight: '56px' }],
+        '6xl': ['60px',  { lineHeight: '68px' }],
+        '7xl': ['72px',  { lineHeight: '80px' }],
+        '8xl': ['90px',  { lineHeight: '96px' }],
       },
 
       maxWidth: {

@@ -7,6 +7,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { PageTransition } from '@/components/PageTransition';
 import { CartProvider } from '@/components/CartProvider';
+import { getSiteSettings } from '@/lib/cms';
 import '@/app/globals.css';
 
 const notoTC = Noto_Sans_TC({
@@ -76,7 +77,14 @@ export default async function LocaleLayout({
   }
 
   setRequestLocale(locale);
-  const messages = await getMessages();
+  const [messages, siteSettings] = await Promise.all([
+    getMessages(),
+    getSiteSettings(locale).catch(() => null),
+  ]);
+
+  const facebookUrl  = (siteSettings as any)?.facebookUrl  ?? null;
+  const instagramUrl = (siteSettings as any)?.instagramUrl ?? null;
+  const copyright    = (siteSettings as any)?.copyright    ?? null;
 
   return (
     <html
@@ -94,9 +102,9 @@ export default async function LocaleLayout({
           <CartProvider>
             <PageTransition />
             <div className="flex min-h-dvh flex-col bg-paper-50 text-ink overflow-x-hidden">
-              <Header />
+              <Header facebookUrl={facebookUrl} instagramUrl={instagramUrl} />
               <main className="flex-1 overflow-x-hidden">{children}</main>
-              <Footer />
+              <Footer facebookUrl={facebookUrl} instagramUrl={instagramUrl} copyright={copyright} />
             </div>
           </CartProvider>
         </NextIntlClientProvider>

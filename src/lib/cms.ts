@@ -106,3 +106,16 @@ export async function getSiteSettings(locale: string) {
     return null;
   }
 }
+
+export async function getShopPageGlobal(locale: string) {
+  try {
+    const payload = await getPayloadInstance();
+    return await payload.findGlobal({
+      slug: 'shop-page',
+      locale: locale as SupportedLocale,
+      depth: 1,
+    });
+  } catch {
+    return null;
+  }
+}

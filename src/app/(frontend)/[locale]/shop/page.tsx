@@ -11,6 +11,7 @@ import {
   placeholderSeasonal,
 } from '@/lib/placeholder-data';
 import { getProducts } from '@/lib/cms-products';
+import { getShopPageGlobal } from '@/lib/cms';
 
 export async function generateMetadata({
   params,
@@ -30,20 +31,23 @@ export default async function ShopPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  let cmsProducts: Awaited<ReturnType<typeof getProducts>> = [];
-  try {
-    cmsProducts = await getProducts(locale);
-  } catch {
-    // DB not ready — fall back to placeholders
-  }
+  const [cmsProducts, shopPage] = await Promise.all([
+    getProducts(locale).catch(() => [] as Awaited<ReturnType<typeof getProducts>>),
+    getShopPageGlobal(locale).catch(() => null),
+  ]);
 
   const goods    = cmsProducts.filter((p) => p.category === 'goods');
   const seasonal = cmsProducts.filter((p) => p.category === 'seasonal');
+
+  const heroImageUrl = (shopPage as any)?.heroImage?.url ?? null;
+  const trustItems   = (shopPage as any)?.trustItems ?? null;
 
   return (
     <ShopContent
       goods={goods.length ? goods : null}
       seasonal={seasonal.length ? seasonal : null}
+      heroImageUrl={heroImageUrl}
+      trustItems={trustItems}
     />
   );
 }
@@ -54,12 +58,24 @@ type ShopProduct = {
   stock?: number; trackStock?: boolean;
 }
 
+type TrustItem = { icon?: string; title?: string; description?: string }
+
+const DEFAULT_TRUST_ITEMS: TrustItem[] = [
+  { icon: '❄️', title: '冷凍配送',        description: '黑貓宅急便冷凍宅配，確保品質' },
+  { icon: '🚚', title: '固定運費 NT$120', description: '全台宅配，1–3 個工作天送達' },
+  { icon: '🎁', title: '精心包裝',        description: '職人用心包裝，完整呈現每份美味' },
+]
+
 function ShopContent({
   goods,
   seasonal,
+  heroImageUrl,
+  trustItems,
 }: {
   goods: ShopProduct[] | null
   seasonal: ShopProduct[] | null
+  heroImageUrl?: string | null
+  trustItems?: TrustItem[] | null
 }) {
   const t      = useTranslations();
   const locale = useLocale();
@@ -80,7 +96,7 @@ function ShopContent({
         eyebrow="SHOP"
         title={t('shop.title')}
         description={t('shop.description')}
-        media={{ kind: 'image', src: '/asahi/hero-shop.png' }}
+        media={{ kind: 'image', src: heroImageUrl ?? '/asahi/hero-shop.png' }}
       />
 
       <WaveDivider fill="#faf8f4" />
@@ -159,16 +175,12 @@ function ShopContent({
       <section className="bg-paper-50 py-16 md:py-20">
         <div className="container-content">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
-            {[
-              { icon: '❄️', title: '冷凍配送',        sub: '黑貓宅急便冷凍宅配，確保品質' },
-              { icon: '🚚', title: '固定運費 NT$120', sub: '全台宅配，1–3 個工作天送達' },
-              { icon: '🎁', title: '精心包裝',        sub: '職人用心包裝，完整呈現每份美味' },
-            ].map(({ icon, title, sub }, i) => (
-              <AnimateIn key={title} delay={i * 100}>
+            {(trustItems?.length ? trustItems : DEFAULT_TRUST_ITEMS).map(({ icon, title, description }, i) => (
+              <AnimateIn key={i} delay={i * 100}>
                 <div className="flex flex-col items-center gap-3">
                   <span className="text-4xl">{icon}</span>
-                  <p className="font-sans tracking-widest text-ink text-base font-medium">{title}</p>
-                  <p className="text-sm text-ink/55 tracking-wide leading-relaxed">{sub}</p>
+                  <p className="font-sans font-medium tracking-widest text-ink text-base">{title}</p>
+                  <p className="font-sans font-light text-sm text-ink/55 tracking-wide leading-relaxed">{description}</p>
                 </div>
               </AnimateIn>
             ))}

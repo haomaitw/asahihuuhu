@@ -47,9 +47,9 @@ body {
 /* ─── Typography helpers ────────────────────────────────────────────── */
 @layer components {
 
-  /* ── Section eyebrow — Averia Sans Libre, brand blue ────────────── */
+  /* ── Section eyebrow — Noto Sans TC light, brand blue ──────────── */
   .section-eyebrow {
-    @apply font-averia text-sm tracking-[0.3em] uppercase text-sea-400 font-normal;
+    @apply font-sans font-light text-sm tracking-[0.3em] uppercase text-sea-400;
   }
 
   /* ── Decorative dash divider under eyebrow ───────────────────────── */
@@ -108,7 +108,7 @@ body {
   .pill-button {
     @apply inline-flex items-center gap-4 rounded-pill border border-[#c6c6c6]
            bg-white px-2 py-2 pr-2
-           font-averia text-sm tracking-[0.25em] text-ink
+           font-sans font-light text-sm tracking-[0.25em] text-ink
            transition-all duration-500
            hover:bg-sea-400 hover:border-sea-400 hover:text-white hover:shadow-sm;
   }

@@ -21,6 +21,7 @@ import { PointTransactions } from './collections/PointTransactions';
 import { SiteSettings } from './globals/SiteSettings';
 import { HomePage } from './globals/HomePage';
 import { AboutPage } from './globals/AboutPage';
+import { ShopPage } from './globals/ShopPage';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -71,7 +72,7 @@ export default buildConfig({
     FAQs, Staff,
   ],
 
-  globals: [SiteSettings, HomePage, AboutPage],
+  globals: [SiteSettings, HomePage, AboutPage, ShopPage],
 
   localization: {
     locales: [
