@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Facebook, Instagram } from 'lucide-react'
 import { Link } from '@/i18n/routing'
@@ -25,7 +26,14 @@ type HeaderProps = {
 
 export function Header({ facebookUrl, instagramUrl }: HeaderProps = {}) {
   const t = useTranslations('nav')
+  const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
+
+  // Home page paths are /<locale> with nothing after (zh-TW, en, ja)
+  const isHome = /^\/(zh-TW|en|ja)\/?$/.test(pathname)
+
+  // On non-home pages, always act as if scrolled (paper background, dark text, logo visible)
+  const active = !isHome || scrolled
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60)
@@ -35,26 +43,24 @@ export function Header({ facebookUrl, instagramUrl }: HeaderProps = {}) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const textColor    = scrolled ? 'text-ink'        : 'text-white'
-  // When scrolled, use near-full opacity so icons/text don't disappear
-  // against the warm paper-50 background (#faf8f4)
-  const textColorSub = scrolled ? 'text-ink/75'    : 'text-white/70'
-  const hoverColor   = scrolled ? 'hover:text-sea-500' : 'hover:text-white'
+  const textColor    = active ? 'text-ink'         : 'text-white'
+  const textColorSub = active ? 'text-ink/75'      : 'text-white/70'
+  const hoverColor   = active ? 'hover:text-sea-500' : 'hover:text-white'
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-30 transition-all duration-500 ${
-        scrolled
+        active
           ? 'bg-paper-50/96 backdrop-blur-md shadow-sm border-b border-paper-200'
           : 'bg-transparent'
       }`}
     >
       <div className="container-content flex items-center justify-between py-4 md:py-5">
 
-        {/* ── Logo (appears once scrolled) ──────────────────────────── */}
+        {/* ── Logo (home: appears on scroll; other pages: always visible) ── */}
         <div
           className={`transition-all duration-500 ${
-            scrolled ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 pointer-events-none'
+            active ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 pointer-events-none'
           }`}
         >
           <Link href="/" aria-label="朝日夫婦">
@@ -69,7 +75,7 @@ export function Header({ facebookUrl, instagramUrl }: HeaderProps = {}) {
               key={item.key}
               href={item.href}
               className={`nav-link font-sans font-light text-xs tracking-[0.28em] transition-all duration-300 ${
-                scrolled
+                active
                   ? 'text-ink hover:text-sea-500'
                   : 'opacity-85 hover:opacity-100'
               }`}

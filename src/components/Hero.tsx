@@ -65,8 +65,8 @@ export function Hero({ videoSrc, poster, tagline1, tagline2, lede }: HeroProps =
         </div>
       </div>
 
-      {/* ── Brand mark — bottom-left (balances top-right text) ────────── */}
-      <div className="absolute bottom-8 left-5 md:left-10 z-10 opacity-75">
+      {/* ── Brand mark — top-left (mirrors top-right text) ───────────── */}
+      <div className="absolute top-20 md:top-24 lg:top-28 left-5 md:left-10 z-10 opacity-75 flex items-start pt-1">
         <BrandMark variant="white" className="h-12 md:h-16" />
       </div>
     </section>
