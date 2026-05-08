@@ -34,9 +34,16 @@ const nextConfig = {
 
   images: {
     remotePatterns: [
+      // Placeholder / stock images used during development
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'picsum.photos' },
       { protocol: 'https', hostname: 'placehold.co' },
+      // Payload-uploaded media: served from the same server, URL = NEXT_PUBLIC_SITE_URL/media/*
+      // Zeabur staging subdomain
+      { protocol: 'https', hostname: '*.zeabur.app' },
+      // Production custom domain
+      { protocol: 'https', hostname: 'asahihuuhu.com' },
+      { protocol: 'https', hostname: 'www.asahihuuhu.com' },
     ],
   },
   experimental: {
