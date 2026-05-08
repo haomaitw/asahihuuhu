@@ -13,14 +13,13 @@ export async function POST(request: Request) {
     const payload = await getPayload({ config })
     const db = payload.db as any
 
-    // Use createRequire to load drizzle-kit's CJS api.js directly by resolving
-    // the package root and appending /api.js — this bypasses the exports map
-    // condition lookup so Node always loads the CJS build (not api.mjs).
+    // Load drizzle-kit's CJS api.js via an absolute path built from process.cwd().
+    // This bypasses both webpack module-ID substitution (which breaks .resolve())
+    // and the exports-map condition lookup (which on Node 22 may load api.mjs).
     const cjsRequire = createRequire(import.meta.url)
-    // resolve drizzle-kit root (index.js), then swap to api.js
-    const indexPath: string = cjsRequire.resolve('drizzle-kit')
-    const apiPath = indexPath.replace(/[/\\]index\.js$/, '/api.js')
-    const { generateDrizzleJson, generateMigration } = cjsRequire(apiPath)
+    const { join } = await import('path')
+    const apiJsPath = join(process.cwd(), 'node_modules', 'drizzle-kit', 'api.js')
+    const { generateDrizzleJson, generateMigration } = cjsRequire(apiJsPath)
 
     const drizzleJsonAfter = generateDrizzleJson(db.schema)
     const drizzleJsonBefore = { ...db.defaultDrizzleSnapshot }
