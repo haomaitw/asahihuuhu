@@ -12,6 +12,10 @@ export default function ProfilePage({ params }: { params: Promise<{ locale: stri
   const [addr, setAddr] = useState({ recipient: '', phone: '', zip: '', city: '', district: '', address: '' })
   const [msg, setMsg] = useState('')
   const [err, setErr] = useState('')
+  const [pwForm, setPwForm] = useState({ current: '', next: '', confirm: '' })
+  const [pwMsg, setPwMsg] = useState('')
+  const [pwErr, setPwErr] = useState('')
+  const [pwLoading, setPwLoading] = useState(false)
 
   useEffect(() => {
     params.then((p) => setLocale(p.locale)).catch(() => {})
@@ -38,6 +42,33 @@ export default function ProfilePage({ params }: { params: Promise<{ locale: stri
     const result = await updateProfile({ ...form, defaultAddress: addr } as any)
     if (result.ok) setMsg('已成功更新')
     else setErr(result.error ?? '更新失敗')
+  }
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setPwMsg(''); setPwErr('')
+    if (pwForm.next !== pwForm.confirm) { setPwErr('兩次輸入的密碼不一致'); return }
+    if (pwForm.next.length < 8) { setPwErr('新密碼至少需要 8 個字元'); return }
+    setPwLoading(true)
+    try {
+      const res = await fetch(`/api/customers/${customer?.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ password: pwForm.next }),
+      })
+      if (res.ok) {
+        setPwMsg('密碼已成功更新')
+        setPwForm({ current: '', next: '', confirm: '' })
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setPwErr(data?.errors?.[0]?.message ?? '密碼更新失敗')
+      }
+    } catch {
+      setPwErr('無法連線，請稍後再試')
+    } finally {
+      setPwLoading(false)
+    }
   }
 
   const f = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -128,6 +159,42 @@ export default function ProfilePage({ params }: { params: Promise<{ locale: stri
           >
             {isLoading ? '儲存中…' : '儲存變更'}
           </button>
+        </form>
+
+        {/* Change Password */}
+        <form onSubmit={handleChangePassword} className="space-y-4 mt-6">
+          <div className="bg-white border border-sand-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <h2 className="text-sm font-medium text-ink/60 uppercase tracking-widest">更改密碼</h2>
+            <div>
+              <label className="block text-xs text-ink/50 mb-1.5">新密碼</label>
+              <input
+                type="password"
+                value={pwForm.next}
+                onChange={(e) => setPwForm(p => ({ ...p, next: e.target.value }))}
+                className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50"
+                placeholder="至少 8 個字元"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-ink/50 mb-1.5">確認新密碼</label>
+              <input
+                type="password"
+                value={pwForm.confirm}
+                onChange={(e) => setPwForm(p => ({ ...p, confirm: e.target.value }))}
+                className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50"
+                placeholder="再次輸入新密碼"
+              />
+            </div>
+            {pwMsg && <p className="text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg px-4 py-3">✓ {pwMsg}</p>}
+            {pwErr && <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{pwErr}</p>}
+            <button
+              type="submit"
+              disabled={pwLoading || !pwForm.next || !pwForm.confirm}
+              className="w-full bg-sand-100 hover:bg-sand-200 disabled:opacity-50 text-ink font-serif tracking-widest py-3 rounded-xl transition-colors text-sm border border-sand-200"
+            >
+              {pwLoading ? '更新中…' : '更新密碼'}
+            </button>
+          </div>
         </form>
       </div>
     </main>

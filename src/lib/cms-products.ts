@@ -62,7 +62,7 @@ function mapProduct(doc: any): CmsProduct {
     comparePrice: (doc.comparePrice as number) || undefined,
     image: imgs[0] ?? '/asahi/ice-3.png',
     images: imgs.length > 0 ? imgs : ['/asahi/ice-3.png'],
-    category: typeof doc.category === 'object' ? (doc.category?.name ?? '') : (doc.category ?? ''),
+    category: typeof doc.category === 'object' ? (doc.category?.slug ?? doc.category?.name ?? '') : (doc.category ?? ''),
     shortDescription: doc.shortDescription as string | undefined,
     isAvailable: doc.isAvailable as boolean,
     trackStock: (doc.trackStock as boolean) ?? true,

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Hero } from '@/components/Hero';
 import { SectionTitle } from '@/components/SectionTitle';
@@ -84,6 +84,7 @@ function HomeContent({
   cmsGoods, cmsSeasonal, cmsNews,
 }: HomeContentProps) {
   const t = useTranslations();
+  const locale = useLocale();
 
   const products = cmsGoods?.length
     ? cmsGoods
@@ -115,7 +116,7 @@ function HomeContent({
             eyebrow={t('home.products.eyebrow')}
             title={t('home.products.title')}
           />
-          <ProductCarousel products={products} />
+          <ProductCarousel products={products} locale={locale} />
           <Link href="/line-up" className="pill-button">
             {t('common.seeMore')}
             <span aria-hidden>→</span>
@@ -131,7 +132,7 @@ function HomeContent({
             eyebrow={t('home.limited.eyebrow')}
             title={t('home.limited.title')}
           />
-          <ProductCarousel products={seasonalProducts} />
+          <ProductCarousel products={seasonalProducts} locale={locale} />
         </div>
       </section>
 
