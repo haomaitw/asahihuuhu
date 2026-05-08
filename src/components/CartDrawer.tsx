@@ -67,10 +67,14 @@ export function CartDrawer({ open, onClose }: Props) {
         </div>
 
         {items.length > 0 && (
-          <div className="px-6 py-5 border-t border-stone-200 space-y-4">
+          <div className="px-6 py-5 border-t border-stone-200 space-y-3">
             <div className="flex items-center justify-between text-sm">
               <span className="tracking-wide text-ink/60">{t('subtotal')}</span>
               <span className="font-medium">NT$ {totalPrice.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs text-ink/40">
+              <span>運費（黑貓冷凍宅配）</span>
+              <span>NT$ 120</span>
             </div>
             <button
               onClick={handleCheckout}

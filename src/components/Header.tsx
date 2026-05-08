@@ -1,9 +1,10 @@
 import { useTranslations } from 'next-intl';
-import { Facebook, Instagram } from 'lucide-react';
+import { Facebook, Instagram, UserCircle } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { LangSwitcher } from './LangSwitcher';
 import { MobileMenu } from './MobileMenu';
 import { CartButton } from './CartButton';
+import { HeaderAccountButton } from './HeaderAccountButton';
 
 const navItems = [
   { key: 'news', href: '/news' },
@@ -49,6 +50,7 @@ export function Header() {
         <div className="hidden md:block">
           <LangSwitcher variant="header" />
         </div>
+        <HeaderAccountButton />
         <CartButton />
         <MobileMenu />
       </div>
