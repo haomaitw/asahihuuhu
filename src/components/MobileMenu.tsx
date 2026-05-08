@@ -15,7 +15,12 @@ const navItems = [
   { key: 'faq', href: '/faq' },
 ] as const;
 
-export function MobileMenu() {
+type MobileMenuProps = {
+  facebookUrl?: string | null
+  instagramUrl?: string | null
+}
+
+export function MobileMenu({ facebookUrl, instagramUrl }: MobileMenuProps = {}) {
   const t = useTranslations('nav');
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -29,23 +34,30 @@ export function MobileMenu() {
     return () => { document.body.style.overflow = ''; };
   }, [open]);
 
+  const fb = facebookUrl ?? 'https://www.facebook.com/asahihuuhu';
+  const ig = instagramUrl ?? 'https://www.instagram.com/asahihuuhu';
+
   return (
     <>
+      {/* ── Hamburger toggle ─────────────────────────────────────────── */}
       <button
         type="button"
         aria-label="Open menu"
         onClick={() => setOpen(true)}
-        className="md:hidden flex h-10 w-10 items-center justify-center text-white transition-opacity duration-200 hover:opacity-70"
+        className="md:hidden flex h-10 w-10 items-center justify-center text-current transition-opacity duration-200 hover:opacity-70"
       >
         <svg width="22" height="14" viewBox="0 0 22 14" fill="none" aria-hidden>
           <path d="M0 1H22M0 7H22M0 13H16" stroke="currentColor" strokeWidth="1.5" />
         </svg>
       </button>
 
+      {/* ── Full-screen overlay ──────────────────────────────────────── */}
       {open && (
         <div className="fixed inset-0 z-50 bg-paper-50 flex flex-col md:hidden">
+
+          {/* Header row */}
           <div className="flex items-center justify-between px-6 py-6">
-            <BrandMark variant="black" className="h-12" />
+            <BrandMark variant="black" className="h-10" />
             <button
               type="button"
               aria-label="Close menu"
@@ -58,22 +70,24 @@ export function MobileMenu() {
             </button>
           </div>
 
-          <nav className="flex-1 flex flex-col items-center justify-center gap-8 text-ink">
+          {/* Nav items — centred, Noto Sans TC light */}
+          <nav className="flex-1 flex flex-col items-center justify-center gap-7">
             {navItems.map((item) => (
               <Link
                 key={item.key}
                 href={item.href}
-                className="font-serif text-xl tracking-[0.3em] transition-colors duration-200 hover:text-sea-500"
+                className="font-sans font-light text-2xl tracking-[0.3em] text-ink transition-colors duration-200 hover:text-sea-500"
               >
                 {t(item.key)}
               </Link>
             ))}
           </nav>
 
-          <div className="flex flex-col items-center gap-6 pb-12">
+          {/* Bottom utilities */}
+          <div className="flex flex-col items-center gap-5 pb-12">
             <div className="flex items-center gap-6 text-ink/60">
               <a
-                href="https://www.facebook.com/"
+                href={fb}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
@@ -82,7 +96,7 @@ export function MobileMenu() {
                 <Facebook size={18} />
               </a>
               <a
-                href="https://www.instagram.com/"
+                href={ig}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"

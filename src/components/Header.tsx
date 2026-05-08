@@ -107,7 +107,7 @@ export function Header({ facebookUrl, instagramUrl }: HeaderProps = {}) {
           </div>
           <HeaderAccountButton />
           <CartButton />
-          <MobileMenu />
+          <MobileMenu facebookUrl={facebookUrl} instagramUrl={instagramUrl} />
         </div>
       </div>
     </header>
