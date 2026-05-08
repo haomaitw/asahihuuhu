@@ -81,10 +81,10 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    group: '系統',
+    group: '帳號管理',
     superAdminOnly: true,
     items: [
-      { label: '使用者', href: '/admin/collections/users', icon: Users, superAdminOnly: true },
+      { label: '帳號管理', href: '/admin/collections/users', icon: Users, superAdminOnly: true },
     ],
   },
 ]
@@ -170,7 +170,7 @@ function SidebarContent({
         />
         {!collapsed && (
           <span className="ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded bg-adm-brand-100 text-adm-brand-700 shrink-0">
-            {isSuperAdmin ? '最高管理員' : '管理員'}
+            {isSuperAdmin ? '代管商' : '客戶'}
           </span>
         )}
       </div>

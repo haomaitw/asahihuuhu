@@ -8,8 +8,8 @@ export const Users: CollectionConfig = {
   },
 
   // Role-based access:
-  // super-admin → full CRUD on all users
-  // admin       → can only read & update their own account (no create/delete)
+  // super-admin (代管商) → full CRUD on all users + system settings
+  // admin       (客戶)   → can only read & update their own account (no create/delete)
   access: {
     create: ({ req }) => req.user?.role === 'super-admin',
     read: ({ req }) => {
@@ -40,11 +40,11 @@ export const Users: CollectionConfig = {
       defaultValue: 'admin',
       required: true,
       options: [
-        { label: '最高管理員（異想天開影像）', value: 'super-admin' },
-        { label: '管理員（老闆）', value: 'admin' },
+        { label: '代管商（異想天開影像）', value: 'super-admin' },
+        { label: '客戶（朝日夫婦）',       value: 'admin' },
       ],
       admin: {
-        description: '最高管理員可編輯系統設定與使用者；管理員可管理內容、商品、訂單',
+        description: '代管商：可管理系統設定、帳號管理；客戶：可管理商品、訂單、內容等日常業務',
       },
       // Only super-admin can change the role field
       access: {

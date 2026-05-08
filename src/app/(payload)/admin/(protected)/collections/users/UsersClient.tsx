@@ -36,15 +36,15 @@ type Props = {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const ROLE_OPTIONS = [
-  { value: 'super-admin', label: '最高管理員' },
-  { value: 'admin',       label: '管理員' },
+  { value: 'super-admin', label: '代管商（異想天開影像）' },
+  { value: 'admin',       label: '客戶（朝日夫婦）' },
 ]
 
 function roleBadge(role: string) {
   if (role === 'super-admin') {
-    return <Badge variant="brand" size="sm">最高管理員</Badge>
+    return <Badge variant="brand" size="sm">代管商</Badge>
   }
-  return <Badge variant="neutral" size="sm">管理員</Badge>
+  return <Badge variant="neutral" size="sm">客戶</Badge>
 }
 
 function initials(user: AdminUser) {
@@ -121,7 +121,7 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
         toast.error(body?.errors?.[0]?.message ?? '建立失敗，請確認資料')
         return
       }
-      toast.success('管理員已建立')
+      toast.success('帳號已建立')
       setCreateOpen(false)
       setCreateName('')
       setCreateEmail('')
@@ -170,7 +170,7 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
         toast.error(data?.errors?.[0]?.message ?? data?.error ?? '更新失敗')
         return
       }
-      toast.success('已更新管理員資料')
+      toast.success('已更新帳號資料')
       setEditUser(null)
       await refreshUsers()
     } catch {
@@ -216,12 +216,12 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-adm-text-primary">管理員帳號</h1>
-          <p className="text-sm text-adm-text-tertiary mt-0.5">共 {users.length} 位管理員</p>
+          <h1 className="text-2xl font-semibold text-adm-text-primary">帳號管理</h1>
+          <p className="text-sm text-adm-text-tertiary mt-0.5">共 {users.length} 位帳號</p>
         </div>
         <Button variant="primary" size="md" onClick={() => setCreateOpen(true)}>
           <UserPlus className="h-4 w-4" />
-          新增管理員
+          新增帳號
         </Button>
       </div>
 
@@ -230,8 +230,8 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
         {users.length === 0 ? (
           <EmptyState
             icon={<Users className="h-6 w-6" />}
-            title="尚無管理員"
-            description="點擊右上角「新增管理員」按鈕新增第一位管理員"
+            title="尚無帳號"
+            description="點擊右上角「新增帳號」按鈕新增第一位帳號"
           />
         ) : (
           <div className="divide-y divide-adm-border-subtle">
@@ -293,8 +293,8 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent size="sm">
           <DialogHeader>
-            <DialogTitle>新增管理員</DialogTitle>
-            <DialogDescription>填寫以下資料以建立新的管理員帳號</DialogDescription>
+            <DialogTitle>新增帳號</DialogTitle>
+            <DialogDescription>填寫以下資料以建立新的帳號</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreate}>
             <div className="px-6 py-5 space-y-4">
@@ -357,7 +357,7 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
                 <Button variant="secondary" size="md" type="button">取消</Button>
               </DialogClose>
               <Button variant="primary" size="md" type="submit" loading={createLoading}>
-                建立帳號
+                建立
               </Button>
             </DialogFooter>
           </form>

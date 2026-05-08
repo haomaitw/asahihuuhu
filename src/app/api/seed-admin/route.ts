@@ -95,7 +95,7 @@ export async function POST(request: Request) {
       data: {
         email:    normalEmail,
         password,
-        name:     name ?? '最高管理員',
+        name:     name ?? '代管商',
         role:     'super-admin',    // ← changed from 'admin'
       },
       overrideAccess: true,
