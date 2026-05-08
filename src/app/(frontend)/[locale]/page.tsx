@@ -116,7 +116,7 @@ function HomeContent({
       <WaveDivider fill="#faf8f4" />
 
       {/* ── Products ─────────────────────────────────────────────────── */}
-      <section className="bg-paper-50 py-24 md:py-32">
+      <section className="bg-paper-50 py-20 md:py-28 overflow-x-hidden">
         <div className="container-content flex flex-col items-center gap-14">
           <AnimateIn>
             <SectionTitle
@@ -136,7 +136,7 @@ function HomeContent({
       <WaveDivider fill="#d5e9f7" />
 
       {/* ── Seasonal / Limited ───────────────────────────────────────── */}
-      <section className="bg-sea-100 py-24 md:py-32">
+      <section className="bg-sea-100 py-20 md:py-28 overflow-x-hidden">
         <div className="container-content flex flex-col items-center gap-14">
           <AnimateIn>
             <SectionTitle
@@ -156,7 +156,7 @@ function HomeContent({
       <WaveDivider fill="#faf8f4" />
 
       {/* ── News ─────────────────────────────────────────────────────── */}
-      <section className="bg-paper-50 py-24 md:py-32">
+      <section className="bg-paper-50 py-20 md:py-28">
         <div className="container-content flex flex-col items-center gap-14">
           <AnimateIn>
             <SectionTitle

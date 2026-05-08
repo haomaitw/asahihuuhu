@@ -29,6 +29,9 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  /* Critical: prevents marquee / negative-margin elements from causing
+     horizontal scroll on iOS Safari and Android Chrome */
+  overflow-x: hidden;
 }
 
 body {
@@ -38,6 +41,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-size: 1rem;
   line-height: 1.7;
+  overflow-x: hidden;
 }
 
 /* ─── Typography helpers ────────────────────────────────────────────── */
@@ -138,18 +142,21 @@ body {
 
   /* ── Marquee containers ──────────────────────────────────────────── */
   .marquee-viewport {
-    @apply w-full overflow-hidden;
-    /* stop animation when user prefers reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      overflow-x: auto;
-    }
+    /* overflow-hidden is the critical clip; position relative creates new
+       stacking context so iOS doesn't scroll the marquee element */
+    @apply w-full overflow-hidden relative;
   }
   .marquee-track {
     @apply flex w-max;
     animation: marquee 34s linear infinite;
+    /* will-change avoids repaints on low-end mobile */
+    will-change: transform;
   }
   @media (prefers-reduced-motion: reduce) {
-    .marquee-track { animation: none; }
+    .marquee-track {
+      animation: none;
+      @apply flex-wrap;
+    }
   }
 
   /* ── Scroll-reveal base state ────────────────────────────────────── */

@@ -83,7 +83,9 @@ export default async function LocaleLayout({
       lang={locale}
       className={`${notoTC.variable} ${notoJP.variable} ${notoSerifTC.variable} ${averia.variable}`}
     >
-      <body>
+      {/* overflow-x-hidden: prevents marquee + any negative-margin element from
+          causing horizontal scroll on iOS / Android */}
+      <body className="overflow-x-hidden">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -91,9 +93,9 @@ export default async function LocaleLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider>
             <PageTransition />
-            <div className="flex min-h-dvh flex-col bg-paper-50 text-ink">
+            <div className="flex min-h-dvh flex-col bg-paper-50 text-ink overflow-x-hidden">
               <Header />
-              <main className="flex-1">{children}</main>
+              <main className="flex-1 overflow-x-hidden">{children}</main>
               <Footer />
             </div>
           </CartProvider>

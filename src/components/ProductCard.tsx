@@ -43,7 +43,7 @@ export function ProductCard({
     <div
       aria-hidden={ariaHidden}
       className={`group flex flex-col gap-4 ${
-        variant === 'grid' ? 'w-full' : 'w-[220px] md:w-[260px] shrink-0'
+        variant === 'grid' ? 'w-full' : 'w-[160px] sm:w-[200px] md:w-[240px] shrink-0'
       }`}
     >
       {/* ── Image ─────────────────────────────────────────────────────── */}
