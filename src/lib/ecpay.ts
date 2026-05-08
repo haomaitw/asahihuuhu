@@ -67,6 +67,12 @@ export function buildEcpayForm(
   const itemName = cartItems.map((i) => `${i.name} x${i.quantity}`).join('#')
   const tradeDate = formatEcpayDate(new Date())
 
+  // 'as-needed' locale prefix: zh-TW (default) has no prefix in the URL
+  const localePrefix = locale === 'zh-TW' ? '' : `/${locale}`
+  // Embed orderNumber in OrderResultURL so the result page can look up the order from DB.
+  // ECPay browser-redirects via POST, so query-string params survive the redirect.
+  const orderResultURL = `${siteUrl}${localePrefix}/checkout/result?orderNumber=${orderNumber}`
+
   const params: Record<string, string> = {
     MerchantID: merchantId,
     MerchantTradeNo: orderNumber,
@@ -76,7 +82,7 @@ export function buildEcpayForm(
     TradeDesc: '朝日夫婦商店',
     ItemName: itemName,
     ReturnURL: `${siteUrl}/api/ecpay/callback`,
-    OrderResultURL: `${siteUrl}/${locale}/checkout/result`,
+    OrderResultURL: orderResultURL,
     ChoosePayment: 'ALL',
     EncryptType: '1',
   }

@@ -23,19 +23,20 @@ const STATUS_LABEL: Record<string, string> = {
   failed: '付款失敗',
   refunded: '已退款',
 }
+// Keys must match what the API/admin actually saves (Orders.ts + /api/orders/[id])
 const FULFILLMENT_LABEL: Record<string, string> = {
-  pending: '待處理',
-  preparing: '備貨中',
-  shipped: '已出貨',
-  delivered: '已送達',
-  cancelled: '已取消',
+  unfulfilled: '待出貨',
+  processing:  '備貨中',
+  shipped:     '已出貨',
+  delivered:   '已送達',
+  cancelled:   '已取消',
 }
 const FULFILLMENT_COLOR: Record<string, string> = {
-  pending: 'text-sand-600 bg-sand-50',
-  preparing: 'text-blue-600 bg-blue-50',
-  shipped: 'text-amber-600 bg-amber-50',
-  delivered: 'text-green-600 bg-green-50',
-  cancelled: 'text-red-500 bg-red-50',
+  unfulfilled: 'text-sand-600 bg-sand-50',
+  processing:  'text-blue-600 bg-blue-50',
+  shipped:     'text-amber-600 bg-amber-50',
+  delivered:   'text-green-600 bg-green-50',
+  cancelled:   'text-red-500 bg-red-50',
 }
 const CARRIER_LABEL: Record<string, string> = {
   tcat: '黑貓宅急便',
