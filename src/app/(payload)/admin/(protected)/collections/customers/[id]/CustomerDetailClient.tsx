@@ -106,7 +106,14 @@ export function CustomerDetailClient({ customer }: Props) {
     }
     setPointsLoading(true)
     try {
-      const res = await fetch('/api/point-transactions', {
+      const newBalance = (customer.points ?? 0) + delta
+      if (newBalance < 0) {
+        toast.error(`調整後點數餘額不可為負數（目前 ${customer.points ?? 0} 點，扣 ${Math.abs(delta)} 點 = ${newBalance} 點）`)
+        setPointsLoading(false)
+        return
+      }
+      // 1. Create point transaction record
+      const txRes = await fetch('/api/point-transactions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -114,17 +121,27 @@ export function CustomerDetailClient({ customer }: Props) {
           customer: customer.id,
           type: 'adjust',
           points: delta,
-          balance: (customer.points ?? 0) + delta,
+          balance: newBalance,
           description: pointsReason.trim(),
         }),
       })
-      if (!res.ok) throw new Error()
-      toast.success('點數已調整')
+      if (!txRes.ok) throw new Error('建立點數紀錄失敗')
+
+      // 2. Update customer points balance
+      const cusRes = await fetch(`/api/customers/${customer.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ points: newBalance }),
+      })
+      if (!cusRes.ok) throw new Error('更新顧客點數失敗')
+
+      toast.success(`點數已調整（${delta > 0 ? '+' : ''}${delta} 點，現餘 ${newBalance} 點）`)
       setPointsDelta('')
       setPointsReason('')
       router.refresh()
-    } catch {
-      toast.error('調整失敗')
+    } catch (err: any) {
+      toast.error(err?.message ?? '調整失敗')
     } finally {
       setPointsLoading(false)
     }

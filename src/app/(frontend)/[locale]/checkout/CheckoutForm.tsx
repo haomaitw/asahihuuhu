@@ -25,9 +25,11 @@ export function CheckoutForm({ locale }: Props) {
   const [couponDiscount, setCouponDiscount] = useState(0)
   const [couponChecking, setCouponChecking] = useState(false)
 
+  const SHIPPING_FEE = 120 // 黑貓冷凍宅配固定運費
+
   // Points state
   const [pointsToRedeem, setPointsToRedeem] = useState(0)
-  const maxPoints = Math.min(customer?.points ?? 0, totalPrice - couponDiscount)
+  const maxPoints = Math.min(customer?.points ?? 0, totalPrice + SHIPPING_FEE - couponDiscount)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -62,7 +64,7 @@ export function CheckoutForm({ locale }: Props) {
     )
   }
 
-  const finalTotal = Math.max(1, totalPrice - couponDiscount - pointsToRedeem)
+  const finalTotal = Math.max(1, totalPrice + SHIPPING_FEE - couponDiscount - pointsToRedeem)
 
   const handleCouponApply = async () => {
     if (!couponCode.trim()) return
@@ -208,6 +210,13 @@ export function CheckoutForm({ locale }: Props) {
           <div className="flex justify-between text-sm text-ink/60">
             <span>小計</span>
             <span>NT${totalPrice.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between text-sm text-ink/60">
+            <span className="flex items-center gap-1">
+              運費
+              <span className="text-[10px] text-ink/40">（黑貓冷凍宅配）</span>
+            </span>
+            <span>NT${SHIPPING_FEE.toLocaleString()}</span>
           </div>
           {couponDiscount > 0 && (
             <div className="flex justify-between text-sm text-green-600">

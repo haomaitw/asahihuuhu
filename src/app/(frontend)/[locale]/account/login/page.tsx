@@ -57,7 +57,12 @@ export default function CustomerLoginPage({
             />
           </div>
           <div>
-            <label className="block text-xs text-ink/60 mb-1.5 tracking-wide">密碼</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs text-ink/60 tracking-wide">密碼</label>
+              <Link href={`/${locale}/account/forgot-password`} className="text-xs text-brand-600 hover:underline">
+                忘記密碼？
+              </Link>
+            </div>
             <input
               type="password"
               required

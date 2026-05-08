@@ -11,7 +11,7 @@ export const Orders: CollectionConfig = {
     create: () => true,
     read: ({ req }) => {
       if (req.user?.collection === 'users') return true
-      if (req.user?.collection === 'customers') return { 'customer.value': { equals: req.user.id } }
+      if (req.user?.collection === 'customers') return { customer: { equals: req.user.id } }
       return false
     },
     update: ({ req }) => req.user?.collection === 'users',

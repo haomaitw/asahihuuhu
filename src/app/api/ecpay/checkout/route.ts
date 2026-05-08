@@ -35,7 +35,8 @@ export async function POST(req: NextRequest) {
     }
 
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
-    const totalAmount = Math.max(1, subtotal - couponDiscount - pointsRedeemed)
+    const shippingFee = 120 // 黑貓宅急便冷凍宅配固定運費
+    const totalAmount = Math.max(1, subtotal + shippingFee - couponDiscount - pointsRedeemed)
     const orderNumber = generateOrderNumber()
 
     const payload = await getPayload({ config: configPromise })
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
           unitPrice: i.price,
         })),
         subtotal,
-        shippingFee: 0,
+        shippingFee,
         couponCode: couponCode ?? '',
         couponDiscount,
         pointsRedeemed,

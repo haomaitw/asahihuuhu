@@ -33,13 +33,15 @@ export default async function ShopPage({
     // DB not ready or no products yet — fall back to placeholders
   }
 
-  return <ShopContent cmsProducts={cmsProducts} />;
+  return <ShopContent cmsProducts={cmsProducts} locale={locale} />;
 }
 
 function ShopContent({
   cmsProducts,
+  locale,
 }: {
   cmsProducts: Awaited<ReturnType<typeof getProducts>>;
+  locale: string;
 }) {
   const t = useTranslations();
   const hasRealProducts = cmsProducts.length > 0;
@@ -59,8 +61,8 @@ function ShopContent({
           <SectionTitle eyebrow={t('shop.goods.eyebrow')} title={t('shop.goods.title')} />
           <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-12 justify-items-center">
             {hasRealProducts
-              ? cmsProducts.map((p) => <ProductCard key={p.id} product={p} />)
-              : placeholders.map((p) => <ProductCard key={p.id} product={p} />)}
+              ? cmsProducts.map((p) => <ProductCard key={p.id} product={p} locale={locale} />)
+              : placeholders.map((p) => <ProductCard key={p.id} product={p} locale={locale} />)}
           </div>
           {!hasRealProducts && (
             <p className="text-center text-xs tracking-widest text-ink/50">
