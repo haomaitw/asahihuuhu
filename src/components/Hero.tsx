@@ -36,9 +36,9 @@ export function Hero({ videoSrc, poster, tagline1, tagline2, lede }: HeroProps =
       {/* ── Gradient overlay: stronger at top for text legibility ─────── */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/10 to-black/20" />
 
-      {/* ── Text content — top-right ──────────────────────────────────── */}
-      <div className="relative z-10 container-content h-full flex flex-col justify-start items-end pt-20 md:pt-24 lg:pt-28">
-        <div className="text-white text-right space-y-3 md:max-w-md lg:max-w-lg">
+      {/* ── Text content — top-left ───────────────────────────────────── */}
+      <div className="relative z-10 container-content h-full flex flex-col justify-start items-start pt-20 md:pt-24 lg:pt-28">
+        <div className="text-white text-left space-y-3 md:max-w-md lg:max-w-lg">
           {/* Main tagline — large, light weight */}
           <h1
             className="font-sans font-light text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-[0.1em] leading-tight"
@@ -65,8 +65,8 @@ export function Hero({ videoSrc, poster, tagline1, tagline2, lede }: HeroProps =
         </div>
       </div>
 
-      {/* ── Brand mark — top-left (mirrors top-right text) ───────────── */}
-      <div className="absolute top-20 md:top-24 lg:top-28 left-5 md:left-10 z-10 opacity-75 flex items-start pt-1">
+      {/* ── Brand mark — bottom-right ─────────────────────────────────── */}
+      <div className="absolute bottom-8 right-5 md:right-10 z-10 opacity-75">
         <BrandMark variant="white" className="h-12 md:h-16" />
       </div>
     </section>

@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Facebook, Instagram } from 'lucide-react'
-import { Link } from '@/i18n/routing'
+import { Link, usePathname } from '@/i18n/routing'
 import { LangSwitcher } from './LangSwitcher'
 import { MobileMenu } from './MobileMenu'
 import { CartButton } from './CartButton'
@@ -26,45 +25,56 @@ type HeaderProps = {
 
 export function Header({ facebookUrl, instagramUrl }: HeaderProps = {}) {
   const t = useTranslations('nav')
+  // usePathname from @/i18n/routing returns the path WITHOUT locale prefix
+  // so the home page is always '/' regardless of locale
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
 
-  // Home page paths are /<locale> with nothing after (zh-TW, en, ja)
-  const isHome = /^\/(zh-TW|en|ja)\/?$/.test(pathname)
-
-  // On non-home pages, always act as if scrolled (paper background, dark text, logo visible)
-  const active = !isHome || scrolled
+  const isHome = pathname === '/'
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60)
-    // Set initial state
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const textColor    = active ? 'text-ink'         : 'text-white'
-  const textColorSub = active ? 'text-ink/75'      : 'text-white/70'
-  const hoverColor   = active ? 'hover:text-sea-500' : 'hover:text-white'
+  // Header background: paper when scrolled (all pages), transparent at top
+  const hasPaper = scrolled
+
+  // Logo: hidden on home when not scrolled; always visible on other pages
+  const logoVisible = !isHome || scrolled
+
+  // Logo & text colour: white on transparent header (dark hero beneath),
+  // ink/black on paper header (light background)
+  const logoVariant  = hasPaper ? 'black'           : 'white'
+  const textColor    = hasPaper ? 'text-ink'        : 'text-white'
+  const textColorSub = hasPaper ? 'text-ink/75'     : 'text-white/70'
+  const hoverColor   = hasPaper ? 'hover:text-sea-500' : 'hover:text-white'
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-30 transition-all duration-500 ${
-        active
+        hasPaper
           ? 'bg-paper-50/96 backdrop-blur-md shadow-sm border-b border-paper-200'
           : 'bg-transparent'
       }`}
     >
       <div className="container-content flex items-center justify-between py-4 md:py-5">
 
-        {/* ── Logo (home: appears on scroll; other pages: always visible) ── */}
+        {/* ── Logo ──────────────────────────────────────────────────────
+            Home:       hidden at top, slides in when scrolled
+            All others: always visible; colour flips white ↔ black
+                        based on whether header has paper bg            */}
         <div
           className={`transition-all duration-500 ${
-            active ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 pointer-events-none'
+            logoVisible
+              ? 'opacity-100 translate-x-0'
+              : 'opacity-0 -translate-x-4 pointer-events-none'
           }`}
         >
           <Link href="/" aria-label="朝日夫婦">
-            <BrandMark variant="black" className="h-8 md:h-9" />
+            <BrandMark variant={logoVariant} className="h-8 md:h-9" />
           </Link>
         </div>
 
@@ -75,7 +85,7 @@ export function Header({ facebookUrl, instagramUrl }: HeaderProps = {}) {
               key={item.key}
               href={item.href}
               className={`nav-link font-sans font-light text-xs tracking-[0.28em] transition-all duration-300 ${
-                active
+                hasPaper
                   ? 'text-ink hover:text-sea-500'
                   : 'opacity-85 hover:opacity-100'
               }`}
