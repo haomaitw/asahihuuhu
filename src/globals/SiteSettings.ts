@@ -2,7 +2,10 @@ import type { GlobalConfig } from 'payload';
 
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
-  access: { read: () => true },
+  access: {
+    read: () => true,
+    update: ({ req }) => !!req.user,
+  },
   fields: [
     // ── 聯絡資訊 ──────────────────────────────────────────────────
     {

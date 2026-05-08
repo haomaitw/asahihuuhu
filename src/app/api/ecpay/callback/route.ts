@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (isPaid) {
-      const totalAmount: number = order.totalAmount ?? 0
+      const totalAmount: number = Number(order.totalAmount ?? 0)
       const pointsEarned = Math.floor(totalAmount / POINTS_PER_NT)
       const customerId = typeof order.customer === 'object' ? order.customer?.id : order.customer
 
@@ -107,8 +107,8 @@ export async function POST(req: NextRequest) {
           overrideAccess: true,
         })
         const customer = customerResult as any
-        const currentPoints: number = customer.points ?? 0
-        const currentTotalSpent: number = customer.totalSpent ?? 0
+        const currentPoints: number = Number(customer.points ?? 0)
+        const currentTotalSpent: number = Number(customer.totalSpent ?? 0)
         const newTotalSpent = currentTotalSpent + totalAmount
         const newPoints = currentPoints + pointsEarned
 

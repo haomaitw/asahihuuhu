@@ -6,6 +6,11 @@ export const dynamic = 'force-dynamic'
 
 export default async function SiteSettingsPage() {
   const payload = await getAdminPayload()
-  const data = await payload.findGlobal({ slug: 'site-settings', locale: 'zh-TW' })
-  return <SiteSettingsForm initialData={data as any} />
+  let data: any = null
+  try {
+    data = await payload.findGlobal({ slug: 'site-settings', locale: 'zh-TW' })
+  } catch {
+    // DB table not ready yet — render form with empty defaults
+  }
+  return <SiteSettingsForm initialData={data} />
 }

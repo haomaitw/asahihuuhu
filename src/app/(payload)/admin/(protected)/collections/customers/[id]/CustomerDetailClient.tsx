@@ -106,9 +106,10 @@ export function CustomerDetailClient({ customer }: Props) {
     }
     setPointsLoading(true)
     try {
-      const newBalance = (customer.points ?? 0) + delta
+      const currentPoints = Number(customer.points ?? 0)
+      const newBalance = currentPoints + delta
       if (newBalance < 0) {
-        toast.error(`調整後點數餘額不可為負數（目前 ${customer.points ?? 0} 點，扣 ${Math.abs(delta)} 點 = ${newBalance} 點）`)
+        toast.error(`調整後點數餘額不可為負數（目前 ${currentPoints} 點，扣 ${Math.abs(delta)} 點 = ${newBalance} 點）`)
         setPointsLoading(false)
         return
       }
@@ -186,8 +187,8 @@ export function CustomerDetailClient({ customer }: Props) {
             {row('生日', customer.birthday ? new Date(customer.birthday).toLocaleDateString('zh-TW') : null)}
             {row('性別', customer.gender === 'male' ? '男' : customer.gender === 'female' ? '女' : customer.gender === 'other' ? '不透露' : null)}
             {row('等級', <Badge variant={tierBadge.variant} size="sm">{tierBadge.label}</Badge>)}
-            {row('可用點數', <span className="font-semibold tabular-nums">{(customer.points ?? 0).toLocaleString()} 點</span>)}
-            {row('累計消費', <span className="tabular-nums">NT$ {(customer.totalSpent ?? 0).toLocaleString()}</span>)}
+            {row('可用點數', <span className="font-semibold tabular-nums">{Number(customer.points ?? 0).toLocaleString()} 點</span>)}
+            {row('累計消費', <span className="tabular-nums">NT$ {Number(customer.totalSpent ?? 0).toLocaleString()}</span>)}
             {row('行銷同意', customer.marketingConsent ? '已同意' : '未同意')}
             {row('加入日期', customer.createdAt ? new Date(customer.createdAt).toLocaleDateString('zh-TW') : null)}
           </dl>
@@ -271,11 +272,11 @@ export function CustomerDetailClient({ customer }: Props) {
             </div>
           </div>
           <p className="text-xs text-adm-text-tertiary">
-            目前點數餘額：<strong className="text-adm-text-primary tabular-nums">{(customer.points ?? 0).toLocaleString()} 點</strong>
+            目前點數餘額：<strong className="text-adm-text-primary tabular-nums">{Number(customer.points ?? 0).toLocaleString()} 點</strong>
             {pointsDelta && !isNaN(parseInt(pointsDelta, 10)) && (
               <span className="ml-2">
                 → 調整後：<strong className="text-adm-brand-600 tabular-nums">
-                  {((customer.points ?? 0) + parseInt(pointsDelta, 10)).toLocaleString()} 點
+                  {(Number(customer.points ?? 0) + parseInt(pointsDelta, 10)).toLocaleString()} 點
                 </strong>
               </span>
             )}

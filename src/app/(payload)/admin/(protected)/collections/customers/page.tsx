@@ -95,10 +95,10 @@ export default async function CustomersPage({
                         <Badge variant={tier.variant} size="sm">{tier.label}</Badge>
                       </td>
                       <td className="px-5 py-3.5 text-sm tabular-nums text-adm-text-primary">
-                        {(c.points ?? 0).toLocaleString()}
+                        {Number(c.points ?? 0).toLocaleString()}
                       </td>
                       <td className="px-5 py-3.5 text-sm tabular-nums text-adm-text-primary whitespace-nowrap">
-                        {c.totalSpent ? `NT$ ${c.totalSpent.toLocaleString()}` : 'NT$ 0'}
+                        {`NT$ ${Number(c.totalSpent ?? 0).toLocaleString()}`}
                       </td>
                       <td className="px-5 py-3.5 text-xs text-adm-text-tertiary whitespace-nowrap">
                         {c.birthday

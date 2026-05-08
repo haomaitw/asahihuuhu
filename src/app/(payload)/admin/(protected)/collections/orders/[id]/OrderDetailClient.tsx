@@ -113,12 +113,12 @@ export function OrderDetailClient({ order, statusLabels }: Props) {
     </div>
   )
 
-  // Calculate totals
-  const subtotal = order.subtotal ?? (order.items ?? []).reduce((s: number, i: any) => s + (i.unitPrice ?? 0) * (i.quantity ?? 0), 0)
-  const shippingFee = order.shippingFee ?? 0
-  const couponDiscount = order.couponDiscount ?? 0
-  const pointsRedeemed = order.pointsRedeemed ?? 0
-  const totalAmount = order.totalAmount ?? 0
+  // Calculate totals — cast to Number because Drizzle returns numeric columns as strings
+  const subtotal = Number(order.subtotal ?? 0) || (order.items ?? []).reduce((s: number, i: any) => s + (Number(i.unitPrice) || 0) * (i.quantity ?? 0), 0)
+  const shippingFee = Number(order.shippingFee ?? 0) || 0
+  const couponDiscount = Number(order.couponDiscount ?? 0) || 0
+  const pointsRedeemed = Number(order.pointsRedeemed ?? 0) || 0
+  const totalAmount = Number(order.totalAmount ?? 0) || 0
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -195,9 +195,9 @@ export function OrderDetailClient({ order, statusLabels }: Props) {
                 <tr key={i} className="border-b border-adm-border-subtle last:border-0">
                   <td className="px-5 py-3 text-sm text-adm-text-primary">{item.productName}</td>
                   <td className="px-5 py-3 text-sm text-adm-text-secondary tabular-nums">{item.quantity}</td>
-                  <td className="px-5 py-3 text-sm tabular-nums text-adm-text-secondary">NT$ {item.unitPrice?.toLocaleString()}</td>
+                  <td className="px-5 py-3 text-sm tabular-nums text-adm-text-secondary">NT$ {Number(item.unitPrice || 0).toLocaleString()}</td>
                   <td className="px-5 py-3 text-sm tabular-nums font-medium text-adm-text-primary">
-                    NT$ {((item.unitPrice ?? 0) * (item.quantity ?? 0)).toLocaleString()}
+                    NT$ {((Number(item.unitPrice) || 0) * (item.quantity ?? 0)).toLocaleString()}
                   </td>
                 </tr>
               ))}

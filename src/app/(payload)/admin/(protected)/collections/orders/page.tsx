@@ -56,7 +56,7 @@ export default async function OrdersPage() {
                         <Badge variant={f.variant as any} size="sm">{f.label}</Badge>
                       </td>
                       <td className="px-5 py-3.5 text-sm tabular-nums text-adm-text-primary">
-                        {o.totalAmount ? `NT$ ${o.totalAmount.toLocaleString()}` : '—'}
+                        {o.totalAmount != null ? `NT$ ${Number(o.totalAmount).toLocaleString()}` : '—'}
                       </td>
                       <td className="px-5 py-3.5 text-xs text-adm-text-tertiary whitespace-nowrap">
                         {o.createdAt ? new Date(o.createdAt).toLocaleDateString('zh-TW') : '—'}

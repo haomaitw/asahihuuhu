@@ -1,4 +1,5 @@
 import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { UsersClient } from './UsersClient'
@@ -10,7 +11,19 @@ export default async function UsersPage() {
   const headersList = await headers()
   const payload = await getPayload({ config: configPromise })
 
-  // Fetch all users
+  // Verify auth and enforce super-admin only
+  let currentUser: any = null
+  try {
+    const result = await payload.auth({ headers: headersList })
+    currentUser = result.user
+  } catch {
+    redirect('/admin/login')
+  }
+
+  if (!currentUser) redirect('/admin/login')
+  if (currentUser.role !== 'super-admin') redirect('/admin/dashboard')
+
+  // Fetch all users (super-admin only reaches here)
   const { docs } = await payload.find({
     collection: 'users',
     limit: 100,
@@ -18,14 +31,7 @@ export default async function UsersPage() {
     overrideAccess: true,
   })
 
-  // Get current user for self-deletion guard
-  let currentUserEmail = ''
-  try {
-    const { user } = await payload.auth({ headers: headersList })
-    currentUserEmail = (user as any)?.email ?? ''
-  } catch {
-    // ignore
-  }
+  const currentUserEmail = currentUser?.email ?? ''
 
   const users = docs.map((u: any) => ({
     id: u.id,

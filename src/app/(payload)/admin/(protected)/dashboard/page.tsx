@@ -4,6 +4,7 @@ import configPromise from '@payload-config'
 import { DashboardClient } from './DashboardClient'
 
 export const metadata: Metadata = { title: 'Dashboard' }
+export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
   const payload = await getPayload({ config: configPromise })
@@ -71,7 +72,7 @@ export default async function DashboardPage() {
       ])
 
     const totalRevenue = allPaid.docs.reduce(
-      (sum: number, o: any) => sum + (o.totalAmount ?? 0),
+      (sum: number, o: any) => sum + (Number(o.totalAmount) || 0),
       0,
     )
 

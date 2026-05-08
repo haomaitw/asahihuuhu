@@ -92,11 +92,11 @@ export default async function PointTransactionsPage() {
                       <td className="px-5 py-3.5">
                         <Badge variant={tl.variant as any} size="sm">{tl.label}</Badge>
                       </td>
-                      <td className={`px-5 py-3.5 text-sm tabular-nums font-medium ${tx.points >= 0 ? 'text-adm-success-600' : 'text-adm-danger-600'}`}>
-                        {tx.points >= 0 ? `+${tx.points}` : tx.points}
+                      <td className={`px-5 py-3.5 text-sm tabular-nums font-medium ${Number(tx.points) >= 0 ? 'text-adm-success-600' : 'text-adm-danger-600'}`}>
+                        {Number(tx.points) >= 0 ? `+${Number(tx.points)}` : Number(tx.points)}
                       </td>
                       <td className="px-5 py-3.5 text-sm tabular-nums text-adm-text-secondary">
-                        {tx.balance ?? '—'}
+                        {tx.balance != null ? Number(tx.balance).toLocaleString() : '—'}
                       </td>
                       <td className="px-5 py-3.5 text-sm text-adm-text-secondary max-w-xs truncate">
                         {tx.description ?? '—'}
