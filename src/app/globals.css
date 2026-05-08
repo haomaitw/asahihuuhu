@@ -2,91 +2,176 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Design tokens ────────────────────────────────────────────────── */
 :root {
-  --background: #FBF8F3;
-  --foreground: #2A2A2A;
-  --radius-image: 12px;
-  --radius-card: 16px;
+  /* Brand palette — matches asahihuuhu.com */
+  --color-brand:      #5aa0d7;
+  --color-brand-dark: #3e88c3;
+  --color-text:       #353535;
+  --color-muted:      #858585;
+  --color-border:     #c6c6c6;
+  --color-bg-light:   #f8f8f8;
+
+  /* Layout */
+  --container-lg: 1128px;
+  --container-md: 936px;
+  --container-sm: 656px;
+  --header-h:     72px;
+
+  /* Image / card frames */
+  --radius-image:  12px;
+  --radius-card:   12px;
+  --radius-blob:   40px;
+  --radius-pill:   100px;
 }
 
+/* ─── Base ─────────────────────────────────────────────────────────── */
 html {
+  font-size: 16px;
   scroll-behavior: smooth;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--color-text);
+  background: #faf8f4;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 1rem;
+  line-height: 1.7;
 }
 
-/* ─── Typography scale ─────────────────────────────────────────── */
+/* ─── Typography helpers ────────────────────────────────────────────── */
 @layer components {
-  /* Eyebrow label above section headings */
+
+  /* ── Section eyebrow — Averia Sans Libre, brand blue ────────────── */
   .section-eyebrow {
-    @apply text-[10px] md:text-xs tracking-[0.35em] uppercase text-sea-500 font-medium font-sans;
+    @apply font-averia text-sm tracking-[0.3em] uppercase text-sea-400 font-normal;
   }
 
-  /* Primary section heading — serif, generous tracking */
+  /* ── Decorative dash divider under eyebrow ───────────────────────── */
+  .section-dash {
+    @apply block w-12 h-px bg-sea-300 mx-auto my-2 opacity-60;
+  }
+
+  /* ── Primary section heading ─────────────────────────────────────── */
   .section-heading {
-    @apply font-serif text-2xl md:text-3xl lg:text-4xl text-ink tracking-[0.15em] leading-snug;
+    @apply font-sans text-2xl md:text-3xl lg:text-4xl text-ink tracking-[0.12em] leading-snug;
   }
 
-  /* Sub-heading inside sections (location, hours, etc.) */
+  /* ── Sub-heading inside sections ─────────────────────────────────── */
   .sub-heading {
-    @apply font-serif text-lg md:text-xl tracking-[0.2em] text-ink;
+    @apply font-sans text-xl md:text-2xl tracking-[0.15em] text-ink font-medium;
   }
 
-  /* Body prose text */
+  /* ── Body prose text — 16px base ────────────────────────────────── */
   .body-text {
-    @apply text-sm leading-loose tracking-wide text-ink/75 font-sans;
+    @apply text-base leading-relaxed tracking-wide text-ink/70 font-sans;
   }
 
-  /* Caption / meta label (dates, categories) */
+  /* ── Caption / meta labels ───────────────────────────────────────── */
   .caption-text {
-    @apply text-xs tracking-[0.25em] text-sea-500 font-medium font-sans tabular-nums;
+    @apply text-xs tracking-[0.25em] text-sea-400 font-medium font-sans tabular-nums;
   }
 
-  /* ─── Layout ─────────────────────────────────────────────────── */
+  /* ── Layout container ────────────────────────────────────────────── */
   .container-content {
-    @apply mx-auto w-full max-w-content px-6 md:px-10;
+    @apply mx-auto w-full px-5 md:px-8 lg:px-10;
+    max-width: var(--container-lg);
   }
 
-  /* ─── Buttons ─────────────────────────────────────────────────── */
-  .pill-button {
-    @apply inline-flex items-center gap-2 rounded-full bg-sea-400 px-7 py-3 text-xs tracking-[0.2em] text-white shadow-sm
-           transition-all duration-300 hover:bg-sea-500 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm;
-  }
-
-  /* ─── Product image frame ─────────────────────────────────────── */
+  /* ── Product image frame ─────────────────────────────────────────── */
   .product-image-wrap {
     @apply relative overflow-hidden bg-paper-100;
     border-radius: var(--radius-image);
-    border: 1px solid rgba(42, 42, 42, 0.06);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
   }
 
-  /* ─── Primary button ─────────────────────────────────────────── */
+  /* ─────────────────────────────────────────────────────────────────── */
+  /*  PRIMARY BUTTON  — solid sea-400 (brand #5aa0d7), transitions      */
+  /* ─────────────────────────────────────────────────────────────────── */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-sea-500 px-6 py-3 text-xs tracking-widest text-white
-           transition-all duration-200 hover:bg-sea-600 hover:-translate-y-px hover:shadow-md active:translate-y-0 active:shadow-sm
+    @apply inline-flex items-center justify-center gap-2 rounded-xl
+           bg-sea-400 px-6 py-3 text-sm tracking-widest text-white
+           transition-all duration-300
+           hover:bg-sea-500 hover:-translate-y-0.5 hover:shadow-md
+           active:translate-y-0 active:shadow-sm
            disabled:opacity-40 disabled:pointer-events-none;
   }
 
-  /* ─── Interactive card ────────────────────────────────────────── */
-  .interactive-card {
-    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-md;
+  /* ─────────────────────────────────────────────────────────────────── */
+  /*  PILL / "SEE MORE" BUTTON — matches original asahihuuhu.com style  */
+  /*  White bg + gray border, right arrow circle, hover fills brand     */
+  /* ─────────────────────────────────────────────────────────────────── */
+  .pill-button {
+    @apply inline-flex items-center gap-4 rounded-pill border border-[#c6c6c6]
+           bg-white px-2 py-2 pr-2
+           font-averia text-sm tracking-[0.25em] text-ink
+           transition-all duration-500
+           hover:bg-sea-400 hover:border-sea-400 hover:text-white hover:shadow-sm;
   }
 
-  /* ─── Nav link with animated underline ───────────────────────── */
+  .pill-button .pill-arrow {
+    @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-full
+           bg-sea-400 text-white text-base transition-all duration-500;
+  }
+
+  .pill-button:hover .pill-arrow {
+    @apply bg-white text-sea-400;
+  }
+
+  /* ── Interactive card ────────────────────────────────────────────── */
+  .interactive-card {
+    @apply transition-all duration-400 hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  /* ── Nav link with animated underline ───────────────────────────── */
   .nav-link {
-    @apply relative tracking-widest transition-opacity duration-200 hover:opacity-100;
+    @apply relative tracking-widest transition-opacity duration-300 hover:opacity-100;
   }
   .nav-link::after {
     content: '';
-    @apply absolute -bottom-0.5 left-0 h-px w-full bg-current origin-left scale-x-0 transition-transform duration-300;
+    @apply absolute -bottom-0.5 left-0 h-px w-full bg-current origin-left
+           scale-x-0 transition-transform duration-300;
   }
   .nav-link:hover::after {
     @apply scale-x-100;
   }
+
+  /* ── Marquee containers ──────────────────────────────────────────── */
+  .marquee-viewport {
+    @apply w-full overflow-hidden;
+    /* stop animation when user prefers reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      overflow-x: auto;
+    }
+  }
+  .marquee-track {
+    @apply flex w-max;
+    animation: marquee 34s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track { animation: none; }
+  }
+
+  /* ── Scroll-reveal base state ────────────────────────────────────── */
+  .reveal {
+    @apply opacity-0 translate-y-7 transition-none;
+  }
+  .reveal.in-view {
+    @apply opacity-100 translate-y-0;
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  }
+}
+
+/* ─── Marquee keyframe ──────────────────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ─── Prose (rich-text) overrides ───────────────────────────────────── */
+.prose {
+  --tw-prose-body:    #353535;
+  --tw-prose-headings: #353535;
+  font-size: 1rem;
+  line-height: 1.8;
 }

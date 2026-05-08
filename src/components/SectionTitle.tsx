@@ -6,10 +6,13 @@ export function SectionTitle({
   title: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 text-center">
+    <div className="flex flex-col items-center gap-2 text-center">
+      {/* Averia Sans Libre eyebrow — matches original asahihuuhu.com style */}
       <span className="section-eyebrow">{eyebrow}</span>
-      <span className="h-px w-10 bg-sea-200" />
-      <h2 className="section-heading">{title}</h2>
+      {/* Decorative dash divider */}
+      <span className="section-dash" aria-hidden />
+      {/* Chinese section title */}
+      <h2 className="section-heading mt-1">{title}</h2>
     </div>
   );
 }

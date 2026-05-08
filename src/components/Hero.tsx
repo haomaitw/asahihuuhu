@@ -13,7 +13,8 @@ export function Hero({ videoSrc, poster, tagline1, tagline2, lede }: HeroProps =
   const t = useTranslations('home.hero');
 
   return (
-    <section className="relative h-[100dvh] min-h-[560px] w-full overflow-hidden">
+    <section className="relative h-[100dvh] min-h-[600px] w-full overflow-hidden">
+      {/* ── Video background ──────────────────────────────────────────── */}
       <video
         className="absolute inset-0 h-full w-full object-cover"
         autoPlay
@@ -27,28 +28,40 @@ export function Hero({ videoSrc, poster, tagline1, tagline2, lede }: HeroProps =
         ) : (
           <>
             <source src="/asahi/hero-home.webm" type="video/webm" />
-            <source src="/asahi/hero-home.mp4" type="video/mp4" />
+            <source src="/asahi/hero-home.mp4"  type="video/mp4" />
           </>
         )}
       </video>
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/20" />
 
-      <div className="relative z-10 container-content h-full flex flex-col justify-between py-24">
-        <div className="text-white max-w-md space-y-3 pt-12 md:pt-20">
-          <h1 className="font-serif text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-[0.2em] md:tracking-[0.3em] leading-relaxed">
+      {/* ── Gradient overlay ─────────────────────────────────────────── */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/35" />
+
+      {/* ── Text content — bottom-left (matches original) ─────────────── */}
+      <div className="relative z-10 container-content h-full flex flex-col justify-end pb-16 md:pb-24">
+        <div className="text-white space-y-4 max-w-xl">
+          <h1
+            className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-[0.18em] md:tracking-[0.22em] leading-snug font-light"
+            style={{ textShadow: '0 1px 12px rgba(0,0,0,0.3)' }}
+          >
             {tagline1 ?? t('tagline1')}
           </h1>
-          <h2 className="font-serif text-base sm:text-lg md:text-xl lg:text-2xl tracking-[0.2em] md:tracking-[0.3em] leading-relaxed">
+          <h2
+            className="font-sans text-xl sm:text-2xl md:text-3xl tracking-[0.18em] md:tracking-[0.22em] leading-snug font-light opacity-90"
+            style={{ textShadow: '0 1px 8px rgba(0,0,0,0.25)' }}
+          >
             {tagline2 ?? t('tagline2')}
           </h2>
-          <p className="text-[10px] sm:text-xs tracking-[0.15em] sm:tracking-[0.2em] opacity-80 pt-2 leading-loose">
-            {lede ?? t('lede')}
-          </p>
+          {(lede || t('lede')) && (
+            <p className="font-averia text-sm md:text-base tracking-[0.18em] opacity-75 pt-1 leading-relaxed">
+              {lede ?? t('lede')}
+            </p>
+          )}
         </div>
+      </div>
 
-        <div className="self-end">
-          <BrandMark variant="white" className="h-16 md:h-20" />
-        </div>
+      {/* ── Brand mark — bottom-right (matches original) ───────────────── */}
+      <div className="absolute bottom-10 right-6 md:right-10 z-10 opacity-80">
+        <BrandMark variant="white" className="h-14 md:h-18" />
       </div>
     </section>
   );

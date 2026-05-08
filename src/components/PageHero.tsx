@@ -14,14 +14,12 @@ export function PageHero({
   media: Media;
 }) {
   return (
-    <section className="relative h-[60dvh] min-h-[360px] md:min-h-[420px] w-full overflow-hidden">
+    <section className="relative h-[65dvh] min-h-[400px] md:min-h-[460px] w-full overflow-hidden">
+      {/* ── Background ───────────────────────────────────────────────── */}
       {media.kind === 'video' ? (
         <video
           className="absolute inset-0 h-full w-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
+          autoPlay muted loop playsInline
           poster={media.poster}
         >
           {media.webm && <source src={media.webm} type="video/webm" />}
@@ -33,20 +31,27 @@ export function PageHero({
           style={{ backgroundImage: `url('${media.src}')` }}
         />
       )}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/20" />
-      <div className="relative z-10 container-content h-full flex items-end pb-16 md:pb-20">
-        <div className="text-white max-w-md space-y-2 md:space-y-3">
-          <span className="text-[10px] tracking-[0.4em] uppercase opacity-90">
+
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/35" />
+
+      {/* ── Text — bottom-left ────────────────────────────────────────── */}
+      <div className="relative z-10 container-content h-full flex items-end pb-16 md:pb-24">
+        <div className="text-white space-y-3 md:space-y-4">
+          {/* Averia eyebrow label */}
+          <span className="block font-averia text-sm tracking-[0.35em] uppercase opacity-80">
             {eyebrow}
           </span>
-          <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl tracking-[0.2em] md:tracking-[0.3em]">
+          <h1
+            className="font-sans text-3xl md:text-4xl lg:text-5xl tracking-[0.18em] font-light leading-snug"
+            style={{ textShadow: '0 1px 12px rgba(0,0,0,0.3)' }}
+          >
             {title}
           </h1>
-          {description ? (
-            <p className="text-[10px] sm:text-xs tracking-[0.15em] sm:tracking-[0.2em] opacity-80 leading-loose">
+          {description && (
+            <p className="font-averia text-sm md:text-base tracking-[0.15em] opacity-75 leading-relaxed max-w-md">
               {description}
             </p>
-          ) : null}
+          )}
         </div>
       </div>
     </section>

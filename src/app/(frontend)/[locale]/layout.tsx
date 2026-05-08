@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
-import { Noto_Sans_TC, Noto_Sans_JP, Noto_Serif_TC } from 'next/font/google';
+import { Noto_Sans_TC, Noto_Sans_JP, Noto_Serif_TC, Averia_Sans_Libre } from 'next/font/google';
 import { routing } from '@/i18n/routing';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -27,6 +27,15 @@ const notoSerifTC = Noto_Serif_TC({
   subsets: ['latin'],
   weight: ['400', '500', '700'],
   variable: '--font-noto-serif-tc',
+  display: 'swap',
+});
+
+// Decorative EN display font — matches original asahihuuhu.com "Averia Sans Libre"
+// Used for eyebrow labels, "See More" text, section EN sub-labels
+const averia = Averia_Sans_Libre({
+  subsets: ['latin'],
+  weight: ['300', '400', '700'],
+  variable: '--font-averia',
   display: 'swap',
 });
 
@@ -72,7 +81,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${notoTC.variable} ${notoJP.variable} ${notoSerifTC.variable}`}
+      className={`${notoTC.variable} ${notoJP.variable} ${notoSerifTC.variable} ${averia.variable}`}
     >
       <body>
         <script

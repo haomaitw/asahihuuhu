@@ -132,16 +132,16 @@ export function ProductDetailClient({ product, locale }: Props) {
             {/* Stock badge */}
             <div>
               {!inStock ? (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-red-50 text-red-500 px-3 py-1.5 rounded-full border border-red-100">
+                <span className="inline-flex items-center gap-1.5 text-sm bg-red-50 text-red-500 px-4 py-2 rounded-full border border-red-100">
                   售完補貨中
                 </span>
               ) : lowStock ? (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full border border-amber-100">
+                <span className="inline-flex items-center gap-1.5 text-sm bg-amber-50 text-amber-600 px-4 py-2 rounded-full border border-amber-100">
                   僅剩 {product.stock} 份，把握機會！
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 text-xs bg-green-50 text-green-600 px-3 py-1.5 rounded-full border border-green-100">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
+                <span className="inline-flex items-center gap-1.5 text-sm bg-green-50 text-green-600 px-4 py-2 rounded-full border border-green-100">
+                  <CheckCircle2 className="h-4 w-4" />
                   現貨供應中
                 </span>
               )}
@@ -186,7 +186,7 @@ export function ProductDetailClient({ product, locale }: Props) {
 
             {/* Cart indicator */}
             {cartQty > 0 && (
-              <p className="text-xs text-sea-600">
+              <p className="text-sm text-sea-500">
                 購物車中已有 {cartQty} 件
                 <Link href={`/${locale}/checkout`} className="ml-2 underline hover:text-sea-800">
                   前往結帳 →
@@ -200,14 +200,14 @@ export function ProductDetailClient({ product, locale }: Props) {
                 <Truck className="h-4 w-4 mt-0.5 shrink-0 text-sea-500" />
                 <div>
                   <p className="font-medium text-ink/80 mb-0.5">黑貓宅急便冷凍配送</p>
-                  <p className="text-xs text-ink/50">運費 NT$120・全台宅配・約 1–3 個工作天</p>
+                  <p className="text-sm text-ink/50">運費 NT$120・全台宅配・約 1–3 個工作天</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 text-sm text-ink/70">
                 <Snowflake className="h-4 w-4 mt-0.5 shrink-0 text-sea-400" />
                 <div>
                   <p className="font-medium text-ink/80 mb-0.5">冷凍保存</p>
-                  <p className="text-xs text-ink/50">本商品為冷凍商品，請於收件後盡速簽收，開封前請保持冷凍保存</p>
+                  <p className="text-sm text-ink/50">本商品為冷凍商品，請於收件後盡速簽收，開封前請保持冷凍保存</p>
                 </div>
               </div>
             </div>

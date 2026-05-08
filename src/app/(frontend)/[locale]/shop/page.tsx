@@ -5,6 +5,7 @@ import { PageHero } from '@/components/PageHero';
 import { SectionTitle } from '@/components/SectionTitle';
 import { WaveDivider } from '@/components/WaveDivider';
 import { ProductCard } from '@/components/ProductCard';
+import { AnimateIn } from '@/components/AnimateIn';
 import {
   placeholderProducts,
   placeholderSeasonal,
@@ -33,11 +34,11 @@ export default async function ShopPage({
   try {
     cmsProducts = await getProducts(locale);
   } catch {
-    // DB not ready or no products yet — fall back to placeholders
+    // DB not ready — fall back to placeholders
   }
 
-  const goods    = cmsProducts.filter((p) => p.category === 'goods')
-  const seasonal = cmsProducts.filter((p) => p.category === 'seasonal')
+  const goods    = cmsProducts.filter((p) => p.category === 'goods');
+  const seasonal = cmsProducts.filter((p) => p.category === 'seasonal');
 
   return (
     <ShopContent
@@ -48,15 +49,9 @@ export default async function ShopPage({
 }
 
 type ShopProduct = {
-  id: string
-  name: string
-  slug?: string
-  image: string
-  price?: number
-  comparePrice?: number
-  shortDescription?: string
-  stock?: number
-  trackStock?: boolean
+  id: string; name: string; slug?: string; image: string;
+  price?: number; comparePrice?: number; shortDescription?: string;
+  stock?: number; trackStock?: boolean;
 }
 
 function ShopContent({
@@ -66,57 +61,56 @@ function ShopContent({
   goods: ShopProduct[] | null
   seasonal: ShopProduct[] | null
 }) {
-  const t = useTranslations();
+  const t      = useTranslations();
   const locale = useLocale();
 
-  const goodsProducts: ShopProduct[] = goods ?? placeholderProducts.map((p) => ({
-    ...p,
-    name: t(p.name as any),
-  }));
+  const goodsProducts: ShopProduct[] = goods ??
+    placeholderProducts.map((p) => ({ ...p, name: t(p.name as any) }));
 
-  const seasonalProducts: ShopProduct[] = seasonal ?? placeholderSeasonal.map((p) => ({
-    ...p,
-    name: t(p.name as any),
-  }));
+  const seasonalProducts: ShopProduct[] = seasonal ??
+    placeholderSeasonal.map((p) => ({ ...p, name: t(p.name as any) }));
 
-  const hasGoods = !!goods?.length;
+  const hasGoods    = !!goods?.length;
   const hasSeasonal = !!seasonal?.length;
 
   return (
     <>
       {/* ── Hero ──────────────────────────────────────────────────────── */}
       <PageHero
-        eyebrow="Shop"
+        eyebrow="SHOP"
         title={t('shop.title')}
         description={t('shop.description')}
         media={{ kind: 'image', src: '/asahi/hero-shop.png' }}
       />
 
-      <WaveDivider fill="#FBF8F3" />
+      <WaveDivider fill="#faf8f4" />
 
-      {/* ── Goods section ────────────────────────────────────────────── */}
+      {/* ── Goods ────────────────────────────────────────────────────── */}
       <section className="bg-paper-50 py-20 md:py-28">
         <div className="container-content flex flex-col gap-14">
-          <SectionTitle
-            eyebrow={t('shop.goods.eyebrow')}
-            title={t('shop.goods.title')}
-          />
+          <AnimateIn>
+            <SectionTitle
+              eyebrow={t('shop.goods.eyebrow')}
+              title={t('shop.goods.title')}
+            />
+          </AnimateIn>
 
           {hasGoods ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 md:gap-x-10 gap-y-12">
-              {goodsProducts.map((p) => (
-                <ProductCard key={p.id} product={p} locale={locale} variant="grid" />
+              {goodsProducts.map((p, i) => (
+                <AnimateIn key={p.id} delay={i * 60}>
+                  <ProductCard product={p} locale={locale} variant="grid" />
+                </AnimateIn>
               ))}
             </div>
           ) : (
             <>
-              {/* Placeholder grid — greyed out to signal "coming soon" */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 md:gap-x-10 gap-y-12 opacity-40 pointer-events-none select-none">
                 {goodsProducts.map((p) => (
                   <ProductCard key={p.id} product={p} locale={locale} variant="grid" />
                 ))}
               </div>
-              <p className="text-center text-[11px] tracking-[0.3em] text-ink/40 -mt-4">
+              <p className="text-center text-sm tracking-[0.3em] text-ink/40 -mt-4">
                 {t('shop.comingSoon')}
               </p>
             </>
@@ -124,20 +118,24 @@ function ShopContent({
         </div>
       </section>
 
-      <WaveDivider fill="#E4F0F6" />
+      <WaveDivider fill="#d5e9f7" />
 
-      {/* ── Seasonal section ─────────────────────────────────────────── */}
+      {/* ── Seasonal ─────────────────────────────────────────────────── */}
       <section className="bg-sea-100 py-20 md:py-28">
         <div className="container-content flex flex-col gap-14">
-          <SectionTitle
-            eyebrow={t('shop.seasonal.eyebrow')}
-            title={t('shop.seasonal.title')}
-          />
+          <AnimateIn>
+            <SectionTitle
+              eyebrow={t('shop.seasonal.eyebrow')}
+              title={t('shop.seasonal.title')}
+            />
+          </AnimateIn>
 
           {hasSeasonal ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 md:gap-x-10 gap-y-12">
-              {seasonalProducts.map((p) => (
-                <ProductCard key={p.id} product={p} locale={locale} variant="grid" />
+              {seasonalProducts.map((p, i) => (
+                <AnimateIn key={p.id} delay={i * 60}>
+                  <ProductCard product={p} locale={locale} variant="grid" />
+                </AnimateIn>
               ))}
             </div>
           ) : (
@@ -147,7 +145,7 @@ function ShopContent({
                   <ProductCard key={p.id} product={p} locale={locale} variant="grid" />
                 ))}
               </div>
-              <p className="text-center text-[11px] tracking-[0.3em] text-ink/40 -mt-4">
+              <p className="text-center text-sm tracking-[0.3em] text-ink/40 -mt-4">
                 {t('shop.comingSoon')}
               </p>
             </>
@@ -155,22 +153,24 @@ function ShopContent({
         </div>
       </section>
 
-      <WaveDivider fill="#FBF8F3" />
+      <WaveDivider fill="#faf8f4" />
 
       {/* ── Trust bar ────────────────────────────────────────────────── */}
-      <section className="bg-paper-50 py-14">
+      <section className="bg-paper-50 py-16 md:py-20">
         <div className="container-content">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
             {[
-              { icon: '❄️', title: '冷凍配送', sub: '黑貓宅急便冷凍宅配，確保品質' },
+              { icon: '❄️', title: '冷凍配送',        sub: '黑貓宅急便冷凍宅配，確保品質' },
               { icon: '🚚', title: '固定運費 NT$120', sub: '全台宅配，1–3 個工作天送達' },
-              { icon: '🎁', title: '精心包裝', sub: '職人用心包裝，完整呈現每份美味' },
-            ].map(({ icon, title, sub }) => (
-              <div key={title} className="flex flex-col items-center gap-3">
-                <span className="text-3xl">{icon}</span>
-                <p className="font-serif tracking-widest text-ink text-sm">{title}</p>
-                <p className="text-xs text-ink/50 tracking-wide leading-relaxed">{sub}</p>
-              </div>
+              { icon: '🎁', title: '精心包裝',        sub: '職人用心包裝，完整呈現每份美味' },
+            ].map(({ icon, title, sub }, i) => (
+              <AnimateIn key={title} delay={i * 100}>
+                <div className="flex flex-col items-center gap-3">
+                  <span className="text-4xl">{icon}</span>
+                  <p className="font-sans tracking-widest text-ink text-base font-medium">{title}</p>
+                  <p className="text-sm text-ink/55 tracking-wide leading-relaxed">{sub}</p>
+                </div>
+              </AnimateIn>
             ))}
           </div>
         </div>

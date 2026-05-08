@@ -24,7 +24,7 @@ export function AddToCartButton({ id, name, price, image }: Props) {
   return (
     <button
       onClick={handleAdd}
-      className="btn-primary w-full py-2.5 text-sm tracking-widest transition-all"
+      className="btn-primary w-full py-3 text-sm tracking-widest transition-all"
     >
       {added ? t('added') : t('addToCart')}
     </button>
