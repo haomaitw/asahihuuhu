@@ -7,118 +7,562 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
-const LOCALES = [{ key: 'zh-TW', label: '中文' }, { key: 'en', label: 'EN' }, { key: 'ja', label: 'JA' }]
-type LocalizedStr = { 'zh-TW': string; en: string; ja: string }
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+const LOCALES = [
+  { key: 'zh-TW', label: '中文' },
+  { key: 'en',    label: 'EN'   },
+  { key: 'ja',    label: 'JA'   },
+] as const
+type LocaleKey = (typeof LOCALES)[number]['key']
+
+type LocalizedStr = Record<LocaleKey, string>
+
+const TABS = [
+  { key: 'basic',   label: '基本資料'     },
+  { key: 'hours',   label: '營業時間'     },
+  { key: 'tcat',    label: '黑貓出貨設定' },
+  { key: 'seo',     label: 'SEO'          },
+] as const
+type TabKey = (typeof TABS)[number]['key']
+
+type TcatState = {
+  senderName:      string
+  senderPhone:     string
+  senderCellPhone: string
+  senderZip:       string
+  senderAddress:   string
+  temperature:     string
+  distance:        string
+}
 
 type FormState = {
-  address: LocalizedStr
-  contact: LocalizedStr
-  hoursWeekday: LocalizedStr
-  hoursClosed: LocalizedStr
-  facebookUrl: string
-  instagramUrl: string
+  // non-localized
+  phone:           string
+  lineId:          string
+  googleMapsUrl:   string
+  googleMapsEmbed: string
+  facebookUrl:     string
+  instagramUrl:    string
+  tcat:            TcatState
+  // localized
+  address:         LocalizedStr
+  contact:         LocalizedStr
+  hoursWeekday:    LocalizedStr
+  hoursWeekend:    LocalizedStr
+  hoursClosed:     LocalizedStr
+  seoDescription:  LocalizedStr
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function emptyLocalized(): LocalizedStr {
+  return { 'zh-TW': '', en: '', ja: '' }
 }
 
 function initForm(data?: any): FormState {
   return {
-    address:      { 'zh-TW': data?.address ?? '', en: '', ja: '' },
-    contact:      { 'zh-TW': data?.contact ?? '', en: '', ja: '' },
-    hoursWeekday: { 'zh-TW': data?.hoursWeekday ?? '', en: '', ja: '' },
-    hoursClosed:  { 'zh-TW': data?.hoursClosed ?? '', en: '', ja: '' },
-    facebookUrl:  data?.facebookUrl ?? '',
-    instagramUrl: data?.instagramUrl ?? '',
+    phone:           data?.phone           ?? '',
+    lineId:          data?.lineId          ?? '',
+    googleMapsUrl:   data?.googleMapsUrl   ?? '',
+    googleMapsEmbed: data?.googleMapsEmbed ?? '',
+    facebookUrl:     data?.facebookUrl     ?? '',
+    instagramUrl:    data?.instagramUrl    ?? '',
+    tcat: {
+      senderName:      data?.tcat?.senderName      ?? '朝日夫婦',
+      senderPhone:     data?.tcat?.senderPhone      ?? '',
+      senderCellPhone: data?.tcat?.senderCellPhone  ?? '',
+      senderZip:       data?.tcat?.senderZip        ?? '251',
+      senderAddress:   data?.tcat?.senderAddress    ?? '新北市淡水區中正路233-3號',
+      temperature:     data?.tcat?.temperature      ?? '0003',
+      distance:        data?.tcat?.distance         ?? '00',
+    },
+    address:        emptyLocalized(),
+    contact:        emptyLocalized(),
+    hoursWeekday:   emptyLocalized(),
+    hoursWeekend:   emptyLocalized(),
+    hoursClosed:    emptyLocalized(),
+    seoDescription: emptyLocalized(),
   }
 }
 
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function SectionHeader({ title, description }: { title: string; description?: string }) {
+  return (
+    <div className="px-5 py-4 border-b border-adm-border-subtle">
+      <h2 className="text-sm font-semibold text-adm-text-primary">{title}</h2>
+      {description && <p className="text-xs text-adm-text-tertiary mt-0.5">{description}</p>}
+    </div>
+  )
+}
+
+function Textarea({
+  label,
+  description,
+  value,
+  onChange,
+  placeholder,
+  rows = 3,
+}: {
+  label?: string
+  description?: string
+  value: string
+  onChange: (val: string) => void
+  placeholder?: string
+  rows?: number
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      {label && (
+        <label className="text-xs uppercase tracking-wider font-medium text-adm-text-secondary">
+          {label}
+        </label>
+      )}
+      {description && <p className="text-xs text-adm-text-tertiary -mt-1">{description}</p>}
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={rows}
+        placeholder={placeholder}
+        className={cn(
+          'w-full rounded-adm-md border border-adm-border-default bg-adm-bg-elevated px-3 py-2 text-sm text-adm-text-primary',
+          'placeholder:text-adm-text-tertiary resize-none',
+          'transition-colors duration-150',
+          'focus:outline-none focus:border-adm-brand-500 focus:ring-2 focus:ring-adm-brand-500/15',
+        )}
+      />
+    </div>
+  )
+}
+
+function SelectField({
+  label,
+  description,
+  value,
+  onChange,
+  options,
+}: {
+  label: string
+  description?: string
+  value: string
+  onChange: (val: string) => void
+  options: { label: string; value: string }[]
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs uppercase tracking-wider font-medium text-adm-text-secondary">
+        {label}
+      </label>
+      {description && <p className="text-xs text-adm-text-tertiary -mt-1">{description}</p>}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={cn(
+          'h-9 w-full rounded-adm-md border border-adm-border-default bg-adm-bg-elevated px-3 text-sm text-adm-text-primary',
+          'transition-colors duration-150',
+          'focus:outline-none focus:border-adm-brand-500 focus:ring-2 focus:ring-adm-brand-500/15',
+        )}
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
+function LocaleTabs({
+  locale,
+  onSelect,
+}: {
+  locale: LocaleKey
+  onSelect: (l: LocaleKey) => void
+}) {
+  return (
+    <div className="flex gap-1 border-b border-adm-border-subtle px-5">
+      {LOCALES.map(({ key, label }) => (
+        <button
+          key={key}
+          type="button"
+          onClick={() => onSelect(key)}
+          className={cn(
+            'px-3 py-2.5 text-xs font-medium border-b-2 -mb-px transition-colors',
+            locale === key
+              ? 'border-adm-brand-500 text-adm-brand-600'
+              : 'border-transparent text-adm-text-tertiary hover:text-adm-text-primary',
+          )}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// ── Main form ─────────────────────────────────────────────────────────────────
+
 export function SiteSettingsForm({ initialData }: { initialData?: any }) {
-  const [form, setForm] = React.useState<FormState>(() => initForm(initialData))
-  const [locale, setLocale] = React.useState<'zh-TW' | 'en' | 'ja'>('zh-TW')
+  const [form, setForm]     = React.useState<FormState>(() => initForm(initialData))
+  const [tab, setTab]       = React.useState<TabKey>('basic')
+  const [locale, setLocale] = React.useState<LocaleKey>('zh-TW')
   const [loading, setLoading] = React.useState(false)
 
+  // Hydrate localized fields from API on mount
   React.useEffect(() => {
-    Promise.all(LOCALES.map(async ({ key }) => {
-      const r = await fetch(`/api/globals/site-settings?locale=${key}`, { credentials: 'include' })
-      return { key, data: await r.json() }
-    })).then((results) => {
-      setForm((prev) => ({
-        ...prev,
-        address:      { 'zh-TW': results.find((r) => r.key === 'zh-TW')?.data.address ?? prev.address['zh-TW'], en: results.find((r) => r.key === 'en')?.data.address ?? '', ja: results.find((r) => r.key === 'ja')?.data.address ?? '' },
-        contact:      { 'zh-TW': results.find((r) => r.key === 'zh-TW')?.data.contact ?? '', en: results.find((r) => r.key === 'en')?.data.contact ?? '', ja: results.find((r) => r.key === 'ja')?.data.contact ?? '' },
-        hoursWeekday: { 'zh-TW': results.find((r) => r.key === 'zh-TW')?.data.hoursWeekday ?? '', en: results.find((r) => r.key === 'en')?.data.hoursWeekday ?? '', ja: results.find((r) => r.key === 'ja')?.data.hoursWeekday ?? '' },
-        hoursClosed:  { 'zh-TW': results.find((r) => r.key === 'zh-TW')?.data.hoursClosed ?? '', en: results.find((r) => r.key === 'en')?.data.hoursClosed ?? '', ja: results.find((r) => r.key === 'ja')?.data.hoursClosed ?? '' },
-      }))
-    })
+    Promise.all(
+      LOCALES.map(async ({ key }) => {
+        const r = await fetch(`/api/globals/site-settings?locale=${key}&depth=0`, {
+          credentials: 'include',
+        })
+        if (!r.ok) return { key, data: null }
+        return { key, data: await r.json() }
+      }),
+    ).then((results) => {
+      setForm((prev) => {
+        const next = { ...prev }
+        // non-localized — take from zh-TW response (same in all)
+        const base = results.find((r) => r.key === 'zh-TW')?.data
+        if (base) {
+          next.phone           = base.phone           ?? prev.phone
+          next.lineId          = base.lineId          ?? prev.lineId
+          next.googleMapsUrl   = base.googleMapsUrl   ?? prev.googleMapsUrl
+          next.googleMapsEmbed = base.googleMapsEmbed ?? prev.googleMapsEmbed
+          next.facebookUrl     = base.facebookUrl     ?? prev.facebookUrl
+          next.instagramUrl    = base.instagramUrl    ?? prev.instagramUrl
+          if (base.tcat) {
+            next.tcat = {
+              senderName:      base.tcat.senderName      ?? prev.tcat.senderName,
+              senderPhone:     base.tcat.senderPhone      ?? prev.tcat.senderPhone,
+              senderCellPhone: base.tcat.senderCellPhone  ?? prev.tcat.senderCellPhone,
+              senderZip:       base.tcat.senderZip        ?? prev.tcat.senderZip,
+              senderAddress:   base.tcat.senderAddress    ?? prev.tcat.senderAddress,
+              temperature:     base.tcat.temperature      ?? prev.tcat.temperature,
+              distance:        base.tcat.distance         ?? prev.tcat.distance,
+            }
+          }
+        }
+        // localized fields
+        for (const { key } of LOCALES) {
+          const d = results.find((r) => r.key === key)?.data
+          if (!d) continue
+          const k = key as LocaleKey
+          next.address        = { ...next.address,        [k]: d.address        ?? '' }
+          next.contact        = { ...next.contact,        [k]: d.contact        ?? '' }
+          next.hoursWeekday   = { ...next.hoursWeekday,   [k]: d.hoursWeekday   ?? '' }
+          next.hoursWeekend   = { ...next.hoursWeekend,   [k]: d.hoursWeekend   ?? '' }
+          next.hoursClosed    = { ...next.hoursClosed,    [k]: d.hoursClosed    ?? '' }
+          next.seoDescription = { ...next.seoDescription, [k]: d.seoDescription ?? '' }
+        }
+        return next
+      })
+    }).catch(() => {/* ignore */})
   }, [])
+
+  // ── Save ──────────────────────────────────────────────────────────────────
 
   const handleSave = async () => {
     setLoading(true)
     try {
-      await Promise.all(LOCALES.map(({ key }) =>
-        fetch(`/api/globals/site-settings?locale=${key}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            address: form.address[key as keyof LocalizedStr],
-            contact: form.contact[key as keyof LocalizedStr],
-            hoursWeekday: form.hoursWeekday[key as keyof LocalizedStr],
-            hoursClosed: form.hoursClosed[key as keyof LocalizedStr],
-            facebookUrl: form.facebookUrl,
-            instagramUrl: form.instagramUrl,
+      // Non-localized fields + tcat — send once (locale doesn't matter for these)
+      const nonLocalizedBody = {
+        phone:           form.phone,
+        lineId:          form.lineId,
+        googleMapsUrl:   form.googleMapsUrl,
+        googleMapsEmbed: form.googleMapsEmbed,
+        facebookUrl:     form.facebookUrl,
+        instagramUrl:    form.instagramUrl,
+        tcat:            form.tcat,
+      }
+
+      // Per-locale POSTs for localized fields
+      await Promise.all(
+        LOCALES.map(({ key }) =>
+          fetch(`/api/globals/site-settings?locale=${key}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              ...nonLocalizedBody,
+              address:        form.address[key],
+              contact:        form.contact[key],
+              hoursWeekday:   form.hoursWeekday[key],
+              hoursWeekend:   form.hoursWeekend[key],
+              hoursClosed:    form.hoursClosed[key],
+              seoDescription: form.seoDescription[key],
+            }),
+          }).then((r) => {
+            if (!r.ok) throw new Error(`HTTP ${r.status}`)
           }),
-        })
-      ))
+        ),
+      )
+
       toast.success('設定已儲存')
-    } catch { toast.error('儲存失敗') } finally { setLoading(false) }
+    } catch {
+      toast.error('儲存失敗，請再試一次')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const setLoc = (field: keyof Pick<FormState, 'address' | 'contact' | 'hoursWeekday' | 'hoursClosed'>, val: string) =>
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  const setLoc = (field: keyof Pick<FormState, 'address' | 'contact' | 'hoursWeekday' | 'hoursWeekend' | 'hoursClosed' | 'seoDescription'>, val: string) =>
     setForm((p) => ({ ...p, [field]: { ...p[field], [locale]: val } }))
+
+  const setField = (field: keyof Omit<FormState, 'tcat' | 'address' | 'contact' | 'hoursWeekday' | 'hoursWeekend' | 'hoursClosed' | 'seoDescription'>) =>
+    (val: string) => setForm((p) => ({ ...p, [field]: val }))
+
+  const setTcat = (field: keyof TcatState) =>
+    (val: string) => setForm((p) => ({ ...p, tcat: { ...p.tcat, [field]: val } }))
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="space-y-6 max-w-2xl">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-adm-text-primary">網站設定</h1>
-        <Button variant="primary" size="md" loading={loading} onClick={handleSave}>儲存設定</Button>
+        <Button variant="primary" size="md" loading={loading} onClick={handleSave}>
+          儲存設定
+        </Button>
       </div>
 
-      {/* Social links - not localized */}
-      <Card>
-        <div className="px-5 py-4 border-b border-adm-border-subtle">
-          <h2 className="text-sm font-semibold text-adm-text-primary">社群媒體</h2>
-        </div>
-        <CardContent className="p-5 space-y-4">
-          <Input label="Facebook URL" value={form.facebookUrl} onChange={(e) => setForm((f) => ({ ...f, facebookUrl: e.target.value }))} placeholder="https://facebook.com/..." />
-          <Input label="Instagram URL" value={form.instagramUrl} onChange={(e) => setForm((f) => ({ ...f, instagramUrl: e.target.value }))} placeholder="https://instagram.com/..." />
-        </CardContent>
-      </Card>
-
-      {/* Locale tabs */}
-      <div className="flex gap-1 border-b border-adm-border-subtle">
-        {LOCALES.map(({ key, label }) => (
-          <button key={key} onClick={() => setLocale(key as any)}
-            className={cn('px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors',
-              locale === key ? 'border-adm-brand-500 text-adm-brand-600' : 'border-transparent text-adm-text-tertiary hover:text-adm-text-primary')}>
+      {/* Top-level tabs */}
+      <div className="flex gap-0.5 border-b border-adm-border-subtle">
+        {TABS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setTab(key)}
+            className={cn(
+              'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
+              tab === key
+                ? 'border-adm-brand-500 text-adm-brand-600'
+                : 'border-transparent text-adm-text-tertiary hover:text-adm-text-primary',
+            )}
+          >
             {label}
           </button>
         ))}
       </div>
 
-      <Card>
-        <div className="px-5 py-4 border-b border-adm-border-subtle">
-          <h2 className="text-sm font-semibold text-adm-text-primary">地址與聯絡 ({locale})</h2>
+      {/* ── Tab: 基本資料 ──────────────────────────────────────────── */}
+      {tab === 'basic' && (
+        <div className="space-y-4">
+          <Card>
+            <SectionHeader title="聯絡資訊" />
+            <CardContent className="p-5 space-y-4">
+              <Input
+                label="電話"
+                value={form.phone}
+                onChange={(e) => setField('phone')(e.target.value)}
+                placeholder="02-1234-5678"
+              />
+              <Input
+                label="LINE ID"
+                value={form.lineId}
+                onChange={(e) => setField('lineId')(e.target.value)}
+                placeholder="@asahihuuhu"
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <SectionHeader title="社群媒體" />
+            <CardContent className="p-5 space-y-4">
+              <Input
+                label="Facebook URL"
+                value={form.facebookUrl}
+                onChange={(e) => setField('facebookUrl')(e.target.value)}
+                placeholder="https://facebook.com/..."
+              />
+              <Input
+                label="Instagram URL"
+                value={form.instagramUrl}
+                onChange={(e) => setField('instagramUrl')(e.target.value)}
+                placeholder="https://instagram.com/..."
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <SectionHeader
+              title="Google 地圖"
+              description="讓顧客導航到門市的地圖設定"
+            />
+            <CardContent className="p-5 space-y-4">
+              <Input
+                label="Google Maps 分享連結"
+                value={form.googleMapsUrl}
+                onChange={(e) => setField('googleMapsUrl')(e.target.value)}
+                placeholder="https://maps.app.goo.gl/..."
+              />
+              <Textarea
+                label="Google Maps 嵌入 iframe src"
+                description="貼入 Google Maps「嵌入地圖」的 iframe src 網址"
+                value={form.googleMapsEmbed}
+                onChange={setField('googleMapsEmbed')}
+                placeholder="https://www.google.com/maps/embed?pb=..."
+                rows={3}
+              />
+            </CardContent>
+          </Card>
         </div>
-        <CardContent className="p-5 space-y-4">
-          <div className="space-y-1.5">
-            <Label>地址 ({locale})</Label>
-            <textarea value={form.address[locale]} onChange={(e) => setLoc('address', e.target.value)} rows={2} placeholder="店家地址"
-              className="w-full rounded-adm-md border border-adm-border-default bg-adm-bg-elevated px-3 py-2 text-sm text-adm-text-primary placeholder:text-adm-text-tertiary focus:outline-none focus:border-adm-brand-500 focus:ring-2 focus:ring-adm-brand-500/15 resize-none" />
-          </div>
-          <Input label={`聯絡方式 (${locale})`} value={form.contact[locale]} onChange={(e) => setLoc('contact', e.target.value)} placeholder="電話或 LINE" />
-          <Input label={`平日營業時間 (${locale})`} value={form.hoursWeekday[locale]} onChange={(e) => setLoc('hoursWeekday', e.target.value)} placeholder="週二～週日 10:00–18:00" />
-          <Input label={`公休日 (${locale})`} value={form.hoursClosed[locale]} onChange={(e) => setLoc('hoursClosed', e.target.value)} placeholder="每週一公休" />
-        </CardContent>
-      </Card>
+      )}
+
+      {/* ── Tab: 營業時間 ─────────────────────────────────────────── */}
+      {tab === 'hours' && (
+        <div className="space-y-4">
+          <Card>
+            <SectionHeader
+              title="地址與聯絡"
+              description="依語言分別設定，顯示於網站各語言版本"
+            />
+            <LocaleTabs locale={locale} onSelect={setLocale} />
+            <CardContent className="p-5 space-y-4">
+              <Textarea
+                label={`地址（${locale}）`}
+                value={form.address[locale]}
+                onChange={(val) => setLoc('address', val)}
+                placeholder={locale === 'zh-TW' ? '251新北市淡水區中正路233-3號' : 'Address...'}
+                rows={2}
+              />
+              <Input
+                label={`聯絡方式（${locale}）`}
+                value={form.contact[locale]}
+                onChange={(e) => setLoc('contact', e.target.value)}
+                placeholder={locale === 'zh-TW' ? '電話或 LINE' : 'Contact info...'}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <SectionHeader title="營業時間" />
+            <LocaleTabs locale={locale} onSelect={setLocale} />
+            <CardContent className="p-5 space-y-4">
+              <Input
+                label={`平日營業時間（${locale}）`}
+                value={form.hoursWeekday[locale]}
+                onChange={(e) => setLoc('hoursWeekday', e.target.value)}
+                placeholder={locale === 'zh-TW' ? '週二至週五 11:00–18:00' : 'Tue–Fri 11:00–18:00'}
+              />
+              <Input
+                label={`假日營業時間（${locale}）`}
+                value={form.hoursWeekend[locale]}
+                onChange={(e) => setLoc('hoursWeekend', e.target.value)}
+                placeholder={locale === 'zh-TW' ? '週六、週日 10:00–19:00' : 'Sat–Sun 10:00–19:00'}
+              />
+              <Input
+                label={`公休日（${locale}）`}
+                value={form.hoursClosed[locale]}
+                onChange={(e) => setLoc('hoursClosed', e.target.value)}
+                placeholder={locale === 'zh-TW' ? '週一公休' : 'Closed on Mondays'}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ── Tab: 黑貓出貨設定 ─────────────────────────────────────── */}
+      {tab === 'tcat' && (
+        <Card>
+          <SectionHeader
+            title="黑貓宅急便寄件設定"
+            description="建立黑貓出貨單時使用的寄件人資料，請填寫與綠界物流申請時相同的資訊"
+          />
+          <CardContent className="p-5 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="寄件人姓名"
+                value={form.tcat.senderName}
+                onChange={(e) => setTcat('senderName')(e.target.value)}
+                placeholder="朝日夫婦"
+              />
+              <Input
+                label="寄件人郵遞區號"
+                value={form.tcat.senderZip}
+                onChange={(e) => setTcat('senderZip')(e.target.value)}
+                placeholder="251"
+              />
+            </div>
+            <Input
+              label="寄件人地址"
+              value={form.tcat.senderAddress}
+              onChange={(e) => setTcat('senderAddress')(e.target.value)}
+              placeholder="新北市淡水區中正路233-3號"
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="寄件人電話"
+                value={form.tcat.senderPhone}
+                onChange={(e) => setTcat('senderPhone')(e.target.value)}
+                placeholder="02-12345678"
+              />
+              <Input
+                label="寄件人手機"
+                value={form.tcat.senderCellPhone}
+                onChange={(e) => setTcat('senderCellPhone')(e.target.value)}
+                placeholder="0912345678"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <SelectField
+                label="配送溫層"
+                description="冰品建議使用冷凍配送"
+                value={form.tcat.temperature}
+                onChange={setTcat('temperature')}
+                options={[
+                  { label: '常溫', value: '0001' },
+                  { label: '冷藏（7°C 以下）', value: '0002' },
+                  { label: '冷凍（-18°C 以下）', value: '0003' },
+                ]}
+              />
+              <SelectField
+                label="配送距離"
+                value={form.tcat.distance}
+                onChange={setTcat('distance')}
+                options={[
+                  { label: '全台（00）', value: '00' },
+                  { label: '同縣市（01）', value: '01' },
+                ]}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Tab: SEO ───────────────────────────────────────────────── */}
+      {tab === 'seo' && (
+        <Card>
+          <SectionHeader
+            title="SEO 設定"
+            description="依語言分別設定，顯示於 Google 搜尋結果"
+          />
+          <LocaleTabs locale={locale} onSelect={setLocale} />
+          <CardContent className="p-5 space-y-4">
+            <Textarea
+              label={`SEO 描述（${locale}）`}
+              description="建議 120–160 字元，簡短說明網站內容"
+              value={form.seoDescription[locale]}
+              onChange={(val) => setLoc('seoDescription', val)}
+              placeholder={
+                locale === 'zh-TW'
+                  ? '朝日夫婦，台灣淡水職人刨冰，使用在地食材手工製作，每季限定口味。'
+                  : 'Asahi Huuhu, artisan shaved ice from Tamsui, Taiwan...'
+              }
+              rows={4}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Sticky save footer */}
+      <div className="flex justify-end pt-2 pb-8">
+        <Button variant="primary" size="md" loading={loading} onClick={handleSave}>
+          儲存設定
+        </Button>
+      </div>
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { buildConfig } from 'payload';
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer';
 import { postgresAdapter } from '@payloadcms/db-postgres';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import sharp from 'sharp';
@@ -46,6 +47,20 @@ export default buildConfig({
   },
 
   serverURL: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+
+  email: nodemailerAdapter({
+    defaultFromAddress: process.env.SMTP_FROM ?? 'oa@extrastudio.tw',
+    defaultFromName: process.env.SMTP_FROM_NAME ?? '朝日夫婦',
+    transportOptions: {
+      host: process.env.SMTP_HOST ?? 'smtp.larksuite.com',
+      port: Number(process.env.SMTP_PORT ?? 465),
+      secure: process.env.SMTP_SECURE !== 'false', // true for port 465
+      auth: {
+        user: process.env.SMTP_USER ?? 'oa@extrastudio.tw',
+        pass: process.env.SMTP_PASS ?? '',
+      },
+    },
+  }),
 
   collections: [
     Users, Customers,

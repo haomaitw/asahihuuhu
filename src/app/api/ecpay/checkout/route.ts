@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       data: {
         orderNumber,
         status: 'pending_payment',
-        fulfillmentStatus: 'pending',
+        fulfillmentStatus: 'unfulfilled',
         customerName,
         customerEmail,
         customerPhone,

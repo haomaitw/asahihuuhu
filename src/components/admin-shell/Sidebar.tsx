@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Newspaper, HelpCircle, Home, Info, Settings2,
   Package, ShoppingBag, Image as ImageIcon, Users,
   ChevronLeft, ChevronRight, Tag, FolderOpen, UserCircle,
+  UsersRound, Ticket, Coins, Truck, QrCode, ChefHat, Lock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -16,6 +17,7 @@ type NavItem = {
   icon: React.ComponentType<{ className?: string }>
   badge?: number
   superAdminOnly?: boolean
+  locked?: boolean
 }
 
 type NavGroup = {
@@ -46,6 +48,9 @@ const NAV: NavGroup[] = [
     items: [
       { label: '商品管理', href: '/admin/collections/products', icon: Package },
       { label: '訂單管理', href: '/admin/collections/orders', icon: ShoppingBag },
+      { label: '顧客管理', href: '/admin/collections/customers', icon: UsersRound },
+      { label: '優惠券', href: '/admin/collections/coupons', icon: Ticket },
+      { label: '點數記錄', href: '/admin/collections/point-transactions', icon: Coins },
     ],
   },
   {
@@ -65,6 +70,14 @@ const NAV: NavGroup[] = [
     group: '資產',
     items: [
       { label: '媒體庫', href: '/admin/collections/media', icon: ImageIcon },
+    ],
+  },
+  {
+    group: '桌邊服務',
+    superAdminOnly: true,
+    items: [
+      { label: 'QR 碼點餐', href: '/admin/dine-in', icon: QrCode, locked: true },
+      { label: '廚房顯示', href: '/admin/kitchen', icon: ChefHat, locked: true },
     ],
   },
   {
@@ -101,7 +114,9 @@ function NavItemRow({
         'relative flex items-center gap-2.5 rounded-adm-md px-2.5 py-1.5 text-sm transition-colors duration-150',
         active
           ? 'bg-adm-brand-100 text-adm-brand-700 font-medium'
-          : 'text-adm-text-secondary hover:bg-adm-brand-50 hover:text-adm-text-primary',
+          : item.locked
+            ? 'text-adm-text-tertiary hover:bg-adm-bg-sunken hover:text-adm-text-secondary'
+            : 'text-adm-text-secondary hover:bg-adm-brand-50 hover:text-adm-text-primary',
         collapsed && 'justify-center px-0'
       )}
       title={collapsed ? item.label : undefined}
@@ -111,7 +126,10 @@ function NavItemRow({
       )}
       <Icon className={cn('shrink-0', collapsed ? 'h-[18px] w-[18px]' : 'h-4 w-4')} />
       {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
-      {!collapsed && item.badge !== undefined && item.badge > 0 && (
+      {!collapsed && item.locked && (
+        <Lock className="h-3 w-3 text-adm-text-tertiary shrink-0" />
+      )}
+      {!collapsed && !item.locked && item.badge !== undefined && item.badge > 0 && (
         <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-adm-danger-500 px-1 text-[10px] font-medium text-white">
           {item.badge}
         </span>

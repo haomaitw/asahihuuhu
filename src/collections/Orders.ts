@@ -43,11 +43,11 @@ export const Orders: CollectionConfig = {
     {
       name: 'fulfillmentStatus',
       type: 'select',
-      defaultValue: 'pending',
+      defaultValue: 'unfulfilled',
       label: '出貨狀態',
       options: [
-        { label: '待處理', value: 'pending' },
-        { label: '備貨中', value: 'preparing' },
+        { label: '未出貨', value: 'unfulfilled' },
+        { label: '備貨中', value: 'processing' },
         { label: '已出貨', value: 'shipped' },
         { label: '已送達', value: 'delivered' },
         { label: '已取消', value: 'cancelled' },
@@ -125,6 +125,7 @@ export const Orders: CollectionConfig = {
     // ── Payment ───────────────────────────────────────────────────
     { name: 'ecpayTradeNo', type: 'text', label: '綠界交易編號', admin: { readOnly: true } },
     { name: 'paidAt', type: 'date', label: '付款時間', admin: { readOnly: true } },
+    { name: 'tcatOrderNo', type: 'text', label: '黑貓訂單編號', admin: { readOnly: true } },
     // ── Notes ─────────────────────────────────────────────────────
     { name: 'note', type: 'textarea', label: '顧客備註' },
     { name: 'adminNote', type: 'textarea', label: '內部備註（僅後台可見）' },

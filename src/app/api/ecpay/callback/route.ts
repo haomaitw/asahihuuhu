@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { generateCheckMacValue } from '@/lib/ecpay'
+import { sendOrderConfirmation } from '@/lib/email'
 
 // Points rule: NT$10 spent = 1 point
 const POINTS_PER_NT = 10
@@ -115,6 +116,24 @@ export async function POST(req: NextRequest) {
             overrideAccess: true,
           })
         }
+      }
+      // Send order confirmation email (non-blocking)
+      if (order.customerEmail) {
+        sendOrderConfirmation({
+          orderNumber: merchantTradeNo,
+          customerName: order.customerName ?? '顧客',
+          customerEmail: order.customerEmail,
+          items: (order.items ?? []).map((i: any) => ({
+            productName: i.productName,
+            quantity: i.quantity,
+            unitPrice: i.unitPrice,
+          })),
+          subtotal: order.subtotal ?? order.totalAmount ?? 0,
+          couponDiscount: order.couponDiscount ?? 0,
+          pointsRedeemed: order.pointsRedeemed ?? 0,
+          shippingFee: order.shippingFee ?? 0,
+          totalAmount: order.totalAmount ?? 0,
+        }).catch((e) => console.error('[email] order confirmation failed:', e))
       }
     } else {
       await payload.update({
