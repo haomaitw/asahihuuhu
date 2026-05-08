@@ -17,9 +17,14 @@ const nextConfig = {
     'sharp',
   ],
 
-  // Force nft to include drizzle-kit in standalone output for the gen-migration route
+  // Force nft to include drizzle-kit's CJS api.js in standalone output.
+  // Use explicit file + glob patterns — '**' alone misses root-level files in some nft versions.
   outputFileTracingIncludes: {
-    '/api/gen-migration': ['./node_modules/drizzle-kit/**'],
+    '/api/gen-migration': [
+      './node_modules/drizzle-kit/api.js',
+      './node_modules/drizzle-kit/api.d.ts',
+      './node_modules/drizzle-kit/**/*',
+    ],
   },
 
   images: {
