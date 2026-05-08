@@ -89,6 +89,10 @@ export default buildConfig({
     pool: {
       connectionString: pgUri || 'postgresql://localhost/asahi_dev',
     },
+    // Migration files live in src/migrations/.
+    // Generate: pnpm payload:migrate:create --name=<label>
+    // Apply:    pnpm payload:migrate  (or use start:migrate in production)
+    migrationDir: path.resolve(dirname, 'migrations'),
   }),
 
   secret: process.env.PAYLOAD_SECRET ?? 'dev-secret-change-in-production',

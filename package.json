@@ -6,6 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:migrate": "payload migrate && next start",
+    "payload:migrate": "payload migrate",
+    "payload:migrate:create": "payload migrate:create",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
   },
