@@ -167,7 +167,7 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        toast.error(data?.error ?? '更新失敗')
+        toast.error(data?.errors?.[0]?.message ?? data?.error ?? '更新失敗')
         return
       }
       toast.success('已更新管理員資料')
@@ -196,7 +196,7 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        toast.error(data?.error ?? '刪除失敗')
+        toast.error(data?.errors?.[0]?.message ?? data?.error ?? '刪除失敗')
         return
       }
       toast.success(`已刪除 ${deleteUser.name ?? deleteUser.email} 的帳號`)
