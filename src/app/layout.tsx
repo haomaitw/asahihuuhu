@@ -41,8 +41,11 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true },
   },
   icons: {
-    icon: '/asahi/favicon.ico',
-    apple: '/asahi/favicon.ico',
+    icon: [
+      { url: '/asahi/favicon.ico', sizes: 'any' },
+      { url: '/asahi/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: { url: '/asahi/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
   },
 };
 
