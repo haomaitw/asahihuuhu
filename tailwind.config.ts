@@ -163,6 +163,11 @@ const config: Config = {
           from: { opacity: '0' },
           to:   { opacity: '1' },
         },
+        // ── Page transition: sunset wave slides up to reveal new page ──
+        'wave-reveal': {
+          '0%':   { transform: 'translateY(0%)' },
+          '100%': { transform: 'translateY(-100%)' },
+        },
       },
 
       animation: {
@@ -170,6 +175,7 @@ const config: Config = {
         'logo-breathe':  'logo-breathe 1s ease-in-out forwards',
         'marquee':       'marquee 32s linear infinite',
         'marquee-slow':  'marquee 48s linear infinite',
+        'wave-reveal':   'wave-reveal 850ms cubic-bezier(0.76, 0, 0.24, 1) both',
         'fade-up':       'fade-up 0.7s ease-out both',
         'fade-in':       'fade-in 0.5s ease-out both',
       },

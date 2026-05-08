@@ -5,7 +5,7 @@ import { Noto_Sans_TC, Noto_Sans_JP, Noto_Serif_TC, Averia_Sans_Libre } from 'ne
 import { routing } from '@/i18n/routing';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { PageTransition } from '@/components/PageTransition';
+import { PageTransitionOverlay } from '@/components/PageTransitionOverlay';
 import { CartProvider } from '@/components/CartProvider';
 import { LoginModal } from '@/components/LoginModal';
 import { getSiteSettings } from '@/lib/cms';
@@ -101,7 +101,7 @@ export default async function LocaleLayout({
         />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider>
-            <PageTransition />
+            <PageTransitionOverlay />
             <LoginModal />
             <div className="flex min-h-dvh flex-col bg-paper-50 text-ink overflow-x-hidden">
               <Header facebookUrl={facebookUrl} instagramUrl={instagramUrl} />
