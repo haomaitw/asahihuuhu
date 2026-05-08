@@ -1,13 +1,36 @@
 /**
- * POST /api/seed-admin
- * 建立或重設管理員帳號（受 PAYLOAD_SECRET 保護）
+ * POST /api/seed-admin  → 建立管理員帳號並立即驗證登入
+ * DELETE /api/seed-admin → 清空所有 users（讓 Payload 顯示建立第一位使用者頁面）
  *
- * Body: { "secret": "...", "email": "...", "password": "...", "name": "..." }
+ * 兩個動作都需要 query: ?secret=<PAYLOAD_SECRET>
  */
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
+function checkSecret(req: Request) {
+  const secret = new URL(req.url).searchParams.get('secret')
+  return secret === process.env.PAYLOAD_SECRET
+}
+
+// ── DELETE：清空所有 admin users ──────────────────────────────────────────────
+export async function DELETE(request: Request) {
+  if (!checkSecret(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  const payload = await getPayload({ config })
+  const all = await payload.find({ collection: 'users', limit: 100, overrideAccess: true })
+  for (const u of all.docs) {
+    await payload.delete({ collection: 'users', id: (u as any).id, overrideAccess: true })
+  }
+  return NextResponse.json({
+    ok: true,
+    deleted: all.docs.length,
+    next: '請前往 /admin 使用 Payload 內建頁面建立第一位管理員',
+  })
+}
+
+// ── POST：建立帳號並立即驗證 ──────────────────────────────────────────────────
 export async function POST(request: Request) {
   try {
     const body = await request.json()
@@ -26,39 +49,48 @@ export async function POST(request: Request) {
     const payload = await getPayload({ config })
     const normalEmail = email.toLowerCase().trim()
 
-    // 找出現有帳號並刪除（讓 create 重建，確保密碼正確 hash）
+    // 刪除現有同 email 帳號
     const existing = await payload.find({
       collection: 'users',
       where: { email: { equals: normalEmail } },
       limit: 1,
       overrideAccess: true,
     })
-
     if (existing.docs.length > 0) {
-      const user = existing.docs[0] as any
       await payload.delete({
         collection: 'users',
-        id: user.id,
+        id: (existing.docs[0] as any).id,
         overrideAccess: true,
       })
     }
 
-    // 重新建立（payload.create 的密碼一定會正確 hash）
-    const created = await payload.create({
+    // 建立新帳號
+    await payload.create({
       collection: 'users',
-      data: {
-        email: normalEmail,
-        password,
-        name: name ?? '管理員',
-        role: 'admin',
-      },
+      data: { email: normalEmail, password, name: name ?? '管理員', role: 'admin' },
       overrideAccess: true,
     })
 
+    // ← 立即用 payload.login() 驗證密碼是否正確設定
+    let loginOk = false
+    let loginError = ''
+    try {
+      const loginResult = await payload.login({
+        collection: 'users',
+        data: { email: normalEmail, password },
+      }) as any
+      loginOk = !!loginResult?.user
+    } catch (e: any) {
+      loginError = e?.message ?? String(e)
+    }
+
     return NextResponse.json({
       ok: true,
-      message: `帳號 ${normalEmail} 已建立，請至 /admin/login 登入`,
-      id: created.id,
+      loginOk,
+      loginError: loginError || undefined,
+      message: loginOk
+        ? `✅ 帳號建立成功，登入驗證通過。請至 /admin/login 登入`
+        : `⚠️ 帳號建立但登入驗證失敗：${loginError}`,
     })
   } catch (err: any) {
     console.error('[seed-admin]', err)
