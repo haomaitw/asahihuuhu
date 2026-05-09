@@ -14,6 +14,7 @@ export default async function OrdersPage() {
     collection: 'orders',
     limit: 100,
     sort: '-createdAt',
+    overrideAccess: true,
   })
 
   return (

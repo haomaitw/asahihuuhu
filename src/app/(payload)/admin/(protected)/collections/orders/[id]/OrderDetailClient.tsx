@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ArrowLeft, Truck } from 'lucide-react'
+import { ArrowLeft, Truck, Mail } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -49,6 +49,12 @@ export function OrderDetailClient({ order, statusLabels }: Props) {
   const [tcatLoading, setTcatLoading] = React.useState(false)
   const [tcatOrderNo, setTcatOrderNo] = React.useState<string>(order.tcatOrderNo ?? '')
 
+  // Email panel state
+  const [emailType, setEmailType] = React.useState<'shipping' | 'message'>('shipping')
+  const [emailSubject, setEmailSubject] = React.useState('')
+  const [emailMessage, setEmailMessage] = React.useState('')
+  const [emailLoading, setEmailLoading] = React.useState(false)
+
   const paymentBadge = statusLabels[order.status ?? ''] ?? { label: order.status ?? '—', variant: 'neutral' }
   const fulfillmentBadge = FULFILLMENT_BADGES[order.fulfillmentStatus ?? ''] ?? { label: order.fulfillmentStatus ?? '—', variant: 'neutral' }
 
@@ -78,6 +84,41 @@ export function OrderDetailClient({ order, statusLabels }: Props) {
       toast.error('更新失敗')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSendEmail = async () => {
+    if (emailType === 'message' && (!emailSubject.trim() || !emailMessage.trim())) {
+      toast.error('請填寫主旨和訊息內容')
+      return
+    }
+    setEmailLoading(true)
+    try {
+      const res = await fetch('/api/admin/send-order-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          type: emailType,
+          orderId: order.id,
+          subject: emailSubject,
+          message: emailMessage,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error ?? '發送失敗')
+        return
+      }
+      toast.success(data.message ?? '已發送')
+      if (emailType === 'message') {
+        setEmailSubject('')
+        setEmailMessage('')
+      }
+    } catch {
+      toast.error('發送失敗，請稍後再試')
+    } finally {
+      setEmailLoading(false)
     }
   }
 
@@ -333,6 +374,79 @@ export function OrderDetailClient({ order, statusLabels }: Props) {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Email to customer */}
+      {order.customerEmail && (
+        <Card>
+          <div className="px-5 py-4 border-b border-adm-border-subtle">
+            <h2 className="text-sm font-semibold text-adm-text-primary flex items-center gap-2">
+              <Mail className="h-4 w-4 text-adm-text-tertiary" />
+              發送電子郵件給顧客
+            </h2>
+            <p className="text-xs text-adm-text-tertiary mt-0.5">{order.customerEmail}</p>
+          </div>
+          <CardContent className="p-5 space-y-4">
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setEmailType('shipping')}
+                className={`px-4 py-2 rounded-adm-md text-sm transition-colors ${
+                  emailType === 'shipping'
+                    ? 'bg-adm-brand-600 text-white'
+                    : 'border border-adm-border-default text-adm-text-secondary hover:bg-adm-bg-base'
+                }`}
+              >
+                出貨通知
+              </button>
+              <button
+                type="button"
+                onClick={() => setEmailType('message')}
+                className={`px-4 py-2 rounded-adm-md text-sm transition-colors ${
+                  emailType === 'message'
+                    ? 'bg-adm-brand-600 text-white'
+                    : 'border border-adm-border-default text-adm-text-secondary hover:bg-adm-bg-base'
+                }`}
+              >
+                自訂訊息
+              </button>
+            </div>
+
+            {emailType === 'shipping' ? (
+              <p className="text-sm text-adm-text-secondary">
+                將發送出貨通知信給顧客，包含目前的追蹤號碼（若已填寫）和黑貓查詢連結。
+              </p>
+            ) : (
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label>主旨</Label>
+                  <input
+                    type="text"
+                    value={emailSubject}
+                    onChange={(e) => setEmailSubject(e.target.value)}
+                    placeholder="如：關於您的訂單出貨時間"
+                    className="h-9 w-full rounded-adm-md border border-adm-border-default bg-adm-bg-elevated px-3 text-sm text-adm-text-primary placeholder:text-adm-text-tertiary focus:outline-none focus:border-adm-brand-500 focus:ring-2 focus:ring-adm-brand-500/15"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>訊息內容</Label>
+                  <textarea
+                    value={emailMessage}
+                    onChange={(e) => setEmailMessage(e.target.value)}
+                    rows={4}
+                    placeholder="輸入要傳達給顧客的訊息..."
+                    className="w-full rounded-adm-md border border-adm-border-default bg-adm-bg-elevated px-3 py-2 text-sm text-adm-text-primary placeholder:text-adm-text-tertiary focus:outline-none focus:border-adm-brand-500 focus:ring-2 focus:ring-adm-brand-500/15 resize-none"
+                  />
+                </div>
+              </div>
+            )}
+
+            <Button variant="secondary" size="md" loading={emailLoading} onClick={handleSendEmail}>
+              <Mail className="h-4 w-4 mr-1.5" />
+              發送
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

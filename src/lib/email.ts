@@ -156,6 +156,25 @@ export async function sendWelcomeEmail(to: string, name: string, bonusPoints: nu
   return send(to, '【朝日夫婦】歡迎加入會員！', html)
 }
 
+/** 後台手動發送給顧客的訂單留言 */
+export async function sendOrderMessage(order: {
+  orderNumber: string
+  customerName: string
+  customerEmail: string
+  subject: string
+  message: string
+}) {
+  const html = wrap(`
+    <h2>${order.subject}</h2>
+    <p>親愛的 ${order.customerName}，</p>
+    <p style="white-space:pre-line">${order.message}</p>
+    <p style="margin-top:20px;font-size:13px;color:#a0917e;">此訊息關於您的訂單 <strong>${order.orderNumber}</strong></p>
+    <a class="btn" href="${process.env.NEXT_PUBLIC_SITE_URL}/zh-TW/track?order=${encodeURIComponent(order.orderNumber)}&email=${encodeURIComponent(order.customerEmail)}">查看訂單狀態</a>
+  `, `${order.subject} — 朝日夫婦`)
+
+  return send(order.customerEmail, `【朝日夫婦】${order.subject}`, html)
+}
+
 /** 系統通知信（管理員用） */
 export async function sendAdminNotification(subject: string, body: string) {
   const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || process.env.SMTP_USER || 'oa@extrastudio.tw'
