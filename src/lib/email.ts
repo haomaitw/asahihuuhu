@@ -96,8 +96,8 @@ export async function sendOrderConfirmation(order: {
       ${discountRows}
       <div class="order-row"><span>實付金額</span><span>NT$ ${order.totalAmount.toLocaleString()}</span></div>
     </div>
-    <p>您可以登入會員中心查看訂單狀態與出貨進度。</p>
-    <a class="btn" href="${process.env.NEXT_PUBLIC_SITE_URL}/zh-TW/account/orders">查看訂單</a>
+    <p>您可以透過以下連結即時查詢出貨進度，訪客與會員皆可使用，無需登入。</p>
+    <a class="btn" href="${process.env.NEXT_PUBLIC_SITE_URL}/zh-TW/track?order=${encodeURIComponent(order.orderNumber)}&email=${encodeURIComponent(order.customerEmail)}">查看訂單狀態</a>
   `, '訂單確認 — 朝日夫婦')
 
   return send(order.customerEmail, `【朝日夫婦】訂單確認 ${order.orderNumber}`, html)
@@ -123,7 +123,8 @@ export async function sendShippingNotification(order: {
       <div class="order-row"><span>收件地址</span><span>${addr}</span></div>
     </div>
     <p style="font-size:13px;color:#a0917e;">冷凍商品請於收到通知後盡快簽收，以確保品質。</p>
-    <a class="btn" href="https://www.t-cat.com.tw/Inquire/Trace.aspx" style="margin-right:8px">黑貓追蹤查詢</a>
+    <a class="btn" href="${process.env.NEXT_PUBLIC_SITE_URL}/zh-TW/track?order=${encodeURIComponent(order.orderNumber)}&email=${encodeURIComponent(order.customerEmail)}" style="margin-right:8px">查看訂單狀態</a>
+    <a class="btn" href="https://www.t-cat.com.tw/Inquire/Trace.aspx${order.trackingNumber ? `?BillID=${encodeURIComponent(order.trackingNumber)}` : ''}" style="background:#5a7d8f;">黑貓追蹤查詢</a>
   `, '出貨通知 — 朝日夫婦')
 
   return send(order.customerEmail, `【朝日夫婦】商品已出貨 ${order.orderNumber}`, html)

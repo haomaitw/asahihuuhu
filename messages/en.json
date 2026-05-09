@@ -33,6 +33,9 @@
     "news": {
       "eyebrow": "NEWS",
       "title": "Latest News"
+    },
+    "about": {
+      "lede": "From the morning sun rising over the Okinawa sea to the golden dusk over the Tamsui harbor — a couple built their most tender promise around one bowl of artisan shaved ice."
     }
   },
   "lineup": {
@@ -92,7 +95,8 @@
       "eyebrow": "SEASONAL",
       "title": "Seasonal Specials"
     },
-    "comingSoon": "Products coming soon — stay tuned"
+    "comingSoon": "Products coming soon — stay tuned",
+    "related": "You may also like"
   },
   "about": {
     "title": "About",

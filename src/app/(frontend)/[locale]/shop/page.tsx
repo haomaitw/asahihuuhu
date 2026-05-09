@@ -6,6 +6,7 @@ import { SectionTitle } from '@/components/SectionTitle';
 import { WaveDivider } from '@/components/WaveDivider';
 import { ProductCard } from '@/components/ProductCard';
 import { AnimateIn } from '@/components/AnimateIn';
+import { ShopFilterBar } from '@/components/ShopFilterBar';
 import {
   placeholderProducts,
   placeholderSeasonal,
@@ -101,26 +102,25 @@ function ShopContent({
 
       <WaveDivider fill="#faf8f4" />
 
-      {/* ── Goods ────────────────────────────────────────────────────── */}
-      <section className="bg-paper-50 py-20 md:py-28">
-        <div className="container-content flex flex-col gap-14">
-          <AnimateIn>
-            <SectionTitle
-              eyebrow={t('shop.goods.eyebrow')}
-              title={t('shop.goods.title')}
-            />
-          </AnimateIn>
-
-          {hasGoods ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 md:gap-x-10 gap-y-12">
-              {goodsProducts.map((p, i) => (
-                <AnimateIn key={p.id} delay={i * 60}>
-                  <ProductCard product={p} locale={locale} variant="grid" />
-                </AnimateIn>
-              ))}
-            </div>
-          ) : (
-            <>
+      {/* ── Products ─────────────────────────────────────────────────── */}
+      {hasGoods || hasSeasonal ? (
+        /* CMS products: filterable single-page layout */
+        <ShopFilterBar
+          goods={goods ?? []}
+          seasonal={seasonal ?? []}
+          locale={locale}
+        />
+      ) : (
+        /* No CMS data: show placeholder coming-soon layout */
+        <>
+          <section className="bg-paper-50 py-20 md:py-28">
+            <div className="container-content flex flex-col gap-14">
+              <AnimateIn>
+                <SectionTitle
+                  eyebrow={t('shop.goods.eyebrow')}
+                  title={t('shop.goods.title')}
+                />
+              </AnimateIn>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 md:gap-x-10 gap-y-12 opacity-40 pointer-events-none select-none">
                 {goodsProducts.map((p) => (
                   <ProductCard key={p.id} product={p} locale={locale} variant="grid" />
@@ -129,33 +129,19 @@ function ShopContent({
               <p className="text-center text-sm tracking-[0.3em] text-ink/40 -mt-4">
                 {t('shop.comingSoon')}
               </p>
-            </>
-          )}
-        </div>
-      </section>
-
-      <WaveDivider fill="#d5e9f7" />
-
-      {/* ── Seasonal ─────────────────────────────────────────────────── */}
-      <section className="bg-sea-100 py-20 md:py-28">
-        <div className="container-content flex flex-col gap-14">
-          <AnimateIn>
-            <SectionTitle
-              eyebrow={t('shop.seasonal.eyebrow')}
-              title={t('shop.seasonal.title')}
-            />
-          </AnimateIn>
-
-          {hasSeasonal ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 md:gap-x-10 gap-y-12">
-              {seasonalProducts.map((p, i) => (
-                <AnimateIn key={p.id} delay={i * 60}>
-                  <ProductCard product={p} locale={locale} variant="grid" />
-                </AnimateIn>
-              ))}
             </div>
-          ) : (
-            <>
+          </section>
+
+          <WaveDivider fill="#d5e9f7" />
+
+          <section className="bg-sea-100 py-20 md:py-28">
+            <div className="container-content flex flex-col gap-14">
+              <AnimateIn>
+                <SectionTitle
+                  eyebrow={t('shop.seasonal.eyebrow')}
+                  title={t('shop.seasonal.title')}
+                />
+              </AnimateIn>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 md:gap-x-10 gap-y-12 opacity-40 pointer-events-none select-none">
                 {seasonalProducts.map((p) => (
                   <ProductCard key={p.id} product={p} locale={locale} variant="grid" />
@@ -164,10 +150,10 @@ function ShopContent({
               <p className="text-center text-sm tracking-[0.3em] text-ink/40 -mt-4">
                 {t('shop.comingSoon')}
               </p>
-            </>
-          )}
-        </div>
-      </section>
+            </div>
+          </section>
+        </>
+      )}
 
       <WaveDivider fill="#faf8f4" />
 

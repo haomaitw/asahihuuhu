@@ -38,6 +38,7 @@ export function CartDrawer({ open, onClose, locale = 'zh-TW' }: Props) {
   const [pointsToRedeem, setPointsToRedeem] = useState(0)
   const maxPoints = Math.min(customer?.points ?? 0, totalPrice + SHIPPING_FEE - couponDiscount)
 
+  const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -69,6 +70,7 @@ export function CartDrawer({ open, onClose, locale = 'zh-TW' }: Props) {
         setCouponMsg('')
         setCouponDiscount(0)
         setPointsToRedeem(0)
+        setNote('')
       }, 300)
     }
   }, [open])
@@ -115,6 +117,7 @@ export function CartDrawer({ open, onClose, locale = 'zh-TW' }: Props) {
           couponDiscount,
           pointsRedeemed: pointsToRedeem,
           customerId: customer?.id,
+          note: note.trim() || undefined,
         }),
       })
       const data = await res.json()
@@ -390,6 +393,19 @@ export function CartDrawer({ open, onClose, locale = 'zh-TW' }: Props) {
                   </div>
                 </div>
               )}
+
+              {/* Gift / Order Note */}
+              <div className="space-y-2">
+                <h3 className="text-xs uppercase tracking-widest text-ink/40">禮品留言 / 備註</h3>
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  rows={2}
+                  maxLength={200}
+                  placeholder="禮品包裝需求或訂單備註（選填）"
+                  className="w-full resize-none border border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-sea-400 bg-white placeholder:text-ink/30 text-ink"
+                />
+              </div>
 
               {/* Order summary */}
               <div className="bg-white border border-stone-100 rounded-xl p-4 space-y-2">

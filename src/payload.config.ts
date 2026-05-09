@@ -19,6 +19,7 @@ import { Staff } from './collections/Staff';
 import { Coupons } from './collections/Coupons';
 import { PointTransactions } from './collections/PointTransactions';
 import { SiteSettings } from './globals/SiteSettings';
+import { FeatureFlags } from './globals/FeatureFlags';
 import { HomePage } from './globals/HomePage';
 import { AboutPage } from './globals/AboutPage';
 import { ShopPage } from './globals/ShopPage';
@@ -72,7 +73,7 @@ export default buildConfig({
     FAQs, Staff,
   ],
 
-  globals: [SiteSettings, HomePage, AboutPage, ShopPage],
+  globals: [SiteSettings, FeatureFlags, HomePage, AboutPage, ShopPage],
 
   localization: {
     locales: [
