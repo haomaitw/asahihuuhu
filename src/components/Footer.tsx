@@ -110,7 +110,7 @@ export function Footer({ facebookUrl, instagramUrl, copyright }: FooterProps = {
               </nav>
             </div>
 
-            {/* ── Policies column ───────────────────────────────────── */}
+            {/* ── Policies + Service column ─────────────────────────── */}
             <div className="md:col-span-3 space-y-4">
               <p className="font-averia text-[10px] tracking-[0.28em] text-sea-300/40 uppercase">
                 Policies
@@ -125,6 +125,23 @@ export function Footer({ facebookUrl, instagramUrl, copyright }: FooterProps = {
                     {t(item.key)}
                   </Link>
                 ))}
+              </nav>
+              <p className="font-averia text-[10px] tracking-[0.28em] text-sea-300/40 uppercase pt-4">
+                Service
+              </p>
+              <nav className="flex flex-col gap-2">
+                <Link
+                  href="/track"
+                  className="font-sans font-light text-sm tracking-[0.18em] text-white/50 transition-colors duration-200 hover:text-white/90"
+                >
+                  訂單查詢
+                </Link>
+                <Link
+                  href="/account/orders"
+                  className="font-sans font-light text-sm tracking-[0.18em] text-white/50 transition-colors duration-200 hover:text-white/90"
+                >
+                  我的訂單
+                </Link>
               </nav>
             </div>
 
