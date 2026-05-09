@@ -81,11 +81,16 @@ const NAV: NavGroup[] = [
     ],
   },
   {
+    group: '員工管理',
+    items: [
+      { label: '帳號管理', href: '/admin/collections/users', icon: Users },
+    ],
+  },
+  {
     group: '代管商專區',
     superAdminOnly: true,
     items: [
       { label: '功能開關', href: '/admin/globals/feature-flags', icon: Lock, superAdminOnly: true },
-      { label: '帳號管理', href: '/admin/collections/users', icon: Users, superAdminOnly: true },
     ],
   },
 ]

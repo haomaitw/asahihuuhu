@@ -38,13 +38,15 @@ export async function middleware(req: NextRequest) {
     return applySecurityHeaders(NextResponse.next())
   }
 
-  // Check maintenance mode (fetch from Payload API — use internal URL)
+  // Check maintenance mode (fetch from Payload API — always fresh, 2 s timeout)
   try {
     const base =
+      process.env.NEXT_PRIVATE_SERVER_URL ??       // internal URL (non-public)
       process.env.NEXT_PUBLIC_SERVER_URL ??
       `http://localhost:${process.env.PORT ?? 3000}`
     const res = await fetch(`${base}/api/globals/site-settings?depth=0`, {
-      next: { revalidate: 30 },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(2000),
     })
     if (res.ok) {
       const data = await res.json()

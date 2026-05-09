@@ -24,27 +24,33 @@ type AdminUser = {
   id: string | number
   name?: string | null
   email: string
-  role: 'super-admin' | 'admin'
+  role: 'super-admin' | 'admin' | 'staff'
   createdAt?: string
 }
 
 type Props = {
   initialUsers: AdminUser[]
   currentUserEmail: string
+  currentUserRole: 'super-admin' | 'admin' | 'staff'
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Role options (filtered by current user's role) ────────────────────────────
 
-const ROLE_OPTIONS = [
+const ALL_ROLE_OPTIONS = [
   { value: 'super-admin', label: '代管商（異想天開影像）' },
   { value: 'admin',       label: '客戶（朝日夫婦）' },
+  { value: 'staff',       label: '員工' },
 ]
 
+function getRoleOptions(currentRole: string) {
+  if (currentRole === 'super-admin') return ALL_ROLE_OPTIONS
+  return ALL_ROLE_OPTIONS.filter((o) => o.value === 'staff')
+}
+
 function roleBadge(role: string) {
-  if (role === 'super-admin') {
-    return <Badge variant="brand" size="sm">代管商</Badge>
-  }
-  return <Badge variant="neutral" size="sm">客戶</Badge>
+  if (role === 'super-admin') return <Badge variant="brand" size="sm">代管商</Badge>
+  if (role === 'admin') return <Badge variant="neutral" size="sm">客戶</Badge>
+  return <Badge variant="info" size="sm">員工</Badge>
 }
 
 function initials(user: AdminUser) {
@@ -60,21 +66,23 @@ const SELECT_CLS =
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
-export function UsersClient({ initialUsers, currentUserEmail }: Props) {
+export function UsersClient({ initialUsers, currentUserEmail, currentUserRole }: Props) {
   const [users, setUsers] = React.useState<AdminUser[]>(initialUsers)
+  const roleOptions = getRoleOptions(currentUserRole)
+  const defaultRole = currentUserRole === 'super-admin' ? 'admin' : 'staff'
 
   // ── Create dialog state
   const [createOpen, setCreateOpen] = React.useState(false)
   const [createName, setCreateName] = React.useState('')
   const [createEmail, setCreateEmail] = React.useState('')
   const [createPassword, setCreatePassword] = React.useState('')
-  const [createRole, setCreateRole] = React.useState<'super-admin' | 'admin'>('admin')
+  const [createRole, setCreateRole] = React.useState<string>(defaultRole)
   const [createLoading, setCreateLoading] = React.useState(false)
 
   // ── Edit dialog state
   const [editUser, setEditUser] = React.useState<AdminUser | null>(null)
   const [editName, setEditName] = React.useState('')
-  const [editRole, setEditRole] = React.useState<'super-admin' | 'admin'>('admin')
+  const [editRole, setEditRole] = React.useState<string>(defaultRole)
   const [editPassword, setEditPassword] = React.useState('')
   const [editLoading, setEditLoading] = React.useState(false)
 
@@ -82,18 +90,14 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
   const [deleteUser, setDeleteUser] = React.useState<AdminUser | null>(null)
   const [deleteLoading, setDeleteLoading] = React.useState(false)
 
-  // ── Re-fetch helper
+  // ── Re-fetch helper (uses custom endpoint)
   async function refreshUsers() {
     try {
-      const res = await fetch('/api/users?limit=100&sort=-createdAt', {
-        credentials: 'include',
-      })
+      const res = await fetch('/api/admin/users', { credentials: 'include' })
       if (!res.ok) return
       const data = await res.json()
       setUsers(data.docs ?? [])
-    } catch {
-      // silently ignore; the mutation already succeeded
-    }
+    } catch {}
   }
 
   // ── Create submit
@@ -105,7 +109,7 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
     }
     setCreateLoading(true)
     try {
-      const res = await fetch('/api/users', {
+      const res = await fetch('/api/admin/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -118,7 +122,7 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
       })
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
-        toast.error(body?.errors?.[0]?.message ?? '建立失敗，請確認資料')
+        toast.error(body?.error ?? '建立失敗，請確認資料')
         return
       }
       toast.success('帳號已建立')
@@ -126,7 +130,7 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
       setCreateName('')
       setCreateEmail('')
       setCreatePassword('')
-      setCreateRole('admin')
+      setCreateRole(defaultRole)
       await refreshUsers()
     } catch {
       toast.error('建立失敗，請稍後再試')
@@ -153,13 +157,10 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
     }
     setEditLoading(true)
     try {
-      const body: Record<string, unknown> = {
-        name: editName,
-        role: editRole,
-      }
+      const body: Record<string, unknown> = { name: editName, role: editRole }
       if (editPassword) body.password = editPassword
 
-      const res = await fetch(`/api/users/${editUser.id}`, {
+      const res = await fetch(`/api/admin/users/${editUser.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -167,7 +168,7 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        toast.error(data?.errors?.[0]?.message ?? data?.error ?? '更新失敗')
+        toast.error(data?.error ?? '更新失敗')
         return
       }
       toast.success('已更新帳號資料')
@@ -190,13 +191,13 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
     }
     setDeleteLoading(true)
     try {
-      const res = await fetch(`/api/users/${deleteUser.id}`, {
+      const res = await fetch(`/api/admin/users/${deleteUser.id}`, {
         method: 'DELETE',
         credentials: 'include',
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        toast.error(data?.errors?.[0]?.message ?? data?.error ?? '刪除失敗')
+        toast.error(data?.error ?? '刪除失敗')
         return
       }
       toast.success(`已刪除 ${deleteUser.name ?? deleteUser.email} 的帳號`)
@@ -237,6 +238,7 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
           <div className="divide-y divide-adm-border-subtle">
             {users.map((user) => {
               const isSelf = user.email === currentUserEmail
+              const canEdit = currentUserRole === 'super-admin' || user.role === 'staff'
               return (
                 <div key={user.id} className="flex items-center gap-4 px-5 py-4">
                   <Avatar className="h-9 w-9 shrink-0">
@@ -260,27 +262,27 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
                   <div className="flex items-center gap-3 shrink-0">
                     {roleBadge(user.role)}
                     <span className="text-xs text-adm-text-disabled tabular-nums">
-                      {user.createdAt
-                        ? new Date(user.createdAt).toLocaleDateString('zh-TW')
-                        : ''}
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString('zh-TW') : ''}
                     </span>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => openEdit(user)}
-                        className="p-1.5 rounded-adm-md text-adm-text-tertiary hover:bg-adm-bg-base hover:text-adm-text-primary transition-colors"
-                        title="編輯"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        onClick={() => setDeleteUser(user)}
-                        disabled={isSelf}
-                        className="p-1.5 rounded-adm-md text-adm-text-tertiary hover:bg-adm-danger-50 hover:text-adm-danger-600 transition-colors disabled:opacity-30 disabled:pointer-events-none"
-                        title={isSelf ? '無法刪除本帳號' : '刪除'}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
+                    {canEdit && (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => openEdit(user)}
+                          className="p-1.5 rounded-adm-md text-adm-text-tertiary hover:bg-adm-bg-base hover:text-adm-text-primary transition-colors"
+                          title="編輯"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteUser(user)}
+                          disabled={isSelf}
+                          className="p-1.5 rounded-adm-md text-adm-text-tertiary hover:bg-adm-danger-50 hover:text-adm-danger-600 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                          title={isSelf ? '無法刪除本帳號' : '刪除'}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )
@@ -343,10 +345,10 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
                 <select
                   id="create-role"
                   value={createRole}
-                  onChange={(e) => setCreateRole(e.target.value as 'super-admin' | 'admin')}
+                  onChange={(e) => setCreateRole(e.target.value)}
                   className={SELECT_CLS}
                 >
-                  {ROLE_OPTIONS.map((o) => (
+                  {roleOptions.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
                 </select>
@@ -368,7 +370,7 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
       <Dialog open={!!editUser} onOpenChange={(open) => { if (!open) setEditUser(null) }}>
         <DialogContent size="sm">
           <DialogHeader>
-            <DialogTitle>編輯管理員</DialogTitle>
+            <DialogTitle>編輯帳號</DialogTitle>
             <DialogDescription>{editUser?.email}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEdit}>
@@ -380,7 +382,7 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  placeholder="管理員姓名"
+                  placeholder="姓名"
                   className={INPUT_CLS}
                 />
               </div>
@@ -389,10 +391,10 @@ export function UsersClient({ initialUsers, currentUserEmail }: Props) {
                 <select
                   id="edit-role"
                   value={editRole}
-                  onChange={(e) => setEditRole(e.target.value as 'super-admin' | 'admin')}
+                  onChange={(e) => setEditRole(e.target.value)}
                   className={SELECT_CLS}
                 >
-                  {ROLE_OPTIONS.map((o) => (
+                  {roleOptions.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
                 </select>

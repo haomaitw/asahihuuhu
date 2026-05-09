@@ -9,24 +9,44 @@ export const Users: CollectionConfig = {
 
   // Role-based access:
   // super-admin (代管商) → full CRUD on all users + system settings
-  // admin       (客戶)   → can only read & update their own account (no create/delete)
+  // admin       (客戶)   → can read/update own account + manage staff accounts
+  // staff       (員工)   → can only read/update their own account
   access: {
-    create: ({ req }) => req.user?.role === 'super-admin',
+    // Custom endpoint /api/admin/users handles creation with overrideAccess
+    create: ({ req }) => ['super-admin', 'admin'].includes(req.user?.role ?? ''),
     read: ({ req }) => {
       if (!req.user) return false
       if (req.user.role === 'super-admin') return true
-      // Regular admin can only read their own record
+      if (req.user.role === 'admin') {
+        return {
+          or: [
+            { id: { equals: req.user.id } },
+            { role: { equals: 'staff' } },
+          ],
+        }
+      }
       return { id: { equals: req.user.id } }
     },
     update: ({ req }) => {
       if (!req.user) return false
       if (req.user.role === 'super-admin') return true
-      // Regular admin can update their own record only
+      if (req.user.role === 'admin') {
+        return {
+          or: [
+            { id: { equals: req.user.id } },
+            { role: { equals: 'staff' } },
+          ],
+        }
+      }
       return { id: { equals: req.user.id } }
     },
-    delete: ({ req }) => req.user?.role === 'super-admin',
-    // unlock applies to auth-related account locks
-    unlock: ({ req }) => req.user?.role === 'super-admin',
+    delete: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.role === 'super-admin') return true
+      if (req.user.role === 'admin') return { role: { equals: 'staff' } }
+      return false
+    },
+    unlock: ({ req }) => ['super-admin', 'admin'].includes(req.user?.role ?? ''),
   },
 
   fields: [
@@ -42,13 +62,14 @@ export const Users: CollectionConfig = {
       options: [
         { label: '代管商（異想天開影像）', value: 'super-admin' },
         { label: '客戶（朝日夫婦）',       value: 'admin' },
+        { label: '員工',                   value: 'staff' },
       ],
       admin: {
-        description: '代管商：可管理系統設定、帳號管理；客戶：可管理商品、訂單、內容等日常業務',
+        description: '代管商：可管理系統設定、帳號管理；客戶：可管理商品、訂單、內容等日常業務；員工：由客戶分配權限的員工帳號',
       },
-      // Only super-admin can change the role field
+      // Only super-admin can assign super-admin or admin role; admin can assign staff
       access: {
-        update: ({ req }) => req.user?.role === 'super-admin',
+        update: ({ req }) => req.user?.role === 'super-admin' || req.user?.role === 'admin',
       },
     },
   ],

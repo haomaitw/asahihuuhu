@@ -9,7 +9,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const { id } = await params
   const payload = await getAdminPayload()
   try {
-    const order = await payload.findByID({ collection: 'orders', id })
+    const order = await payload.findByID({ collection: 'orders', id, overrideAccess: true })
     return <OrderDetailClient order={order as any} statusLabels={STATUS_LABELS} />
   } catch {
     notFound()
