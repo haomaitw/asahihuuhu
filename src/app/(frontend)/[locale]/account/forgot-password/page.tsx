@@ -1,21 +1,18 @@
 'use client'
-import { useState } from 'react'
+import { use, useState } from 'react'
 import Link from 'next/link'
+import { BrandMark } from '@/components/BrandMark'
 
 export default function ForgotPasswordPage({
   params,
 }: {
   params: Promise<{ locale: string }>
 }) {
-  const [locale, setLocale] = useState('zh-TW')
+  const { locale } = use(params)
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
-
-  if (typeof window !== 'undefined') {
-    params.then((p) => setLocale(p.locale)).catch(() => {})
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,21 +41,27 @@ export default function ForgotPasswordPage({
     <main className="min-h-dvh bg-paper-50 flex items-center justify-center px-4 py-24">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <p className="font-serif text-3xl text-ink tracking-widest mb-2">朝日夫婦</p>
+          <p className="font-sans font-light text-2xl tracking-[0.3em] text-ink mb-2">朝日夫婦</p>
           <p className="text-sm text-ink/50 tracking-wide">重設密碼</p>
         </div>
 
-        <div className="bg-white border border-sand-200 rounded-2xl p-8 shadow-sm">
+        <div className="bg-white/90 backdrop-blur-sm border border-paper-200 rounded-2xl p-8 shadow-sm">
+          <BrandMark variant="black" className="h-8 mb-6 mx-auto" />
           {sent ? (
             <div className="text-center space-y-4">
-              <div className="text-4xl">📧</div>
-              <h2 className="font-serif text-lg text-ink">確認信已寄出</h2>
+              <div className="mx-auto w-14 h-14 rounded-full bg-sea-50 flex items-center justify-center">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-sea-400">
+                  <path d="M22 16.5a2.5 2.5 0 01-2.5 2.5h-15A2.5 2.5 0 012 16.5v-9A2.5 2.5 0 014.5 5h15A2.5 2.5 0 0122 7.5v9z" />
+                  <polyline points="2,7 12,13 22,7" />
+                </svg>
+              </div>
+              <h2 className="font-sans font-light text-lg text-ink">確認信已寄出</h2>
               <p className="text-sm text-ink/60 leading-relaxed">
                 若您的 Email 已在系統中登錄，您將收到一封包含重設密碼連結的郵件，請在 1 小時內完成重設。
               </p>
               <Link
                 href={`/${locale}/account/login`}
-                className="inline-block text-sm text-brand-700 hover:underline mt-2"
+                className="inline-block text-sm text-sea-500 hover:text-sea-400 mt-2"
               >
                 返回登入
               </Link>
@@ -75,7 +78,7 @@ export default function ForgotPasswordPage({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50"
+                  className="w-full border border-paper-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-sea-400 bg-paper-50 transition-colors"
                   placeholder="your@email.com"
                 />
               </div>
@@ -87,7 +90,7 @@ export default function ForgotPasswordPage({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-brand-700 hover:bg-brand-800 disabled:opacity-50 text-white font-serif tracking-widest py-3.5 rounded-xl transition-colors text-sm"
+                className="w-full btn-primary disabled:opacity-50 py-3.5 text-sm tracking-widest"
               >
                 {loading ? '發送中…' : '發送重設信'}
               </button>
@@ -96,7 +99,7 @@ export default function ForgotPasswordPage({
         </div>
 
         <p className="text-center text-sm text-ink/50 mt-6">
-          <Link href={`/${locale}/account/login`} className="text-brand-700 hover:underline">
+          <Link href={`/${locale}/account/login`} className="text-sea-500 hover:text-sea-400">
             ← 返回登入
           </Link>
         </p>

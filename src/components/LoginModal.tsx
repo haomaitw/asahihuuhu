@@ -219,6 +219,18 @@ export function LoginModal() {
                 <input type="password" required value={lPassword} onChange={(e) => setLPassword(e.target.value)}
                   autoComplete="current-password" placeholder="••••••••" className={INPUT} />
               </div>
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeLogin()
+                    router.push('/account/forgot-password')
+                  }}
+                  className="text-xs text-ink/40 hover:text-sea-400 transition-colors"
+                >
+                  忘記密碼？
+                </button>
+              </div>
               <div className="flex-1" />
               <button
                 type="submit"

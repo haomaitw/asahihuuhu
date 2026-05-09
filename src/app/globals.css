@@ -162,6 +162,34 @@ body {
     @apply opacity-100 translate-y-0;
     transition: opacity 0.7s ease-out, transform 0.7s ease-out;
   }
+
+  /* ── Scroll reveal ────────────────────────────────────────────────── */
+  .reveal-up {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  }
+  .reveal-up.revealed { opacity: 1; transform: none; }
+
+  .reveal-fade {
+    opacity: 0;
+    transition: opacity 0.8s ease-out;
+  }
+  .reveal-fade.revealed { opacity: 1; }
+
+  .reveal-left {
+    opacity: 0;
+    transform: translateX(-28px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  }
+  .reveal-left.revealed { opacity: 1; transform: none; }
+
+  .reveal-right {
+    opacity: 0;
+    transform: translateX(28px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  }
+  .reveal-right.revealed { opacity: 1; transform: none; }
 }
 
 /* ─── Marquee keyframe ──────────────────────────────────────────────── */

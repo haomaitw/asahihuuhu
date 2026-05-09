@@ -162,6 +162,40 @@ export const SiteSettings: GlobalConfig = {
         },
       ],
     },
+    // ── 電子郵件設定 ──────────────────────────────────────────────
+    {
+      name: 'emailSettings',
+      type: 'group',
+      label: '電子郵件設定',
+      admin: { description: '系統寄件設定（覆寫環境變數 SMTP_FROM / SMTP_FROM_NAME）' },
+      fields: [
+        {
+          name: 'fromAddress',
+          type: 'email',
+          label: '寄件人 Email',
+          admin: { description: '如：hello@asahihuuhu.com（留空使用環境變數 SMTP_FROM）' },
+        },
+        {
+          name: 'fromName',
+          type: 'text',
+          label: '寄件人名稱',
+          defaultValue: '朝日夫婦',
+          admin: { description: '顯示在收件匣的名稱，如：朝日夫婦' },
+        },
+        {
+          name: 'orderConfirmationEnabled',
+          type: 'checkbox',
+          label: '啟用訂單確認信',
+          defaultValue: true,
+        },
+        {
+          name: 'replyTo',
+          type: 'email',
+          label: '回覆地址',
+          admin: { description: '顧客回覆信件時使用的地址' },
+        },
+      ],
+    },
     // ── 網站 SEO ─────────────────────────────────────────────────
     {
       name: 'seoDescription',

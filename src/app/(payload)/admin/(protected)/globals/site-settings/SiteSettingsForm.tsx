@@ -22,6 +22,7 @@ const TABS = [
   { key: 'basic',   label: '基本資料'     },
   { key: 'hours',   label: '營業時間'     },
   { key: 'tcat',    label: '黑貓出貨設定' },
+  { key: 'email',   label: 'Email 設定'   },
   { key: 'seo',     label: 'SEO'          },
 ] as const
 type TabKey = (typeof TABS)[number]['key']
@@ -36,6 +37,13 @@ type TcatState = {
   distance:        string
 }
 
+type EmailSettingsState = {
+  fromAddress:               string
+  fromName:                  string
+  orderConfirmationEnabled:  boolean
+  replyTo:                   string
+}
+
 type FormState = {
   // non-localized
   phone:           string
@@ -45,6 +53,7 @@ type FormState = {
   facebookUrl:     string
   instagramUrl:    string
   tcat:            TcatState
+  emailSettings:   EmailSettingsState
   // localized
   address:         LocalizedStr
   contact:         LocalizedStr
@@ -76,6 +85,12 @@ function initForm(data?: any): FormState {
       senderAddress:   data?.tcat?.senderAddress    ?? '新北市淡水區中正路233-3號',
       temperature:     data?.tcat?.temperature      ?? '0003',
       distance:        data?.tcat?.distance         ?? '00',
+    },
+    emailSettings: {
+      fromAddress:              data?.emailSettings?.fromAddress              ?? '',
+      fromName:                 data?.emailSettings?.fromName                 ?? '朝日夫婦',
+      orderConfirmationEnabled: data?.emailSettings?.orderConfirmationEnabled ?? true,
+      replyTo:                  data?.emailSettings?.replyTo                  ?? '',
     },
     address:        emptyLocalized(),
     contact:        emptyLocalized(),
@@ -241,6 +256,14 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
               distance:        base.tcat.distance         ?? prev.tcat.distance,
             }
           }
+          if (base.emailSettings) {
+            next.emailSettings = {
+              fromAddress:              base.emailSettings.fromAddress              ?? prev.emailSettings.fromAddress,
+              fromName:                 base.emailSettings.fromName                 ?? prev.emailSettings.fromName,
+              orderConfirmationEnabled: base.emailSettings.orderConfirmationEnabled ?? prev.emailSettings.orderConfirmationEnabled,
+              replyTo:                  base.emailSettings.replyTo                  ?? prev.emailSettings.replyTo,
+            }
+          }
         }
         // localized fields
         for (const { key } of LOCALES) {
@@ -273,6 +296,7 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
         facebookUrl:     form.facebookUrl,
         instagramUrl:    form.instagramUrl,
         tcat:            form.tcat,
+        emailSettings:   form.emailSettings,
       }
 
       // Per-locale POSTs for localized fields
@@ -315,6 +339,9 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
 
   const setTcat = (field: keyof TcatState) =>
     (val: string) => setForm((p) => ({ ...p, tcat: { ...p.tcat, [field]: val } }))
+
+  const setEmail = (field: keyof EmailSettingsState) =>
+    (val: string | boolean) => setForm((p) => ({ ...p, emailSettings: { ...p.emailSettings, [field]: val } }))
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -527,6 +554,48 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
                   { label: '同縣市（01）', value: '01' },
                 ]}
               />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Tab: Email 設定 ──────────────────────────────────────── */}
+      {tab === 'email' && (
+        <Card>
+          <SectionHeader
+            title="電子郵件設定"
+            description="系統寄件設定（覆寫環境變數 SMTP_FROM / SMTP_FROM_NAME）"
+          />
+          <CardContent className="p-5 space-y-4">
+            <Input
+              label="寄件人 Email"
+              value={form.emailSettings.fromAddress}
+              onChange={(e) => setEmail('fromAddress')(e.target.value)}
+              placeholder="hello@asahihuuhu.com"
+            />
+            <Input
+              label="寄件人名稱"
+              value={form.emailSettings.fromName}
+              onChange={(e) => setEmail('fromName')(e.target.value)}
+              placeholder="朝日夫婦"
+            />
+            <Input
+              label="回覆地址"
+              value={form.emailSettings.replyTo}
+              onChange={(e) => setEmail('replyTo')(e.target.value)}
+              placeholder="hello@asahihuuhu.com"
+            />
+            <div className="flex items-center gap-3 pt-1">
+              <input
+                id="orderConfirmationEnabled"
+                type="checkbox"
+                checked={form.emailSettings.orderConfirmationEnabled}
+                onChange={(e) => setEmail('orderConfirmationEnabled')(e.target.checked)}
+                className="h-4 w-4 rounded border-adm-border-default accent-adm-brand-500 cursor-pointer"
+              />
+              <Label htmlFor="orderConfirmationEnabled" className="text-sm text-adm-text-primary cursor-pointer select-none">
+                啟用訂單確認信
+              </Label>
             </div>
           </CardContent>
         </Card>

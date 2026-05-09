@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Package, Star, User, ShoppingBag } from 'lucide-react'
 import { useCustomerStore } from '@/store/customer'
 
 const TIER_LABEL: Record<string, string> = {
@@ -10,7 +11,7 @@ const TIER_LABEL: Record<string, string> = {
   gold: '金卡會員',
 }
 const TIER_COLOR: Record<string, string> = {
-  regular: 'bg-sand-100 text-sand-700',
+  regular: 'bg-sea-50 text-sea-700',
   silver: 'bg-gray-100 text-gray-600',
   gold: 'bg-amber-100 text-amber-700',
 }
@@ -64,14 +65,21 @@ export default function MemberCenterPage({
     router.push(`/${locale}`)
   }
 
+  const quickLinks = [
+    { href: `/${locale}/account/orders`, icon: Package, label: '我的訂單', sub: '查看訂單狀態與出貨追蹤' },
+    { href: `/${locale}/account/points`, icon: Star, label: '點數 & 折扣', sub: `${customer.points} 點可用` },
+    { href: `/${locale}/account/profile`, icon: User, label: '個人資料', sub: '編輯帳號與地址' },
+    { href: `/${locale}/shop`, icon: ShoppingBag, label: '繼續購物', sub: '探索當季刨冰與商品' },
+  ]
+
   return (
     <main className="min-h-dvh bg-paper-50 py-24 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-white border border-sand-200 rounded-2xl p-6 shadow-sm">
+        <div className="bg-white border border-paper-200 rounded-2xl p-6 shadow-sm">
           <div className="flex items-start justify-between">
             <div>
-              <p className="font-serif text-xl text-ink">{customer.name}</p>
+              <p className="font-sans font-light text-xl tracking-wide text-ink">{customer.name}</p>
               <p className="text-sm text-ink/50 mt-0.5">{customer.email}</p>
             </div>
             <span className={`text-xs px-3 py-1 rounded-full font-medium ${TIER_COLOR[tier]}`}>
@@ -80,14 +88,14 @@ export default function MemberCenterPage({
           </div>
 
           {/* Points balance */}
-          <div className="mt-5 bg-brand-50 rounded-xl p-4 flex items-center justify-between">
+          <div className="mt-5 bg-sea-50/60 rounded-xl p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-ink/50 mb-0.5">可用點數</p>
-              <p className="font-serif text-3xl text-brand-700">{customer.points.toLocaleString()}</p>
+              <p className="font-sans font-light text-3xl text-sea-600">{customer.points.toLocaleString()}</p>
             </div>
             <Link
               href={`/${locale}/account/points`}
-              className="text-xs text-brand-700 border border-brand-300 px-3 py-1.5 rounded-lg hover:bg-brand-50 transition-colors"
+              className="text-xs text-sea-600 border border-sea-300 px-3 py-1.5 rounded-lg hover:bg-sea-50 transition-colors"
             >
               查看明細
             </Link>
@@ -100,9 +108,9 @@ export default function MemberCenterPage({
                 <span>累計消費 NT${customer.totalSpent.toLocaleString()}</span>
                 <span>距離{nextTier.label} NT${Math.max(0, nextTier.target - customer.totalSpent).toLocaleString()}</span>
               </div>
-              <div className="h-1.5 bg-sand-100 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-paper-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-brand-500 rounded-full transition-all"
+                  className="h-full bg-sea-400 rounded-full transition-all"
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
@@ -112,18 +120,13 @@ export default function MemberCenterPage({
 
         {/* Quick links */}
         <div className="grid grid-cols-2 gap-4">
-          {[
-            { href: `/${locale}/account/orders`, icon: '📦', label: '我的訂單', sub: '查看訂單狀態與出貨追蹤' },
-            { href: `/${locale}/account/points`, icon: '⭐', label: '點數 & 折扣', sub: `${customer.points} 點可用` },
-            { href: `/${locale}/account/profile`, icon: '👤', label: '個人資料', sub: '編輯帳號與地址' },
-            { href: `/${locale}/shop`, icon: '🍧', label: '繼續購物', sub: '探索當季刨冰與商品' },
-          ].map((item) => (
+          {quickLinks.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="bg-white border border-sand-200 rounded-2xl p-5 hover:border-brand-300 hover:shadow-sm transition-all"
+              className="bg-white border border-paper-200 rounded-2xl p-5 hover:border-sea-300 hover:shadow-sm transition-all"
             >
-              <span className="text-2xl">{item.icon}</span>
+              <item.icon size={22} className="text-sea-400" />
               <p className="font-medium text-sm text-ink mt-2">{item.label}</p>
               <p className="text-xs text-ink/40 mt-0.5">{item.sub}</p>
             </Link>

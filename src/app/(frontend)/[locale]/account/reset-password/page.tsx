@@ -1,7 +1,8 @@
 'use client'
-import { useState, useEffect, Suspense } from 'react'
+import { use, useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { BrandMark } from '@/components/BrandMark'
 
 function ResetPasswordForm({ locale }: { locale: string }) {
   const router = useRouter()
@@ -45,18 +46,29 @@ function ResetPasswordForm({ locale }: { locale: string }) {
   }
 
   return (
-    <div className="bg-white border border-sand-200 rounded-2xl p-8 shadow-sm">
+    <div className="bg-white/90 backdrop-blur-sm border border-paper-200 rounded-2xl p-8 shadow-sm">
+      <BrandMark variant="black" className="h-8 mb-6 mx-auto" />
       {done ? (
         <div className="text-center space-y-4">
-          <div className="text-4xl">✅</div>
-          <h2 className="font-serif text-lg text-ink">密碼重設成功！</h2>
+          <div className="mx-auto w-14 h-14 rounded-full bg-sea-50 flex items-center justify-center">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-sea-400">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <h2 className="font-sans font-light text-lg text-ink">密碼重設成功！</h2>
           <p className="text-sm text-ink/60">正在為您跳轉至登入頁面…</p>
         </div>
       ) : !token ? (
         <div className="text-center space-y-4">
-          <div className="text-4xl">⚠️</div>
+          <div className="mx-auto w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-500">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </div>
           <p className="text-sm text-red-500">{error}</p>
-          <Link href={`/${locale}/account/forgot-password`} className="text-sm text-brand-700 hover:underline">
+          <Link href={`/${locale}/account/forgot-password`} className="text-sm text-sea-500 hover:text-sea-400">
             重新申請重設密碼
           </Link>
         </div>
@@ -69,7 +81,7 @@ function ResetPasswordForm({ locale }: { locale: string }) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50"
+              className="w-full border border-paper-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-sea-400 bg-paper-50 transition-colors"
               placeholder="至少 8 個字元"
             />
           </div>
@@ -80,7 +92,7 @@ function ResetPasswordForm({ locale }: { locale: string }) {
               required
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50"
+              className="w-full border border-paper-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-sea-400 bg-paper-50 transition-colors"
               placeholder="再次輸入密碼"
             />
           </div>
@@ -92,7 +104,7 @@ function ResetPasswordForm({ locale }: { locale: string }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-brand-700 hover:bg-brand-800 disabled:opacity-50 text-white font-serif tracking-widest py-3.5 rounded-xl transition-colors text-sm"
+            className="w-full btn-primary disabled:opacity-50 py-3.5 text-sm tracking-widest"
           >
             {loading ? '重設中…' : '重設密碼'}
           </button>
@@ -107,23 +119,20 @@ export default function ResetPasswordPage({
 }: {
   params: Promise<{ locale: string }>
 }) {
-  const [locale, setLocale] = useState('zh-TW')
-  if (typeof window !== 'undefined') {
-    params.then((p) => setLocale(p.locale)).catch(() => {})
-  }
+  const { locale } = use(params)
 
   return (
     <main className="min-h-dvh bg-paper-50 flex items-center justify-center px-4 py-24">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <p className="font-serif text-3xl text-ink tracking-widest mb-2">朝日夫婦</p>
+          <p className="font-sans font-light text-2xl tracking-[0.3em] text-ink mb-2">朝日夫婦</p>
           <p className="text-sm text-ink/50 tracking-wide">設定新密碼</p>
         </div>
         <Suspense fallback={<div className="text-center text-ink/40 text-sm">載入中…</div>}>
           <ResetPasswordForm locale={locale} />
         </Suspense>
         <p className="text-center text-sm text-ink/50 mt-6">
-          <Link href={`/${locale}/account/login`} className="text-brand-700 hover:underline">
+          <Link href={`/${locale}/account/login`} className="text-sea-500 hover:text-sea-400">
             ← 返回登入
           </Link>
         </p>

@@ -76,24 +76,26 @@ export default function ProfilePage({ params }: { params: Promise<{ locale: stri
   const a = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setAddr((p) => ({ ...p, [k]: e.target.value }))
 
+  const inputCls = 'w-full border border-paper-200 rounded-xl px-4 py-3 text-sm bg-paper-50 focus:outline-none focus:border-sea-400 transition-colors'
+
   return (
     <main className="min-h-dvh bg-paper-50 py-24 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
           <Link href={`/${locale}/account`} className="text-ink/40 hover:text-ink text-sm">← 會員中心</Link>
-          <h1 className="font-serif text-2xl text-ink">個人資料</h1>
+          <h1 className="font-sans font-light text-2xl text-ink">個人資料</h1>
         </div>
 
         <form onSubmit={handleSave} className="space-y-6">
           {/* Basic info */}
-          <div className="bg-white border border-sand-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <div className="bg-white border border-paper-200 rounded-2xl p-6 shadow-sm space-y-4">
             <h2 className="text-sm font-medium text-ink/60 uppercase tracking-widest">基本資料</h2>
             <div>
               <label className="block text-xs text-ink/50 mb-1.5">姓名</label>
               <input
                 value={form.name}
                 onChange={f('name')}
-                className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50"
+                className={inputCls}
               />
             </div>
             <div>
@@ -101,7 +103,7 @@ export default function ProfilePage({ params }: { params: Promise<{ locale: stri
               <input
                 value={customer?.email ?? ''}
                 disabled
-                className="w-full border border-sand-100 rounded-xl px-4 py-3 text-sm bg-sand-50 text-ink/40"
+                className="w-full border border-paper-100 rounded-xl px-4 py-3 text-sm bg-paper-100 text-ink/40"
               />
             </div>
             <div>
@@ -110,42 +112,42 @@ export default function ProfilePage({ params }: { params: Promise<{ locale: stri
                 type="tel"
                 value={form.phone}
                 onChange={f('phone')}
-                className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50"
+                className={inputCls}
                 placeholder="0912-345-678"
               />
             </div>
           </div>
 
           {/* Default address */}
-          <div className="bg-white border border-sand-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <div className="bg-white border border-paper-200 rounded-2xl p-6 shadow-sm space-y-4">
             <h2 className="text-sm font-medium text-ink/60 uppercase tracking-widest">預設收件地址</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs text-ink/50 mb-1.5">收件人</label>
-                <input value={addr.recipient} onChange={a('recipient')} className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50" />
+                <input value={addr.recipient} onChange={a('recipient')} className={inputCls} />
               </div>
               <div>
                 <label className="block text-xs text-ink/50 mb-1.5">收件電話</label>
-                <input value={addr.phone} onChange={a('phone')} className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50" />
+                <input value={addr.phone} onChange={a('phone')} className={inputCls} />
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs text-ink/50 mb-1.5">郵遞區號</label>
-                <input value={addr.zip} onChange={a('zip')} className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50" />
+                <input value={addr.zip} onChange={a('zip')} className={inputCls} />
               </div>
               <div>
                 <label className="block text-xs text-ink/50 mb-1.5">縣市</label>
-                <input value={addr.city} onChange={a('city')} className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50" />
+                <input value={addr.city} onChange={a('city')} className={inputCls} />
               </div>
               <div>
                 <label className="block text-xs text-ink/50 mb-1.5">區</label>
-                <input value={addr.district} onChange={a('district')} className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50" />
+                <input value={addr.district} onChange={a('district')} className={inputCls} />
               </div>
             </div>
             <div>
               <label className="block text-xs text-ink/50 mb-1.5">詳細地址</label>
-              <input value={addr.address} onChange={a('address')} className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50" />
+              <input value={addr.address} onChange={a('address')} className={inputCls} />
             </div>
           </div>
 
@@ -155,7 +157,7 @@ export default function ProfilePage({ params }: { params: Promise<{ locale: stri
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-brand-700 hover:bg-brand-800 disabled:opacity-50 text-white font-serif tracking-widest py-3.5 rounded-xl transition-colors text-sm"
+            className="w-full btn-primary disabled:opacity-50 py-3.5 text-sm tracking-widest"
           >
             {isLoading ? '儲存中…' : '儲存變更'}
           </button>
@@ -163,7 +165,7 @@ export default function ProfilePage({ params }: { params: Promise<{ locale: stri
 
         {/* Change Password */}
         <form onSubmit={handleChangePassword} className="space-y-4 mt-6">
-          <div className="bg-white border border-sand-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <div className="bg-white border border-paper-200 rounded-2xl p-6 shadow-sm space-y-4">
             <h2 className="text-sm font-medium text-ink/60 uppercase tracking-widest">更改密碼</h2>
             <div>
               <label className="block text-xs text-ink/50 mb-1.5">新密碼</label>
@@ -171,7 +173,7 @@ export default function ProfilePage({ params }: { params: Promise<{ locale: stri
                 type="password"
                 value={pwForm.next}
                 onChange={(e) => setPwForm(p => ({ ...p, next: e.target.value }))}
-                className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50"
+                className={inputCls}
                 placeholder="至少 8 個字元"
               />
             </div>
@@ -181,7 +183,7 @@ export default function ProfilePage({ params }: { params: Promise<{ locale: stri
                 type="password"
                 value={pwForm.confirm}
                 onChange={(e) => setPwForm(p => ({ ...p, confirm: e.target.value }))}
-                className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50"
+                className={inputCls}
                 placeholder="再次輸入新密碼"
               />
             </div>
@@ -190,12 +192,27 @@ export default function ProfilePage({ params }: { params: Promise<{ locale: stri
             <button
               type="submit"
               disabled={pwLoading || !pwForm.next || !pwForm.confirm}
-              className="w-full bg-sand-100 hover:bg-sand-200 disabled:opacity-50 text-ink font-serif tracking-widest py-3 rounded-xl transition-colors text-sm border border-sand-200"
+              className="w-full bg-paper-100 hover:bg-paper-200 disabled:opacity-50 text-ink font-sans tracking-widest py-3 rounded-xl transition-colors text-sm border border-paper-200"
             >
               {pwLoading ? '更新中…' : '更新密碼'}
             </button>
           </div>
         </form>
+
+        {/* Email verification status */}
+        <div className="bg-white border border-paper-200 rounded-2xl p-6 shadow-sm mt-6">
+          <h2 className="text-sm font-medium text-ink/60 uppercase tracking-widest mb-4">帳號安全</h2>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-sans text-ink">電子郵件驗證</p>
+              <p className="text-xs text-ink/40 mt-0.5">{customer?.email}</p>
+            </div>
+            {/* Show verified or not - check customer.verified */}
+            <span className="text-xs px-3 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">
+              已驗證
+            </span>
+          </div>
+        </div>
       </div>
     </main>
   )

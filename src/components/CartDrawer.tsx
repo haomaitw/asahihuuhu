@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { useCartStore } from '@/store/cart'
 import { useCustomerStore } from '@/store/customer'
+import { useModalStore } from '@/store/modal'
 
 type Props = { open: boolean; onClose: () => void; locale?: string }
 
@@ -245,6 +246,23 @@ export function CartDrawer({ open, onClose, locale = 'zh-TW' }: Props) {
         {step === 'checkout' && (
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
+
+              {/* Guest/member banner */}
+              {!customer && (
+                <div className="flex items-center justify-between bg-sea-50 border border-sea-200 rounded-xl px-4 py-3">
+                  <div>
+                    <p className="text-sm font-sans text-ink/80">以訪客身份結帳</p>
+                    <p className="text-xs text-ink/45 mt-0.5">訂單完成後可憑 Email 查詢</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => useModalStore.getState().openLogin()}
+                    className="text-xs text-sea-500 hover:text-sea-400 font-sans underline-offset-2 hover:underline shrink-0 ml-3"
+                  >
+                    會員登入
+                  </button>
+                </div>
+              )}
 
               {/* Contact info */}
               <div className="space-y-3">

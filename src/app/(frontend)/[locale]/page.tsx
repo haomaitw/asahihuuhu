@@ -8,6 +8,7 @@ import { ProductCarousel } from '@/components/ProductCarousel';
 import { NewsItem } from '@/components/NewsItem';
 import { AnimateIn } from '@/components/AnimateIn';
 import { SeeMoreLink } from '@/components/SeeMoreLink';
+import { Reveal } from '@/components/Reveal';
 import {
   placeholderProducts,
   placeholderSeasonal,
@@ -116,66 +117,72 @@ function HomeContent({
       <WaveDivider fill="#faf8f4" />
 
       {/* ── Products ─────────────────────────────────────────────────── */}
-      <section className="bg-paper-50 py-20 md:py-28 overflow-x-hidden">
-        <div className="container-content flex flex-col items-center gap-14">
-          <AnimateIn>
-            <SectionTitle
-              eyebrow={t('home.products.eyebrow')}
-              title={t('home.products.title')}
-            />
-          </AnimateIn>
-          <AnimateIn delay={100} className="w-full">
-            <ProductCarousel products={products} locale={locale} />
-          </AnimateIn>
-          <AnimateIn delay={200}>
-            <SeeMoreLink href="/shop" label={t('common.seeMore')} />
-          </AnimateIn>
-        </div>
-      </section>
+      <Reveal direction="up">
+        <section className="bg-paper-50 py-20 md:py-28 overflow-x-hidden">
+          <div className="container-content flex flex-col items-center gap-14">
+            <AnimateIn>
+              <SectionTitle
+                eyebrow={t('home.products.eyebrow')}
+                title={t('home.products.title')}
+              />
+            </AnimateIn>
+            <AnimateIn delay={100} className="w-full">
+              <ProductCarousel products={products} locale={locale} />
+            </AnimateIn>
+            <AnimateIn delay={200}>
+              <SeeMoreLink href="/shop" label={t('common.seeMore')} />
+            </AnimateIn>
+          </div>
+        </section>
+      </Reveal>
 
       <WaveDivider fill="#d5e9f7" />
 
       {/* ── Seasonal / Limited ───────────────────────────────────────── */}
-      <section className="bg-sea-100 py-20 md:py-28 overflow-x-hidden">
-        <div className="container-content flex flex-col items-center gap-14">
-          <AnimateIn>
-            <SectionTitle
-              eyebrow={t('home.limited.eyebrow')}
-              title={t('home.limited.title')}
-            />
-          </AnimateIn>
-          <AnimateIn delay={100} className="w-full">
-            <ProductCarousel products={seasonalProducts} locale={locale} />
-          </AnimateIn>
-          <AnimateIn delay={200}>
-            <SeeMoreLink href="/shop" label={t('common.seeMore')} />
-          </AnimateIn>
-        </div>
-      </section>
+      <Reveal direction="up" delay={80}>
+        <section className="bg-sea-100 py-20 md:py-28 overflow-x-hidden">
+          <div className="container-content flex flex-col items-center gap-14">
+            <AnimateIn>
+              <SectionTitle
+                eyebrow={t('home.limited.eyebrow')}
+                title={t('home.limited.title')}
+              />
+            </AnimateIn>
+            <AnimateIn delay={100} className="w-full">
+              <ProductCarousel products={seasonalProducts} locale={locale} />
+            </AnimateIn>
+            <AnimateIn delay={200}>
+              <SeeMoreLink href="/shop" label={t('common.seeMore')} />
+            </AnimateIn>
+          </div>
+        </section>
+      </Reveal>
 
       <WaveDivider fill="#faf8f4" />
 
       {/* ── News ─────────────────────────────────────────────────────── */}
-      <section className="bg-paper-50 py-20 md:py-28">
-        <div className="container-content flex flex-col items-center gap-14">
-          <AnimateIn>
-            <SectionTitle
-              eyebrow={t('home.news.eyebrow')}
-              title={t('home.news.title')}
-            />
-          </AnimateIn>
-          <div className="w-full max-w-2xl">
-            {news.map((entry, i) => (
-              <AnimateIn key={entry.slug} delay={i * 90}>
-                <NewsItem entry={entry} />
-              </AnimateIn>
-            ))}
+      <Reveal direction="up" delay={80}>
+        <section className="bg-paper-50 py-20 md:py-28">
+          <div className="container-content flex flex-col items-center gap-14">
+            <AnimateIn>
+              <SectionTitle
+                eyebrow={t('home.news.eyebrow')}
+                title={t('home.news.title')}
+              />
+            </AnimateIn>
+            <div className="w-full max-w-2xl">
+              {news.map((entry, i) => (
+                <AnimateIn key={entry.slug} delay={i * 90}>
+                  <NewsItem entry={entry} />
+                </AnimateIn>
+              ))}
+            </div>
+            <AnimateIn delay={300}>
+              <SeeMoreLink href="/news" label={t('common.seeMore')} />
+            </AnimateIn>
           </div>
-          <AnimateIn delay={300}>
-            <SeeMoreLink href="/news" label={t('common.seeMore')} />
-          </AnimateIn>
-        </div>
-      </section>
+        </section>
+      </Reveal>
     </>
   );
 }
