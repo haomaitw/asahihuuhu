@@ -119,3 +119,12 @@ export async function getShopPageGlobal(locale: string) {
     return null;
   }
 }
+
+export async function getFeatureFlags() {
+  try {
+    const payload = await getPayloadInstance();
+    return await payload.findGlobal({ slug: 'feature-flags' });
+  } catch {
+    return null;
+  }
+}
