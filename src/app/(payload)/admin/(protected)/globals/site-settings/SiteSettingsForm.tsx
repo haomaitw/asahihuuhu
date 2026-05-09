@@ -312,7 +312,7 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
   const handleSave = async () => {
     setLoading(true)
     try {
-      // Non-localized fields + tcat — send once (locale doesn't matter for these)
+      // Non-localized fields + tcat — spread into each per-locale request
       const nonLocalizedBody = {
         maintenanceMode: { enabled: form.maintenanceMode.enabled },
         phone:           form.phone,
@@ -322,7 +322,6 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
         facebookUrl:     form.facebookUrl,
         instagramUrl:    form.instagramUrl,
         tcat:            form.tcat,
-        emailSettings:   form.emailSettings,
       }
 
       // Per-locale POSTs for localized fields
@@ -334,6 +333,12 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
             credentials: 'include',
             body: JSON.stringify({
               ...nonLocalizedBody,
+              // Strip empty strings from email-type fields to avoid Payload validation errors
+              emailSettings: {
+                ...form.emailSettings,
+                fromAddress: form.emailSettings.fromAddress || undefined,
+                replyTo:     form.emailSettings.replyTo     || undefined,
+              },
               maintenanceMode: {
                 enabled: form.maintenanceMode.enabled,
                 message: form.maintenanceMode.message[key],
@@ -345,15 +350,19 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
               hoursClosed:    form.hoursClosed[key],
               seoDescription: form.seoDescription[key],
             }),
-          }).then((r) => {
-            if (!r.ok) throw new Error(`HTTP ${r.status}`)
+          }).then(async (r) => {
+            if (!r.ok) {
+              const body = await r.json().catch(() => ({}))
+              const msg = body?.errors?.[0]?.message ?? body?.message ?? `HTTP ${r.status}`
+              throw new Error(msg)
+            }
           }),
         ),
       )
 
       toast.success('設定已儲存')
-    } catch {
-      toast.error('儲存失敗，請再試一次')
+    } catch (err: any) {
+      toast.error(`儲存失敗：${err?.message ?? '請稍後再試'}`)
     } finally {
       setLoading(false)
     }
