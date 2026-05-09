@@ -70,7 +70,7 @@ body{margin:0;padding:0;background:#f0f4f8;font-family:'Helvetica Neue',Helvetic
     </div>
     <p style="color:#555;">點數可在下次消費時折抵，1 點 = NT$1。</p>
     <p style="text-align:center;margin-top:24px;">
-      <a class="btn" href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://asahihuuhu.zeabur.app'}/zh-TW/shop">立即選購</a>
+      <a class="btn" href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/zh-TW/shop">立即選購</a>
     </p>
   </div>
   <div class="footer">
@@ -93,7 +93,7 @@ body{margin:0;padding:0;background:#f0f4f8;font-family:'Helvetica Neue',Helvetic
     verify: {
       generateEmailHTML: async (args?: { req?: any; token?: string; user?: any }) => {
         const { token, user } = args ?? {}
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://asahihuuhu.zeabur.app'
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
         const verifyUrl = `${siteUrl}/api/customers/verify?token=${token ?? ''}`
         const name = (user?.name as string) ?? '新朋友'
         return `<!DOCTYPE html>
@@ -149,7 +149,7 @@ body{margin:0;padding:0;background:#f0f4f8;font-family:'Helvetica Neue',Helvetic
     forgotPassword: {
       generateEmailHTML: async (args?: { req?: any; token?: string; user?: any }) => {
         const { token, user } = args ?? {}
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://asahihuuhu.zeabur.app'
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
         const resetUrl = `${siteUrl}/zh-TW/account/reset-password?token=${token ?? ''}`
         const name = (user?.name as string) ?? '顧客'
         return `<!DOCTYPE html>
