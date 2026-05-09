@@ -7,6 +7,8 @@ import { NewsItem } from '@/components/NewsItem';
 import { placeholderNews } from '@/lib/placeholder-data';
 import { getNewsItems } from '@/lib/cms';
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({
   params,
 }: {
