@@ -115,6 +115,21 @@ export function MobileMenu({ facebookUrl, instagramUrl }: MobileMenuProps = {}) 
                 {t(item.key)}
               </Link>
             ))}
+            {/* Order tracking — smaller, subtle */}
+            <Link
+              href="/track"
+              className="font-sans font-light text-sm tracking-[0.35em] text-ink/40 transition-colors duration-200 hover:text-sea-500 mt-2"
+              style={{
+                transitionProperty: 'opacity, transform, color',
+                transitionDuration: '0.45s',
+                transitionTimingFunction: 'ease',
+                transitionDelay: open ? `${180 + navItems.length * 65}ms` : '0ms',
+                opacity: open ? 1 : 0,
+                transform: open ? 'translateY(0)' : 'translateY(14px)',
+              }}
+            >
+              訂單查詢
+            </Link>
           </nav>
 
           {/* ── Bottom: social + lang ─────────────────────────────── */}

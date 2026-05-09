@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { ShoppingBag, Truck, Snowflake, ChevronLeft, CheckCircle2 } from 'lucide-react'
+import { ShoppingBag, Truck, Snowflake, ChevronLeft, CheckCircle2, Bell } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import type { CmsProduct, CmsProductDetail } from '@/lib/cms-products'
 import { RichText } from '@/components/RichText'
@@ -23,11 +23,31 @@ export function ProductDetailClient({ product, locale, relatedProducts = [] }: P
   const [qty, setQty] = useState(1)
   const [justAdded, setJustAdded] = useState(false)
 
+  // Sticky bar state — show when main CTA scrolls out of view
+  const [showSticky, setShowSticky] = useState(false)
+  const ctaRef = useRef<HTMLDivElement>(null)
+
+  // Out-of-stock notify state
+  const [notifyEmail, setNotifyEmail] = useState('')
+  const [notifySent, setNotifySent] = useState(false)
+  const [notifyLoading, setNotifyLoading] = useState(false)
+
   const cartItem = items.find((i) => i.id === product.id)
   const cartQty = cartItem?.quantity ?? 0
 
   const inStock = !product.trackStock || product.stock > 0
   const lowStock = product.trackStock && product.stock > 0 && product.stock <= 3
+
+  useEffect(() => {
+    const el = ctaRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowSticky(!entry.isIntersecting),
+      { threshold: 0, rootMargin: '-80px 0px 0px 0px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const handleAddToCart = () => {
     for (let i = 0; i < qty; i++) {
@@ -40,6 +60,24 @@ export function ProductDetailClient({ product, locale, relatedProducts = [] }: P
     }
     setJustAdded(true)
     setTimeout(() => setJustAdded(false), 2000)
+  }
+
+  async function handleNotify(e: React.FormEvent) {
+    e.preventDefault()
+    if (!notifyEmail.trim()) return
+    setNotifyLoading(true)
+    try {
+      await fetch('/api/notify-stock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: product.id, productName: product.name, email: notifyEmail }),
+      })
+      setNotifySent(true)
+    } catch {
+      // silent — best effort
+    } finally {
+      setNotifyLoading(false)
+    }
   }
 
   const discount = product.comparePrice && product.comparePrice > product.price
@@ -149,41 +187,77 @@ export function ProductDetailClient({ product, locale, relatedProducts = [] }: P
             </div>
 
             {/* Quantity + CTA */}
-            {inStock && (
-              <div className="flex items-center gap-3">
-                {/* Qty stepper */}
-                <div className="flex items-center border border-paper-200 rounded-xl overflow-hidden bg-white">
+            <div ref={ctaRef}>
+              {inStock ? (
+                <div className="flex items-center gap-3">
+                  {/* Qty stepper */}
+                  <div className="flex items-center border border-paper-200 rounded-xl overflow-hidden bg-white">
+                    <button
+                      onClick={() => setQty(q => Math.max(1, q - 1))}
+                      className="px-4 py-3 text-ink/60 hover:text-ink hover:bg-paper-50 transition-colors text-lg leading-none"
+                      aria-label="減少數量"
+                    >
+                      −
+                    </button>
+                    <span className="w-10 text-center text-sm font-medium">{qty}</span>
+                    <button
+                      onClick={() => setQty(q => product.trackStock ? Math.min(product.stock, q + 1) : q + 1)}
+                      className="px-4 py-3 text-ink/60 hover:text-ink hover:bg-paper-50 transition-colors text-lg leading-none"
+                      aria-label="增加數量"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {/* Add to cart */}
                   <button
-                    onClick={() => setQty(q => Math.max(1, q - 1))}
-                    className="px-4 py-3 text-ink/60 hover:text-ink hover:bg-paper-50 transition-colors text-lg leading-none"
-                    aria-label="減少數量"
+                    onClick={handleAddToCart}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl text-sm tracking-widest font-medium transition-all duration-200 ${
+                      justAdded
+                        ? 'bg-green-600 text-white'
+                        : 'btn-primary'
+                    }`}
                   >
-                    −
-                  </button>
-                  <span className="w-10 text-center text-sm font-medium">{qty}</span>
-                  <button
-                    onClick={() => setQty(q => product.trackStock ? Math.min(product.stock, q + 1) : q + 1)}
-                    className="px-4 py-3 text-ink/60 hover:text-ink hover:bg-paper-50 transition-colors text-lg leading-none"
-                    aria-label="增加數量"
-                  >
-                    +
+                    <ShoppingBag className="h-4 w-4" />
+                    {justAdded ? '已加入購物車 ✓' : t('cart.addToCart')}
                   </button>
                 </div>
-
-                {/* Add to cart */}
-                <button
-                  onClick={handleAddToCart}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl text-sm tracking-widest font-medium transition-all duration-200 ${
-                    justAdded
-                      ? 'bg-green-600 text-white'
-                      : 'btn-primary'
-                  }`}
-                >
-                  <ShoppingBag className="h-4 w-4" />
-                  {justAdded ? '已加入購物車 ✓' : t('cart.addToCart')}
-                </button>
-              </div>
-            )}
+              ) : (
+                /* Out-of-stock: notify form */
+                <div className="rounded-2xl bg-white border border-paper-100 p-5">
+                  {notifySent ? (
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <CheckCircle2 className="h-4 w-4 shrink-0" />
+                      已登記！補貨時我們將發 Email 通知你。
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Bell className="h-4 w-4 text-sea-400 shrink-0" />
+                        <p className="text-sm text-ink/70">補貨到貨通知</p>
+                      </div>
+                      <form onSubmit={handleNotify} className="flex gap-2">
+                        <input
+                          type="email"
+                          value={notifyEmail}
+                          onChange={e => setNotifyEmail(e.target.value)}
+                          placeholder="輸入你的 Email"
+                          required
+                          className="flex-1 rounded-xl border border-paper-200 bg-paper-50 px-3 py-2.5 text-sm text-ink placeholder-ink/30 focus:border-sea-300 focus:outline-none focus:ring-2 focus:ring-sea-100 transition-colors"
+                        />
+                        <button
+                          type="submit"
+                          disabled={notifyLoading}
+                          className="shrink-0 btn-primary px-4 py-2.5 text-xs rounded-xl disabled:opacity-60"
+                        >
+                          {notifyLoading ? '…' : '通知我'}
+                        </button>
+                      </form>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Cart indicator */}
             {cartQty > 0 && (
@@ -261,6 +335,37 @@ export function ProductDetailClient({ product, locale, relatedProducts = [] }: P
           </div>
         )}
       </div>
+
+      {/* ── Sticky mobile bottom bar ─────────────────────────────── */}
+      {inStock && (
+        <div
+          className={`fixed bottom-0 inset-x-0 z-40 lg:hidden bg-white/95 backdrop-blur-sm border-t border-paper-100 shadow-lg transition-transform duration-300 ${
+            showSticky ? 'translate-y-0' : 'translate-y-full'
+          }`}
+        >
+          <div className="flex items-center gap-3 px-4 py-3 pb-safe">
+            {/* Thumb */}
+            <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-paper-100 shrink-0">
+              <Image src={product.image} alt={product.name} fill sizes="44px" className="object-cover" />
+            </div>
+            {/* Name + price */}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-ink truncate">{product.name}</p>
+              <p className="text-xs text-sea-700 font-medium">NT$ {product.price.toLocaleString()}</p>
+            </div>
+            {/* Add button */}
+            <button
+              onClick={handleAddToCart}
+              className={`shrink-0 flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-medium tracking-widest transition-all duration-200 ${
+                justAdded ? 'bg-green-600 text-white' : 'btn-primary'
+              }`}
+            >
+              <ShoppingBag className="h-3.5 w-3.5" />
+              {justAdded ? '已加入 ✓' : '加入購物車'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

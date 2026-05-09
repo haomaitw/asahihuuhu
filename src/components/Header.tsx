@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { Facebook, Instagram } from 'lucide-react'
+import { Facebook, Instagram, Package } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { LangSwitcher } from './LangSwitcher'
 import { MobileMenu } from './MobileMenu'
@@ -105,6 +105,18 @@ export function Header({ facebookUrl, instagramUrl }: HeaderProps = {}) {
           <div className="hidden md:block">
             <LangSwitcher variant="header" />
           </div>
+          {/* Order tracking shortcut */}
+          <Link
+            href="/track"
+            aria-label="訂單查詢"
+            className={`hidden md:flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300 ${
+              hasPaper
+                ? 'text-ink/60 hover:text-sea-500 hover:bg-sea-50'
+                : 'text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <Package size={16} />
+          </Link>
           <HeaderAccountButton />
           <CartButton />
           <MobileMenu facebookUrl={facebookUrl} instagramUrl={instagramUrl} />
