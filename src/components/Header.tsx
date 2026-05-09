@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
+import { usePathname } from 'next/navigation'
 import { Facebook, Instagram, Package } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { LangSwitcher } from './LangSwitcher'
@@ -9,6 +10,9 @@ import { MobileMenu } from './MobileMenu'
 import { CartButton } from './CartButton'
 import { HeaderAccountButton } from './HeaderAccountButton'
 import { BrandMark } from './BrandMark'
+
+// Pages with light backgrounds that need dark nav text even at the top
+const LIGHT_BG_PATHS = ['/privacy', '/terms', '/returns', '/faq', '/track', '/account', '/shop', '/news', '/line-up', '/about']
 
 const navItems = [
   { key: 'news',   href: '/news'    },
@@ -25,6 +29,7 @@ type HeaderProps = {
 
 export function Header({ facebookUrl, instagramUrl }: HeaderProps = {}) {
   const t = useTranslations('nav')
+  const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -34,8 +39,11 @@ export function Header({ facebookUrl, instagramUrl }: HeaderProps = {}) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  // Pages without a dark hero always need ink-coloured nav
+  const isLightPage = LIGHT_BG_PATHS.some(p => pathname.includes(p))
+
   // Header bg: paper when scrolled, transparent at top (all pages)
-  const hasPaper = scrolled
+  const hasPaper = scrolled || isLightPage
 
   // Logo & text colour: white on transparent dark-hero, ink on paper bg
   const logoVariant  = hasPaper ? 'black'              : 'white'

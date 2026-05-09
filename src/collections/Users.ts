@@ -16,28 +16,12 @@ export const Users: CollectionConfig = {
     create: ({ req }) => ['super-admin', 'admin'].includes(req.user?.role ?? ''),
     read: ({ req }) => {
       if (!req.user) return false
-      if (req.user.role === 'super-admin') return true
-      if (req.user.role === 'admin') {
-        return {
-          or: [
-            { id: { equals: req.user.id } },
-            { role: { equals: 'staff' } },
-          ],
-        }
-      }
+      if (['super-admin', 'admin'].includes(req.user.role ?? '')) return true
       return { id: { equals: req.user.id } }
     },
     update: ({ req }) => {
       if (!req.user) return false
-      if (req.user.role === 'super-admin') return true
-      if (req.user.role === 'admin') {
-        return {
-          or: [
-            { id: { equals: req.user.id } },
-            { role: { equals: 'staff' } },
-          ],
-        }
-      }
+      if (['super-admin', 'admin'].includes(req.user.role ?? '')) return true
       return { id: { equals: req.user.id } }
     },
     delete: ({ req }) => {
