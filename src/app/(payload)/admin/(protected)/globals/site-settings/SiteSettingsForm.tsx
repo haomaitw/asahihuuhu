@@ -19,11 +19,12 @@ type LocaleKey = (typeof LOCALES)[number]['key']
 type LocalizedStr = Record<LocaleKey, string>
 
 const TABS = [
-  { key: 'basic',   label: '基本資料'     },
-  { key: 'hours',   label: '營業時間'     },
-  { key: 'tcat',    label: '黑貓出貨設定' },
-  { key: 'email',   label: 'Email 設定'   },
-  { key: 'seo',     label: 'SEO'          },
+  { key: 'maintenance', label: '⚠ 維護模式'   },
+  { key: 'basic',       label: '基本資料'     },
+  { key: 'hours',       label: '營業時間'     },
+  { key: 'tcat',        label: '黑貓出貨設定' },
+  { key: 'email',       label: 'Email 設定'   },
+  { key: 'seo',         label: 'SEO'          },
 ] as const
 type TabKey = (typeof TABS)[number]['key']
 
@@ -44,8 +45,14 @@ type EmailSettingsState = {
   replyTo:                   string
 }
 
+type MaintenanceState = {
+  enabled: boolean
+  message: LocalizedStr
+}
+
 type FormState = {
   // non-localized
+  maintenanceMode: MaintenanceState
   phone:           string
   lineId:          string
   googleMapsUrl:   string
@@ -71,6 +78,14 @@ function emptyLocalized(): LocalizedStr {
 
 function initForm(data?: any): FormState {
   return {
+    maintenanceMode: {
+      enabled: data?.maintenanceMode?.enabled ?? false,
+      message: {
+        'zh-TW': data?.maintenanceMode?.message ?? '',
+        en:      '',
+        ja:      '',
+      },
+    },
     phone:           data?.phone           ?? '',
     lineId:          data?.lineId          ?? '',
     googleMapsUrl:   data?.googleMapsUrl   ?? '',
@@ -219,7 +234,7 @@ function LocaleTabs({
 
 export function SiteSettingsForm({ initialData }: { initialData?: any }) {
   const [form, setForm]     = React.useState<FormState>(() => initForm(initialData))
-  const [tab, setTab]       = React.useState<TabKey>('basic')
+  const [tab, setTab]       = React.useState<TabKey>('maintenance')
   const [locale, setLocale] = React.useState<LocaleKey>('zh-TW')
   const [loading, setLoading] = React.useState(false)
 
@@ -239,6 +254,11 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
         // non-localized — take from zh-TW response (same in all)
         const base = results.find((r) => r.key === 'zh-TW')?.data
         if (base) {
+          // Maintenance mode (non-localized enabled flag)
+          next.maintenanceMode = {
+            enabled: base.maintenanceMode?.enabled ?? prev.maintenanceMode.enabled,
+            message: { ...prev.maintenanceMode.message },
+          }
           next.phone           = base.phone           ?? prev.phone
           next.lineId          = base.lineId          ?? prev.lineId
           next.googleMapsUrl   = base.googleMapsUrl   ?? prev.googleMapsUrl
@@ -276,6 +296,11 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
           next.hoursWeekend   = { ...next.hoursWeekend,   [k]: d.hoursWeekend   ?? '' }
           next.hoursClosed    = { ...next.hoursClosed,    [k]: d.hoursClosed    ?? '' }
           next.seoDescription = { ...next.seoDescription, [k]: d.seoDescription ?? '' }
+          // Localized maintenance message
+          next.maintenanceMode.message = {
+            ...next.maintenanceMode.message,
+            [k]: d.maintenanceMode?.message ?? '',
+          }
         }
         return next
       })
@@ -289,6 +314,7 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
     try {
       // Non-localized fields + tcat — send once (locale doesn't matter for these)
       const nonLocalizedBody = {
+        maintenanceMode: { enabled: form.maintenanceMode.enabled },
         phone:           form.phone,
         lineId:          form.lineId,
         googleMapsUrl:   form.googleMapsUrl,
@@ -308,6 +334,10 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
             credentials: 'include',
             body: JSON.stringify({
               ...nonLocalizedBody,
+              maintenanceMode: {
+                enabled: form.maintenanceMode.enabled,
+                message: form.maintenanceMode.message[key],
+              },
               address:        form.address[key],
               contact:        form.contact[key],
               hoursWeekday:   form.hoursWeekday[key],
@@ -373,6 +403,88 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
           </button>
         ))}
       </div>
+
+      {/* ── Tab: 維護模式 ──────────────────────────────────────────── */}
+      {tab === 'maintenance' && (
+        <div className="space-y-4">
+          {/* Status banner */}
+          <div className={cn(
+            'flex items-center gap-3 rounded-xl px-4 py-3 border text-sm font-medium',
+            form.maintenanceMode.enabled
+              ? 'bg-red-50 border-red-200 text-red-700'
+              : 'bg-green-50 border-green-200 text-green-700',
+          )}>
+            <span className={cn(
+              'inline-block h-2.5 w-2.5 rounded-full shrink-0',
+              form.maintenanceMode.enabled ? 'bg-red-500 animate-pulse' : 'bg-green-500',
+            )} />
+            {form.maintenanceMode.enabled
+              ? '⚠ 維護模式已開啟 — 訪客目前無法瀏覽前台'
+              : '✓ 前台正常運作中'}
+          </div>
+
+          <Card>
+            <SectionHeader
+              title="維護模式開關"
+              description="開啟後，所有前台頁面將顯示維護畫面。後台管理員不受影響。"
+            />
+            <CardContent className="p-5 space-y-5">
+              {/* Big toggle */}
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="text-sm font-semibold text-adm-text-primary">開啟維護模式</p>
+                  <p className="text-xs text-adm-text-tertiary mt-0.5">
+                    儲存後立即生效（約 30 秒快取刷新）
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={form.maintenanceMode.enabled}
+                  onClick={() => setForm((p) => ({
+                    ...p,
+                    maintenanceMode: { ...p.maintenanceMode, enabled: !p.maintenanceMode.enabled },
+                  }))}
+                  className={cn(
+                    'relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-adm-brand-500 focus:ring-offset-2',
+                    form.maintenanceMode.enabled ? 'bg-red-500' : 'bg-adm-border-default',
+                  )}
+                >
+                  <span className={cn(
+                    'inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200',
+                    form.maintenanceMode.enabled ? 'translate-x-6' : 'translate-x-1',
+                  )} />
+                </button>
+              </div>
+
+              {/* Localized maintenance message */}
+              <div>
+                <LocaleTabs locale={locale} onSelect={setLocale} />
+                <div className="pt-4">
+                  <Textarea
+                    label={`維護說明訊息（${locale}）`}
+                    description="顯示給訪客的說明文字，留空使用預設訊息"
+                    value={form.maintenanceMode.message[locale]}
+                    onChange={(val) => setForm((p) => ({
+                      ...p,
+                      maintenanceMode: {
+                        ...p.maintenanceMode,
+                        message: { ...p.maintenanceMode.message, [locale]: val },
+                      },
+                    }))}
+                    placeholder={
+                      locale === 'zh-TW'
+                        ? '網站目前進行維護，預計於 XX 日 XX 時恢復。感謝您的耐心等候。'
+                        : 'We are currently performing maintenance. Please check back soon.'
+                    }
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* ── Tab: 基本資料 ──────────────────────────────────────────── */}
       {tab === 'basic' && (
