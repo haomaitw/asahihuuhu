@@ -33,6 +33,9 @@
     "news": {
       "eyebrow": "NEWS",
       "title": "最新消息"
+    },
+    "about": {
+      "lede": "從沖繩海邊的清晨朝陽，到淡水漁港旁的傍晚霞光——一對夫婦用一碗職人刨冰，在異鄉築起了關於家與初心最溫柔的承諾。"
     }
   },
   "lineup": {
@@ -92,7 +95,8 @@
       "eyebrow": "SEASONAL",
       "title": "季節 & 期間限定"
     },
-    "comingSoon": "商品即將上架，敬請期待"
+    "comingSoon": "商品即將上架，敬請期待",
+    "related": "你可能也喜歡"
   },
   "about": {
     "title": "關於朝日",

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { useTranslations, useLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Hero } from '@/components/Hero';
@@ -9,6 +10,7 @@ import { NewsItem } from '@/components/NewsItem';
 import { AnimateIn } from '@/components/AnimateIn';
 import { SeeMoreLink } from '@/components/SeeMoreLink';
 import { Reveal } from '@/components/Reveal';
+import { Link } from '@/i18n/routing';
 import {
   placeholderProducts,
   placeholderSeasonal,
@@ -180,6 +182,66 @@ function HomeContent({
             <AnimateIn delay={300}>
               <SeeMoreLink href="/news" label={t('common.seeMore')} />
             </AnimateIn>
+          </div>
+        </section>
+      </Reveal>
+
+      {/* ── Brand Story Teaser ───────────────────────────────────────── */}
+      <WaveDivider fill="#16364f" />
+
+      <Reveal direction="up" delay={60}>
+        <section className="py-20 md:py-28" style={{ background: '#16364f' }}>
+          <div className="container-content">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
+
+              {/* ── Text column ─────────────────────────────────────── */}
+              <AnimateIn className="flex flex-col gap-7">
+                <p className="font-sans font-light text-xs tracking-[0.3em] uppercase text-sea-400">
+                  {t('about.story.eyebrow')}
+                </p>
+                <h2 className="font-serif text-3xl md:text-4xl tracking-wide text-white leading-snug">
+                  {t('about.story.title')}
+                </h2>
+                <p className="font-sans font-light text-sm leading-relaxed text-white/55 max-w-sm">
+                  {t('home.about.lede')}
+                </p>
+                <Link
+                  href="/about"
+                  className="inline-flex items-center gap-4 self-start rounded-pill border border-white/20 bg-white/10 px-2 py-2 pr-2 font-sans font-light text-sm tracking-[0.25em] text-white/70 transition-all duration-500 hover:bg-white/20 hover:text-white group"
+                >
+                  <span className="pl-4 pr-2">{t('common.seeMore')}</span>
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sea-400 text-white text-base group-hover:bg-white group-hover:text-sea-400 transition-all duration-500">→</span>
+                </Link>
+              </AnimateIn>
+
+              {/* ── Images column ───────────────────────────────────── */}
+              <AnimateIn delay={150} className="relative">
+                {/* Main image */}
+                <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl">
+                  <Image
+                    src="/asahi/67d79a864bfa605e29f4a621_img-top-about1.png"
+                    alt="朝日夫婦的故事"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover"
+                  />
+                </div>
+                {/* Accent image */}
+                <div
+                  className="absolute -bottom-6 -left-6 w-[48%] aspect-square rounded-2xl overflow-hidden shadow-xl border-4"
+                  style={{ borderColor: '#16364f' }}
+                >
+                  <Image
+                    src="/asahi/67d79a869b7cba72b493e155_img-top-about2.png"
+                    alt="朝日夫婦手工刨冰"
+                    fill
+                    sizes="30vw"
+                    className="object-cover"
+                  />
+                </div>
+              </AnimateIn>
+
+            </div>
           </div>
         </section>
       </Reveal>

@@ -52,5 +52,23 @@ export default async function ProductDetailPage({ params }: Props) {
 
   if (!product) notFound()
 
-  return <ProductDetailClient product={product} locale={locale} />
+  // Fetch related products (same category, exclude current)
+  let relatedProducts: Awaited<ReturnType<typeof getProducts>> = []
+  try {
+    const all = await getProducts(locale)
+    relatedProducts = all
+      .filter((p) => p.category === product!.category && p.id !== product!.id)
+      .slice(0, 3)
+    // If not enough from same category, fill with others
+    if (relatedProducts.length < 3) {
+      const others = all.filter(
+        (p) => p.id !== product!.id && !relatedProducts.find((r) => r.id === p.id)
+      )
+      relatedProducts = [...relatedProducts, ...others].slice(0, 3)
+    }
+  } catch {
+    // DB not ready / ignore
+  }
+
+  return <ProductDetailClient product={product!} locale={locale} relatedProducts={relatedProducts} />
 }

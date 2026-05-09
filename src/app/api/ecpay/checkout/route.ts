@@ -22,12 +22,13 @@ export async function POST(req: NextRequest) {
       couponDiscount?: number
       pointsRedeemed?: number
       customerId?: string
+      note?: string
     }
 
     const {
       items, locale, customerName, customerEmail, customerPhone,
       shippingAddress, couponCode, couponDiscount = 0,
-      pointsRedeemed = 0, customerId,
+      pointsRedeemed = 0, customerId, note,
     } = body
 
     if (!items || items.length === 0) {
@@ -94,6 +95,7 @@ export async function POST(req: NextRequest) {
         couponDiscount,
         pointsRedeemed,
         totalAmount,
+        ...(note ? { note } : {}),
       },
     })
 

@@ -6,15 +6,16 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ShoppingBag, Truck, Snowflake, ChevronLeft, CheckCircle2 } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
-import type { CmsProductDetail } from '@/lib/cms-products'
+import type { CmsProduct, CmsProductDetail } from '@/lib/cms-products'
 import { RichText } from '@/components/RichText'
 
 type Props = {
   product: CmsProductDetail
   locale: string
+  relatedProducts?: CmsProduct[]
 }
 
-export function ProductDetailClient({ product, locale }: Props) {
+export function ProductDetailClient({ product, locale, relatedProducts = [] }: Props) {
   const { addItem, items } = useCartStore()
   const t = useTranslations()
 
@@ -220,6 +221,42 @@ export function ProductDetailClient({ product, locale }: Props) {
             <h2 className="font-serif text-2xl tracking-wider mb-8 text-center">商品詳情</h2>
             <div className="max-w-2xl mx-auto prose prose-sm prose-ink leading-relaxed">
               <RichText data={product.description} />
+            </div>
+          </div>
+        )}
+
+        {/* ── Related Products ─────────────────────────────────────── */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-16 lg:mt-24 border-t border-paper-100 pt-12">
+            <h2 className="font-serif text-2xl tracking-wider mb-10 text-center">
+              {t('shop.related')}
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-10">
+              {relatedProducts.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/${locale}/shop/${p.slug}`}
+                  className="group flex flex-col gap-3"
+                >
+                  <div className="relative aspect-square rounded-2xl overflow-hidden bg-white shadow-sm">
+                    <Image
+                      src={p.image}
+                      alt={p.name}
+                      fill
+                      sizes="(max-width: 768px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-sans font-light text-sm text-ink group-hover:text-sea-600 transition-colors leading-snug">
+                      {p.name}
+                    </p>
+                    <p className="text-xs text-sea-700 mt-1">
+                      NT$ {p.price.toLocaleString()}
+                    </p>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         )}

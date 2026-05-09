@@ -31,6 +31,7 @@ export function CheckoutForm({ locale }: Props) {
   const [pointsToRedeem, setPointsToRedeem] = useState(0)
   const maxPoints = Math.min(customer?.points ?? 0, totalPrice + SHIPPING_FEE - couponDiscount)
 
+  const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -108,6 +109,7 @@ export function CheckoutForm({ locale }: Props) {
           couponDiscount,
           pointsRedeemed: pointsToRedeem,
           customerId: customer?.id,
+          note: note.trim() || undefined,
         }),
       })
       const data = await res.json()
@@ -315,6 +317,22 @@ export function CheckoutForm({ locale }: Props) {
             className="w-full border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50"
           />
         </div>
+      </div>
+
+      {/* Gift / Order Note */}
+      <div className="bg-white border border-sand-200 rounded-2xl p-5 shadow-sm space-y-3">
+        <h2 className="text-xs uppercase tracking-widest text-ink/50">禮品留言 / 備註</h2>
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          rows={3}
+          maxLength={200}
+          placeholder="如有禮品包裝需求、特殊說明或訂單備註，請在此輸入（選填）"
+          className="w-full resize-none border border-sand-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-400 bg-paper-50 text-ink placeholder:text-ink/30"
+        />
+        {note.length > 0 && (
+          <p className="text-xs text-ink/30 text-right">{note.length}/200</p>
+        )}
       </div>
 
       {!customer && (
