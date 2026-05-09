@@ -42,13 +42,15 @@ const averia = Averia_Sans_Libre({
   display: 'swap',
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.asahihuuhu.com';
+
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'FoodEstablishment',
   name: '朝日夫婦 ASAHI HUUHU',
   description: '職人堅持的日式刨冰',
-  url: 'https://www.asahihuuhu.com',
-  image: 'https://www.asahihuuhu.com/asahi/hero-home-poster.jpg',
+  url: SITE_URL,
+  image: `${SITE_URL}/asahi/hero-home-poster.jpg`,
   servesCuisine: 'Japanese',
   priceRange: '$$',
   openingHoursSpecification: [
