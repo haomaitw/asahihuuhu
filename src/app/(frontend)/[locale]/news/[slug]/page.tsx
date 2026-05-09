@@ -6,6 +6,8 @@ import { RichText } from '@/components/RichText';
 import { Link } from '@/i18n/routing';
 import { getNewsItem } from '@/lib/cms';
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({
   params,
 }: {

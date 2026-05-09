@@ -5,6 +5,8 @@ import { PageHero } from '@/components/PageHero';
 import { WaveDivider } from '@/components/WaveDivider';
 import { getFAQs } from '@/lib/cms';
 
+export const dynamic = 'force-dynamic'
+
 const STATIC_FAQ_KEYS = ['q1', 'q2', 'q3', 'q4', 'q5'] as const;
 
 export async function generateMetadata({

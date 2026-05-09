@@ -7,6 +7,8 @@ import { MenuAnchorBar } from '@/components/MenuAnchorBar';
 import { MenuSection } from '@/components/MenuSection';
 import { menu } from '@/lib/menu-data';
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({
   params,
 }: {

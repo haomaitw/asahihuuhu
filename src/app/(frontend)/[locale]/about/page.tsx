@@ -6,6 +6,8 @@ import { SectionTitle } from '@/components/SectionTitle';
 import { WaveDivider } from '@/components/WaveDivider';
 import { getAboutPageGlobal, getSiteSettings } from '@/lib/cms';
 
+
+export const dynamic = 'force-dynamic'
 export async function generateMetadata({
   params,
 }: {

@@ -4,6 +4,8 @@ import { setRequestLocale } from 'next-intl/server'
 import { getProductBySlug, getProducts } from '@/lib/cms-products'
 import { ProductDetailClient } from './ProductDetailClient'
 
+export const dynamic = 'force-dynamic'
+
 type Props = {
   params: Promise<{ locale: string; slug: string }>
 }

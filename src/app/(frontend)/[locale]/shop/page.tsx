@@ -14,6 +14,8 @@ import {
 import { getProducts } from '@/lib/cms-products';
 import { getShopPageGlobal } from '@/lib/cms';
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({
   params,
 }: {
