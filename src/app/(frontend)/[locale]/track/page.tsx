@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, FormEvent } from 'react'
+import { useState, useEffect, FormEvent, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -168,6 +168,18 @@ function OrderCard({ order }: { order: OrderResult }) {
 // ── Main page ──────────────────────────────────────────────────────────────────
 
 export default function TrackPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-paper-50 pt-28 pb-20 flex items-center justify-center">
+        <p className="text-sm text-ink/40 tracking-wide">載入中…</p>
+      </main>
+    }>
+      <TrackContent />
+    </Suspense>
+  )
+}
+
+function TrackContent() {
   const searchParams = useSearchParams()
   const [orderNumber, setOrderNumber] = useState(searchParams.get('order') ?? '')
   const [email,       setEmail]       = useState(searchParams.get('email') ?? '')
