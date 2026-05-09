@@ -18,18 +18,27 @@ const nextConfig = {
   ],
 
   // Force nft to include drizzle-kit's CJS api.js in standalone output.
-  // Both /api/gen-migration and /api/apply-db use it at runtime.
+  // '/**' ensures it's available for instrumentation.ts (no route) as well as
+  // the /api/apply-db and /api/gen-migration routes that use it at runtime.
   outputFileTracingIncludes: {
-    '/api/gen-migration': [
+    '/**': [
       './node_modules/drizzle-kit/api.js',
       './node_modules/drizzle-kit/api.d.ts',
       './node_modules/drizzle-kit/**/*',
     ],
-    '/api/apply-db': [
-      './node_modules/drizzle-kit/api.js',
-      './node_modules/drizzle-kit/api.d.ts',
-      './node_modules/drizzle-kit/**/*',
-    ],
+  },
+
+  async headers() {
+    return [
+      {
+        // All frontend pages — prevent CDN/proxy caching of CMS-driven HTML
+        source: '/((?!_next|api|admin).*)',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+        ],
+      },
+    ]
   },
 
   images: {
