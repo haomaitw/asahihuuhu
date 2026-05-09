@@ -3,12 +3,12 @@
  * PageTransitionOverlay
  *
  * On every client-side navigation (pathname change), this overlay slides
- * down over the screen — a sunset scene (sea 900 → amber → sea 400) with
- * the brand mark centred and two SVG wave shapes at the bottom — then
- * continues upward off the viewport, revealing the new page beneath.
+ * down over the screen — a moonrise-over-harbour scene (deep navy → light
+ * aqua) with the brand mark centred and two SVG wave shapes at the bottom —
+ * then continues upward off the viewport, revealing the new page beneath.
  *
- * Visual metaphor: the Tamsui harbour at golden hour, tide rolling in,
- * lifting the scene to uncover the next destination.
+ * Visual metaphor: the Tamsui harbour at dawn, cool blue light spreading
+ * from the horizon, lifting the ocean to uncover the next destination.
  */
 
 import { usePathname } from 'next/navigation'
@@ -35,27 +35,27 @@ export function PageTransitionOverlay() {
       aria-hidden
       className="fixed inset-0 z-[100] pointer-events-none overflow-hidden animate-wave-reveal"
     >
-      {/* ── Sky gradient: deep harbour → amber sun → sea surface ────── */}
+      {/* ── Sky gradient: deep navy → harbour blue → light aqua ──────── */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(to bottom, #0b1c2c 0%, #16364f 18%, #265989 45%, #f59e0b 68%, #fb923c 80%, #5aa0d7 100%)',
+            'linear-gradient(to bottom, #0b1c2c 0%, #16364f 20%, #1e4569 38%, #265989 55%, #3e88c3 72%, #5aa0d7 85%, #a8d2ef 100%)',
         }}
       />
 
-      {/* ── Sun glow ─────────────────────────────────────────────────── */}
+      {/* ── Ice-blue moonlight glow ───────────────────────────────────── */}
       <div
         className="absolute"
         style={{
-          width: 180,
-          height: 180,
-          top: '60%',
+          width: 220,
+          height: 220,
+          top: '55%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
           borderRadius: '50%',
           background:
-            'radial-gradient(circle, rgba(255,237,158,0.85) 0%, rgba(251,191,36,0.45) 42%, transparent 68%)',
+            'radial-gradient(circle, rgba(213,233,247,0.65) 0%, rgba(90,160,215,0.30) 45%, transparent 68%)',
         }}
       />
 
@@ -73,7 +73,7 @@ export function PageTransitionOverlay() {
         >
           <path
             d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,20 1440,40 L1440,80 L0,80 Z"
-            fill="rgba(30,69,105,0.65)"
+            fill="rgba(168,210,239,0.45)"
           />
         </svg>
         <svg
@@ -83,7 +83,7 @@ export function PageTransitionOverlay() {
         >
           <path
             d="M0,26 C300,52 600,0 900,26 C1050,39 1200,13 1440,26 L1440,52 L0,52 Z"
-            fill="rgba(11,28,44,0.55)"
+            fill="rgba(213,233,247,0.35)"
           />
         </svg>
       </div>
