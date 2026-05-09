@@ -4,15 +4,38 @@ import { routing } from './i18n/routing'
 
 const intlMiddleware = createIntlMiddleware(routing)
 
+/**
+ * Applies a standard set of security headers to the given response.
+ * HSTS is added unconditionally (harmless in dev, required in prod).
+ * CSP is intentionally omitted — the Payload + asset stack is too complex
+ * for a strict policy without breakage.
+ */
+function applySecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  response.headers.set('X-XSS-Protection', '1; mode=block')
+  response.headers.set(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=()',
+  )
+  response.headers.set(
+    'Strict-Transport-Security',
+    'max-age=63072000; includeSubDomains',
+  )
+  return response
+}
+
 export async function middleware(req: NextRequest) {
-  // Skip admin, api, static assets
   const { pathname } = req.nextUrl
+
+  // Skip admin, api, static assets — but still apply security headers
   if (
     pathname.startsWith('/admin') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next')
   ) {
-    return NextResponse.next()
+    return applySecurityHeaders(NextResponse.next())
   }
 
   // Check maintenance mode (fetch from Payload API — use internal URL)
@@ -30,7 +53,7 @@ export async function middleware(req: NextRequest) {
         if (!pathname.includes('/maintenance')) {
           const url = req.nextUrl.clone()
           url.pathname = '/maintenance'
-          return NextResponse.rewrite(url)
+          return applySecurityHeaders(NextResponse.rewrite(url))
         }
       }
     }
@@ -38,7 +61,7 @@ export async function middleware(req: NextRequest) {
     // If the fetch fails (e.g. cold start), continue normally
   }
 
-  return intlMiddleware(req)
+  return applySecurityHeaders(intlMiddleware(req) as NextResponse)
 }
 
 export const config = {

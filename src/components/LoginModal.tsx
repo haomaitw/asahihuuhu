@@ -37,6 +37,9 @@ export function LoginModal() {
   const [rEmail,    setREmail]    = useState('')
   const [rPassword, setRPassword] = useState('')
   const [rPhone,    setRPhone]    = useState('')
+  const [rPrivacy,   setRPrivacy]   = useState(false)
+  const [rMarketing, setRMarketing] = useState(false)
+  const [rEmailSub,  setREmailSub]  = useState(false)
 
   const overlayRef = useRef<HTMLDivElement>(null)
 
@@ -65,7 +68,7 @@ export function LoginModal() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true); setError('')
-    const r = await register({ email: rEmail, password: rPassword, name: rName, phone: rPhone || undefined })
+    const r = await register({ email: rEmail, password: rPassword, name: rName, phone: rPhone || undefined, privacyConsent: rPrivacy, marketingConsent: rMarketing, emailConsent: rEmailSub })
     setLoading(false)
     if (!r.ok) return setError(r.error ?? '註冊失敗，請稍後再試')
     closeLogin()
@@ -267,7 +270,45 @@ export function LoginModal() {
                 <input type="password" required minLength={8} value={rPassword} onChange={(e) => setRPassword(e.target.value)}
                   autoComplete="new-password" placeholder="至少 8 個字元" className={INPUT} />
               </div>
-              <div className="flex-1" />
+              <div className="space-y-2.5 py-1">
+                {/* Privacy policy - required */}
+                <label className="flex items-start gap-2.5 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    required
+                    checked={rPrivacy}
+                    onChange={(e) => setRPrivacy(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-paper-300 accent-sea-400 cursor-pointer"
+                  />
+                  <span className="text-xs text-ink/55 leading-snug">
+                    我已閱讀並同意{' '}
+                    <a href="/privacy" target="_blank" rel="noopener" className="text-sea-400 underline underline-offset-2">
+                      《隱私權政策》
+                    </a>
+                    {' '}<span className="text-red-400">*</span>
+                  </span>
+                </label>
+                {/* Marketing consent - optional */}
+                <label className="flex items-start gap-2.5 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={rMarketing}
+                    onChange={(e) => setRMarketing(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-paper-300 accent-sea-400 cursor-pointer"
+                  />
+                  <span className="text-xs text-ink/55 leading-snug">同意接收朝日夫婦的行銷訊息（選填）</span>
+                </label>
+                {/* Email subscription - optional */}
+                <label className="flex items-start gap-2.5 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={rEmailSub}
+                    onChange={(e) => setREmailSub(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-paper-300 accent-sea-400 cursor-pointer"
+                  />
+                  <span className="text-xs text-ink/55 leading-snug">訂閱電子報，掌握最新優惠（選填）</span>
+                </label>
+              </div>
               <button
                 type="submit"
                 disabled={loading}

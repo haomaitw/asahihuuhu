@@ -31,6 +31,8 @@ type CustomerStore = {
     name: string
     phone?: string
     marketingConsent?: boolean
+    privacyConsent?: boolean
+    emailConsent?: boolean
   }) => Promise<{ ok: boolean; error?: string }>
   logout: () => Promise<void>
   fetchMe: () => Promise<void>
@@ -66,13 +68,13 @@ export const useCustomerStore = create<CustomerStore>()(
         }
       },
 
-      register: async ({ email, password, name, phone, marketingConsent }) => {
+      register: async ({ email, password, name, phone, marketingConsent, privacyConsent, emailConsent }) => {
         set({ isLoading: true })
         try {
           const res = await fetch('/api/customers', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, name, phone, marketingConsent }),
+            body: JSON.stringify({ email, password, name, phone, marketingConsent, privacyConsent, emailConsent }),
             credentials: 'include',
           })
           const data = await res.json()

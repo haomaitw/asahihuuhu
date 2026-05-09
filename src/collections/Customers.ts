@@ -293,6 +293,22 @@ body{margin:0;padding:0;background:#f0f4f8;font-family:'Helvetica Neue',Helvetic
       defaultValue: false,
       label: '同意接收行銷通知',
     },
+    {
+      name: 'privacyConsent',
+      type: 'checkbox',
+      defaultValue: false,
+      label: '同意隱私權政策',
+      admin: {
+        description: '會員註冊時是否同意隱私權政策',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'emailConsent',
+      type: 'checkbox',
+      defaultValue: false,
+      label: '訂閱電子報',
+    },
     // Shipping addresses (denormalized for simplicity)
     {
       name: 'defaultAddress',

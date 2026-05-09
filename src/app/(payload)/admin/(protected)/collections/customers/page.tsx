@@ -41,9 +41,31 @@ export default async function CustomersPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-adm-text-primary">會員管理</h1>
-        <p className="text-sm text-adm-text-tertiary mt-0.5">共 {totalDocs} 位會員</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-adm-text-primary">會員管理</h1>
+          <p className="text-sm text-adm-text-tertiary mt-0.5">共 {totalDocs} 位會員</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/collections/customers/send-email"
+            className="inline-flex items-center gap-1.5 text-sm px-3.5 py-2 rounded-adm-md border border-adm-border-default bg-adm-bg-elevated text-adm-text-secondary hover:border-adm-brand-500 hover:text-adm-brand-600 transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/>
+            </svg>
+            發送行銷信
+          </Link>
+          <Link
+            href="/admin/collections/customers/new"
+            className="inline-flex items-center gap-1.5 text-sm px-3.5 py-2 rounded-adm-md bg-adm-brand-600 text-white hover:bg-adm-brand-700 transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            新增會員
+          </Link>
+        </div>
       </div>
 
       {/* Search */}
@@ -68,7 +90,7 @@ export default async function CustomersPage({
             <table className="w-full">
               <thead>
                 <tr className="border-b border-adm-border-subtle bg-adm-bg-base">
-                  {['姓名', 'Email', '電話', '等級', '點數', '累計消費', '生日', '加入日期', ''].map((h) => (
+                  {['姓名', 'Email', '電話', '等級', '點數', '累計消費', '生日', '加入日期', '行銷同意', ''].map((h) => (
                     <th
                       key={h}
                       className="px-5 py-3 text-left text-2xs uppercase tracking-wider text-adm-text-tertiary font-medium whitespace-nowrap"
@@ -107,6 +129,13 @@ export default async function CustomersPage({
                       </td>
                       <td className="px-5 py-3.5 text-xs text-adm-text-tertiary whitespace-nowrap">
                         {c.createdAt ? new Date(c.createdAt).toLocaleDateString('zh-TW') : '—'}
+                      </td>
+                      <td className="px-5 py-3.5 text-center">
+                        {c.marketingConsent ? (
+                          <span className="inline-block w-4 h-4 rounded-full bg-green-100 text-green-600 text-[10px] flex items-center justify-center">✓</span>
+                        ) : (
+                          <span className="text-adm-text-tertiary text-xs">—</span>
+                        )}
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         <Link

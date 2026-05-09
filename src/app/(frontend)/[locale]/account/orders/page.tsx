@@ -133,7 +133,12 @@ export default function OrdersPage({ params }: { params: Promise<{ locale: strin
                     <span className="ml-2 text-brand-600">+ {order.pointsEarned} 點</span>
                   )}
                 </div>
-                <p className="font-serif text-base text-ink">NT${order.totalAmount.toLocaleString()}</p>
+                <div className="flex items-center gap-3">
+                  <p className="font-serif text-base text-ink">NT${order.totalAmount.toLocaleString()}</p>
+                  <Link href={`/${locale}/account/orders/${order.id}`} className="text-xs text-sea-400 hover:underline ml-auto">
+                    查看詳情 →
+                  </Link>
+                </div>
               </div>
             </div>
           ))}
