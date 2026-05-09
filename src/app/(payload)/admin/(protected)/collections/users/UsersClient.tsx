@@ -94,10 +94,15 @@ export function UsersClient({ initialUsers, currentUserEmail, currentUserRole }:
   async function refreshUsers() {
     try {
       const res = await fetch('/api/admin/users', { credentials: 'include' })
-      if (!res.ok) return
+      if (!res.ok) {
+        toast.error('無法重新整理帳號列表，請重新整理頁面')
+        return
+      }
       const data = await res.json()
       setUsers(data.docs ?? [])
-    } catch {}
+    } catch {
+      toast.error('無法重新整理帳號列表，請重新整理頁面')
+    }
   }
 
   // ── Create submit

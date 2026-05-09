@@ -112,7 +112,17 @@ export default async function DashboardPage() {
       sort: '-createdAt',
       overrideAccess: true,
     })
-    recentOrders = result.docs
+    recentOrders = result.docs.map((o: any) => ({
+      id:                String(o.id),
+      orderNumber:       o.orderNumber       ?? null,
+      status:            o.status            ?? null,
+      fulfillmentStatus: o.fulfillmentStatus ?? null,
+      totalAmount:       o.totalAmount != null ? Number(o.totalAmount) : null,
+      createdAt:         o.createdAt ? String(o.createdAt) : null,
+      customerName:      typeof o.customer === 'object' && o.customer !== null
+                           ? (o.customer?.name ?? null)
+                           : null,
+    }))
   } catch {
     // ignore
   }

@@ -23,6 +23,10 @@ export function MediaLibraryClient({ docs: initial, total }: { docs: MediaDoc[];
         fd.append('file', file)
         fd.append('alt', file.name.replace(/\.[^.]+$/, ''))
         const r = await fetch('/api/media', { method: 'POST', body: fd, credentials: 'include' })
+        if (!r.ok) {
+          const body = await r.json().catch(() => ({}))
+          throw new Error(body?.errors?.[0]?.message ?? body?.message ?? `HTTP ${r.status}`)
+        }
         const { doc } = await r.json()
         return doc as MediaDoc
       }))

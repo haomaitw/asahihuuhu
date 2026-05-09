@@ -45,7 +45,7 @@ export default async function UsersPage() {
     name: u.name ?? null,
     email: u.email,
     role: u.role ?? 'staff',
-    createdAt: u.createdAt,
+    createdAt: u.createdAt ? String(u.createdAt) : null,
   }))
 
   return (
