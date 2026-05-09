@@ -56,11 +56,11 @@ export default buildConfig({
     transportOptions: {
       host: process.env.SMTP_HOST ?? 'smtp.larksuite.com',
       port: Number(process.env.SMTP_PORT ?? 465),
-      secure: process.env.SMTP_SECURE !== 'false', // true for port 465
-      auth: {
-        user: process.env.SMTP_USER ?? 'oa@extrastudio.tw',
-        pass: process.env.SMTP_PASS ?? '',
-      },
+      secure: process.env.SMTP_SECURE !== 'false',
+      // Only pass auth when credentials are available — prevents build-time crash
+      ...(process.env.SMTP_USER && process.env.SMTP_PASS
+        ? { auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } }
+        : {}),
     },
   }),
 
