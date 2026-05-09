@@ -10,6 +10,7 @@ import { CartProvider } from '@/components/CartProvider';
 import { LoginModal } from '@/components/LoginModal';
 import { BackToTop } from '@/components/BackToTop';
 import { getSiteSettings } from '@/lib/cms';
+import { MaintenancePage } from '@/components/MaintenancePage';
 import '@/app/globals.css';
 
 const notoTC = Noto_Sans_TC({
@@ -89,6 +90,25 @@ export default async function LocaleLayout({
   const facebookUrl  = (siteSettings as any)?.facebookUrl  ?? null;
   const instagramUrl = (siteSettings as any)?.instagramUrl ?? null;
   const copyright    = (siteSettings as any)?.copyright    ?? null;
+
+  // Maintenance mode — checked here via Payload local API (reliable, no HTTP fetch)
+  const maintenanceEnabled = (siteSettings as any)?.maintenanceMode?.enabled === true;
+  const maintenanceMessage = (siteSettings as any)?.maintenanceMode?.message ?? null;
+
+  if (maintenanceEnabled) {
+    return (
+      <html
+        lang={locale}
+        className={`${notoTC.variable} ${notoJP.variable} ${notoSerifTC.variable} ${averia.variable}`}
+      >
+        <body className="overflow-x-hidden">
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <MaintenancePage message={maintenanceMessage} />
+          </NextIntlClientProvider>
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html
