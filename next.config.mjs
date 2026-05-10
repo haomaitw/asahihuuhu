@@ -7,15 +7,35 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const nextConfig = {
   output: 'standalone',
 
-  // These packages use native bindings or CJS — must NOT be bundled by webpack
+  // These packages use native Node.js bindings or CJS — must NOT be bundled by webpack
   serverExternalPackages: [
     'pg',
     'pg-native',
     '@payloadcms/db-postgres',
+    '@payloadcms/drizzle',
+    '@payloadcms/email-nodemailer',
     'drizzle-orm',
     'drizzle-kit',
     'sharp',
+    'nodemailer',
   ],
+
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Prevent Node.js built-ins from breaking the browser bundle
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        crypto: false,
+        fs: false,
+        os: false,
+        path: false,
+        stream: false,
+        net: false,
+        tls: false,
+      }
+    }
+    return config
+  },
 
   // Force nft to include drizzle-kit's CJS api.js in standalone output.
   // '/**' ensures it's available for instrumentation.ts (no route) as well as
