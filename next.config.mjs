@@ -1,6 +1,9 @@
 import { withPayload } from '@payloadcms/next/withPayload';
 import createNextIntlPlugin from 'next-intl/plugin';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
@@ -11,6 +14,7 @@ const nextConfig = {
   serverExternalPackages: [
     'pg',
     'pg-native',
+    'pg-connection-string',
     '@payloadcms/db-postgres',
     '@payloadcms/drizzle',
     '@payloadcms/email-nodemailer',
@@ -47,14 +51,10 @@ const nextConfig = {
 
   images: {
     remotePatterns: [
-      // Placeholder / stock images used during development
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'picsum.photos' },
       { protocol: 'https', hostname: 'placehold.co' },
-      // Payload-uploaded media: served from the same server, URL = NEXT_PUBLIC_SITE_URL/media/*
-      // Zeabur staging subdomain
       { protocol: 'https', hostname: '*.zeabur.app' },
-      // Production custom domain
       { protocol: 'https', hostname: 'asahihuuhu.howard.taipei' },
       { protocol: 'https', hostname: 'asahihuuhu.com' },
       { protocol: 'https', hostname: 'www.asahihuuhu.com' },
@@ -66,7 +66,7 @@ const nextConfig = {
   devIndicators: false,
 };
 
-// Apply withPayload first, then patch webpack AFTER so our fallbacks
+// Apply withPayload first, then patch webpack AFTER so our changes
 // cannot be overridden by withPayload's own webpack logic.
 const payloadConfig = withPayload(nextConfig);
 const _payloadWebpack = payloadConfig.webpack;
@@ -77,9 +77,21 @@ payloadConfig.webpack = (config, options) => {
     ? _payloadWebpack(config, options)
     : config;
 
-  // Then add browser fallbacks for Node.js built-ins (busboy, @next/env, etc.)
   if (!options.isServer) {
     result.resolve ??= {};
+
+    // Redirect @payload-config to an empty stub on the client bundle.
+    // withPayload should do this automatically, but it's not working in this
+    // version combination — so we override it explicitly. This cuts the entire
+    // pg → pg-connection-string → fs dependency chain from the browser bundle.
+    result.resolve.alias = {
+      ...result.resolve.alias,
+      '@payload-config': resolve(__dirname, 'src/payload-config-stub.js'),
+    };
+
+    // Belt-and-suspenders: stub out Node.js built-ins so any other
+    // server-only code that still slips through gets an empty module
+    // instead of a build error.
     result.resolve.fallback = {
       ...result.resolve.fallback,
       stream: false,
