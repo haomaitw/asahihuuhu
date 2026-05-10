@@ -11,7 +11,6 @@ export async function register() {
 
   try {
     const { createRequire } = await import('module')
-    const { join } = await import('path')
     const { getPayload } = await import('payload')
     const { default: configPromise } = await import('@payload-config')
     const { sql } = await import('drizzle-orm')
@@ -20,8 +19,9 @@ export async function register() {
     const db = (payload as any).db
 
     const cjsRequire = createRequire(import.meta.url)
-    const apiJsPath = join(process.cwd(), 'node_modules', 'drizzle-kit', 'api.js')
-    const { generateDrizzleJson, generateMigration } = cjsRequire(apiJsPath)
+    // Use bare specifier so Node resolves relative to this module's location —
+    // works correctly in standalone mode where node_modules live next to server.js.
+    const { generateDrizzleJson, generateMigration } = cjsRequire('drizzle-kit/api')
 
     const drizzleJsonAfter = generateDrizzleJson(db.schema)
     const drizzleJsonBefore = { ...db.defaultDrizzleSnapshot }

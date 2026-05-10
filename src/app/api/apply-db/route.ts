@@ -19,7 +19,6 @@
  */
 import { NextResponse } from 'next/server'
 import { createRequire } from 'module'
-import { join } from 'path'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
@@ -33,10 +32,8 @@ export async function POST(request: Request) {
     const payload = await getPayload({ config })
     const db = payload.db as any
 
-    // Load drizzle-kit api.js via absolute require (avoids ESM/webpack issues)
     const cjsRequire = createRequire(import.meta.url)
-    const apiJsPath = join(process.cwd(), 'node_modules', 'drizzle-kit', 'api.js')
-    const { generateDrizzleJson, generateMigration } = cjsRequire(apiJsPath)
+    const { generateDrizzleJson, generateMigration } = cjsRequire('drizzle-kit/api')
 
     const drizzleJsonAfter = generateDrizzleJson(db.schema)
     const drizzleJsonBefore = { ...db.defaultDrizzleSnapshot }
