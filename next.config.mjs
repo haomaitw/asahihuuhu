@@ -18,24 +18,8 @@ const nextConfig = {
     'drizzle-kit',
     'sharp',
     'nodemailer',
+    'busboy',
   ],
-
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Prevent Node.js built-ins from breaking the browser bundle
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        crypto: false,
-        fs: false,
-        os: false,
-        path: false,
-        stream: false,
-        net: false,
-        tls: false,
-      }
-    }
-    return config
-  },
 
   // Force nft to include drizzle-kit's CJS api.js in standalone output.
   // '/**' ensures it's available for instrumentation.ts (no route) as well as
@@ -71,6 +55,7 @@ const nextConfig = {
       // Zeabur staging subdomain
       { protocol: 'https', hostname: '*.zeabur.app' },
       // Production custom domain
+      { protocol: 'https', hostname: 'asahihuuhu.howard.taipei' },
       { protocol: 'https', hostname: 'asahihuuhu.com' },
       { protocol: 'https', hostname: 'www.asahihuuhu.com' },
     ],
@@ -81,4 +66,34 @@ const nextConfig = {
   devIndicators: false,
 };
 
-export default withNextIntl(withPayload(nextConfig));
+// Apply withPayload first, then patch webpack AFTER so our fallbacks
+// cannot be overridden by withPayload's own webpack logic.
+const payloadConfig = withPayload(nextConfig);
+const _payloadWebpack = payloadConfig.webpack;
+
+payloadConfig.webpack = (config, options) => {
+  // Run withPayload's webpack modifications first
+  const result = typeof _payloadWebpack === 'function'
+    ? _payloadWebpack(config, options)
+    : config;
+
+  // Then add browser fallbacks for Node.js built-ins (busboy, @next/env, etc.)
+  if (!options.isServer) {
+    result.resolve ??= {};
+    result.resolve.fallback = {
+      ...result.resolve.fallback,
+      stream: false,
+      crypto: false,
+      fs: false,
+      os: false,
+      path: false,
+      net: false,
+      tls: false,
+      child_process: false,
+    };
+  }
+
+  return result;
+};
+
+export default withNextIntl(payloadConfig);
