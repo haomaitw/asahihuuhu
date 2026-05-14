@@ -8,11 +8,19 @@ import { Toaster } from 'sonner'
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const headersList = await headers()
-  let user: any = null
+  let user: { id: string; name?: string; email?: string; role?: string } | null = null
   try {
     const payload = await getPayload({ config: configPromise })
     const result = await payload.auth({ headers: headersList })
-    user = result.user
+    if (result.user) {
+      const u = result.user as any
+      user = {
+        id:    String(u.id),
+        name:  u.name  ?? undefined,
+        email: u.email ?? undefined,
+        role:  u.role  ?? undefined,
+      }
+    }
   } catch {
     // DB not ready — fall through to redirect
   }
