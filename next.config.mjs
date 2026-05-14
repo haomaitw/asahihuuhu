@@ -15,9 +15,14 @@ const nextConfig = {
     'pg',
     'pg-native',
     'pg-connection-string',
+    'payload',
     '@payloadcms/db-postgres',
     '@payloadcms/drizzle',
     '@payloadcms/email-nodemailer',
+    '@payloadcms/next',
+    '@payloadcms/richtext-lexical',
+    '@payloadcms/translations',
+    '@payloadcms/ui',
     'drizzle-orm',
     'drizzle-kit',
     'sharp',
@@ -77,21 +82,24 @@ payloadConfig.webpack = (config, options) => {
     ? _payloadWebpack(config, options)
     : config;
 
-  if (!options.isServer) {
-    result.resolve ??= {};
+  // Apply @payload-config stub for ALL non-nodejs compilations:
+  // client bundle (!isServer) AND edge runtime (isServer + nextRuntime === 'edge').
+  // Without this, webpack traces instrumentation.ts → @payload-config →
+  // payload.config.ts → @payloadcms/db-postgres → @next/env → crypto → ERROR
+  // during the edge runtime compilation pass.
+  const isNonNodeCompilation = !options.isServer || options.nextRuntime === 'edge'
 
-    // Redirect @payload-config to an empty stub on the client bundle.
-    // withPayload should do this automatically, but it's not working in this
-    // version combination — so we override it explicitly. This cuts the entire
-    // pg → pg-connection-string → fs dependency chain from the browser bundle.
+  if (isNonNodeCompilation) {
+    result.resolve ??= {}
     result.resolve.alias = {
       ...result.resolve.alias,
       '@payload-config': resolve(__dirname, 'src/payload-config-stub.js'),
-    };
+    }
+  }
 
-    // Belt-and-suspenders: stub out Node.js built-ins so any other
-    // server-only code that still slips through gets an empty module
-    // instead of a build error.
+  // Belt-and-suspenders fallback stubs — only needed for client bundle
+  if (!options.isServer) {
+    result.resolve ??= {}
     result.resolve.fallback = {
       ...result.resolve.fallback,
       stream: false,
@@ -102,7 +110,7 @@ payloadConfig.webpack = (config, options) => {
       net: false,
       tls: false,
       child_process: false,
-    };
+    }
   }
 
   return result;
