@@ -90,20 +90,15 @@ export default async function ResultPage({
                 <span>實付金額</span>
                 <span>NT${(order.totalAmount ?? 0).toLocaleString()}</span>
               </div>
-              {(order.pointsEarned ?? 0) > 0 && (
-                <div className="bg-brand-50 rounded-lg px-4 py-2.5 text-center text-sm text-brand-700 font-medium">
-                  ⭐ 本次獲得 {order.pointsEarned} 點！
-                </div>
-              )}
             </div>
           )}
 
           <div className="flex flex-col gap-3">
             <Link
-              href={`/${locale}/account/orders`}
+              href={`/${locale}/track?order=${encodeURIComponent(orderNumber)}`}
               className="bg-brand-700 hover:bg-brand-800 text-white font-serif tracking-widest py-3.5 rounded-xl transition-colors text-sm block"
             >
-              查看訂單
+              查看訂單狀態
             </Link>
             <Link
               href={`/${locale}/shop`}
@@ -137,10 +132,10 @@ export default async function ResultPage({
             {t('backToShop')}
           </Link>
           <Link
-            href={`/${locale}/account/orders`}
+            href={`/${locale}/track`}
             className="border border-sand-200 hover:border-brand-300 text-ink/70 py-3.5 rounded-xl transition-colors text-sm block"
           >
-            查看訂單記錄
+            查詢訂單狀態
           </Link>
         </div>
       </div>

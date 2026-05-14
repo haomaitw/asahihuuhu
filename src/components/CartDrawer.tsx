@@ -3,8 +3,6 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { useCartStore } from '@/store/cart'
-import { useCustomerStore } from '@/store/customer'
-import { useModalStore } from '@/store/modal'
 
 type Props = { open: boolean; onClose: () => void; locale?: string }
 
@@ -16,49 +14,20 @@ export function CartDrawer({ open, onClose, locale = 'zh-TW' }: Props) {
   const t = useTranslations('cart')
   const tc = useTranslations('checkout')
   const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCartStore()
-  const { customer } = useCustomerStore()
 
   const [step, setStep] = useState<Step>('cart')
   const [orderNumber, setOrderNumber] = useState('')
   const [orderOk, setOrderOk] = useState(false)
 
-  // Checkout form state
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [addr, setAddr] = useState({ zip: '', city: '', district: '', address: '' })
-
-  // Coupon state
-  const [couponCode, setCouponCode] = useState('')
-  const [couponMsg, setCouponMsg] = useState('')
-  const [couponDiscount, setCouponDiscount] = useState(0)
-  const [couponChecking, setCouponChecking] = useState(false)
-
-  // Points
-  const [pointsToRedeem, setPointsToRedeem] = useState(0)
-  const maxPoints = Math.min(customer?.points ?? 0, totalPrice + SHIPPING_FEE - couponDiscount)
-
   const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const finalTotal = Math.max(1, totalPrice + SHIPPING_FEE - couponDiscount - pointsToRedeem)
-
-  // Auto-fill from customer
-  useEffect(() => {
-    if (customer) {
-      setName(customer.name ?? '')
-      setEmail(customer.email ?? '')
-      setPhone(customer.phone ?? '')
-      const da = (customer.defaultAddress ?? {}) as any
-      setAddr({
-        zip: da.zip ?? '',
-        city: da.city ?? '',
-        district: da.district ?? '',
-        address: da.address ?? '',
-      })
-    }
-  }, [customer])
+  const finalTotal = Math.max(1, totalPrice + SHIPPING_FEE)
 
   // Reset step when drawer closes
   useEffect(() => {
@@ -66,36 +35,10 @@ export function CartDrawer({ open, onClose, locale = 'zh-TW' }: Props) {
       setTimeout(() => {
         setStep('cart')
         setError('')
-        setCouponCode('')
-        setCouponMsg('')
-        setCouponDiscount(0)
-        setPointsToRedeem(0)
         setNote('')
       }, 300)
     }
   }, [open])
-
-  const handleCouponApply = async () => {
-    if (!couponCode.trim()) return
-    setCouponChecking(true)
-    setCouponMsg('')
-    setCouponDiscount(0)
-    try {
-      const res = await fetch(`/api/coupons/validate?code=${couponCode.trim()}&amount=${totalPrice}`)
-      const data = await res.json()
-      if (data.valid) {
-        setCouponDiscount(data.discountAmount ?? 0)
-        const c = data.coupon
-        setCouponMsg(`✓ ${c.description ?? '折扣碼有效'} — 折抵 NT$${data.discountAmount}`)
-      } else {
-        setCouponMsg(`✗ ${data.error ?? '折扣碼無效'}`)
-      }
-    } catch {
-      setCouponMsg('✗ 查詢失敗，請稍後再試')
-    } finally {
-      setCouponChecking(false)
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -113,10 +56,6 @@ export function CartDrawer({ open, onClose, locale = 'zh-TW' }: Props) {
           customerEmail: email,
           customerPhone: phone,
           shippingAddress: addr,
-          couponCode: couponDiscount > 0 ? couponCode.trim() : undefined,
-          couponDiscount,
-          pointsRedeemed: pointsToRedeem,
-          customerId: customer?.id,
           note: note.trim() || undefined,
         }),
       })
@@ -128,7 +67,6 @@ export function CartDrawer({ open, onClose, locale = 'zh-TW' }: Props) {
       setOrderOk(true)
       setStep('done')
 
-      // If server returns ECPay redirect form fields, submit them
       if (data.url && data.fields) {
         const form = document.createElement('form')
         form.method = 'POST'
@@ -250,29 +188,9 @@ export function CartDrawer({ open, onClose, locale = 'zh-TW' }: Props) {
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
 
-              {/* Guest/member banner */}
-              {!customer && (
-                <div className="flex items-center justify-between bg-sea-50 border border-sea-200 rounded-xl px-4 py-3">
-                  <div>
-                    <p className="text-sm font-sans text-ink/80">以訪客身份結帳</p>
-                    <p className="text-xs text-ink/45 mt-0.5">訂單完成後可憑 Email 查詢</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => useModalStore.getState().openLogin()}
-                    className="text-xs text-sea-500 hover:text-sea-400 font-sans underline-offset-2 hover:underline shrink-0 ml-3"
-                  >
-                    會員登入
-                  </button>
-                </div>
-              )}
-
               {/* Contact info */}
               <div className="space-y-3">
                 <h3 className="text-xs uppercase tracking-widest text-ink/40">聯絡資料</h3>
-                {customer && (
-                  <p className="text-xs text-sea-600 bg-sea-50 rounded-lg px-3 py-2">已自動填入會員資料</p>
-                )}
                 <div>
                   <label className="block text-xs text-ink/50 mb-1">{tc('name')} *</label>
                   <input
@@ -344,56 +262,6 @@ export function CartDrawer({ open, onClose, locale = 'zh-TW' }: Props) {
                 </div>
               </div>
 
-              {/* Coupon */}
-              <div className="space-y-2">
-                <h3 className="text-xs uppercase tracking-widest text-ink/40">折扣碼</h3>
-                <div className="flex gap-2">
-                  <input
-                    value={couponCode}
-                    onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponMsg(''); setCouponDiscount(0) }}
-                    placeholder="輸入折扣碼"
-                    className="flex-1 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-mono focus:outline-none focus:border-sea-400 bg-white"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleCouponApply}
-                    disabled={couponChecking || !couponCode}
-                    className="bg-paper-100 hover:bg-paper-200 text-ink text-sm px-4 py-2 rounded-xl transition-colors disabled:opacity-50"
-                  >
-                    套用
-                  </button>
-                </div>
-                {couponMsg && (
-                  <p className={`text-xs ${couponMsg.startsWith('✓') ? 'text-green-600' : 'text-red-500'}`}>
-                    {couponMsg}
-                  </p>
-                )}
-              </div>
-
-              {/* Points */}
-              {customer && (customer.points ?? 0) > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xs uppercase tracking-widest text-ink/40">點數折抵</h3>
-                    <span className="text-xs text-ink/50">可用：{customer.points} 點</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min={0}
-                      max={maxPoints}
-                      step={10}
-                      value={pointsToRedeem}
-                      onChange={(e) => setPointsToRedeem(Number(e.target.value))}
-                      className="flex-1 accent-sea-500"
-                    />
-                    <span className="text-sm font-medium text-sea-600 w-16 text-right shrink-0">
-                      {pointsToRedeem > 0 ? `-NT$${pointsToRedeem}` : '0'}
-                    </span>
-                  </div>
-                </div>
-              )}
-
               {/* Gift / Order Note */}
               <div className="space-y-2">
                 <h3 className="text-xs uppercase tracking-widest text-ink/40">禮品留言 / 備註</h3>
@@ -421,18 +289,6 @@ export function CartDrawer({ open, onClose, locale = 'zh-TW' }: Props) {
                     <span>運費（黑貓冷凍宅配）</span>
                     <span>NT${SHIPPING_FEE}</span>
                   </div>
-                  {couponDiscount > 0 && (
-                    <div className="flex justify-between text-xs text-green-600">
-                      <span>折扣碼</span>
-                      <span>-NT${couponDiscount.toLocaleString()}</span>
-                    </div>
-                  )}
-                  {pointsToRedeem > 0 && (
-                    <div className="flex justify-between text-xs text-sea-600">
-                      <span>點數折抵</span>
-                      <span>-NT${pointsToRedeem.toLocaleString()}</span>
-                    </div>
-                  )}
                   <div className="flex justify-between font-medium text-sm pt-1 border-t border-stone-100">
                     <span>實付金額</span>
                     <span>NT${finalTotal.toLocaleString()}</span>

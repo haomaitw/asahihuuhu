@@ -16,7 +16,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
   } catch {
     // DB not ready — fall through to redirect
   }
-  if (!user) redirect('/admin/login')
+  if (!user || (user as any).role !== 'super-admin') redirect('/admin/login')
 
   return (
     <AdminShell user={user}>

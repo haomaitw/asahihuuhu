@@ -8,17 +8,15 @@ import { Link } from '@/i18n/routing'
 import { LangSwitcher } from './LangSwitcher'
 import { MobileMenu } from './MobileMenu'
 import { CartButton } from './CartButton'
-import { HeaderAccountButton } from './HeaderAccountButton'
 import { BrandMark } from './BrandMark'
 
 // Pages with light backgrounds that need dark nav text even at the top
-const LIGHT_BG_PATHS = ['/privacy', '/terms', '/returns', '/faq', '/track', '/account', '/shop', '/news', '/line-up', '/about']
+const LIGHT_BG_PATHS = ['/privacy', '/terms', '/returns', '/faq', '/track', '/shop', '/news', '/line-up']
 
 const navItems = [
   { key: 'news',   href: '/news'    },
   { key: 'lineup', href: '/line-up' },
   { key: 'shop',   href: '/shop'    },
-  { key: 'about',  href: '/about'   },
   { key: 'faq',    href: '/faq'     },
 ] as const
 
@@ -125,7 +123,6 @@ export function Header({ facebookUrl, instagramUrl }: HeaderProps = {}) {
           >
             <Package size={16} />
           </Link>
-          <HeaderAccountButton />
           <CartButton />
           <MobileMenu facebookUrl={facebookUrl} instagramUrl={instagramUrl} />
         </div>
