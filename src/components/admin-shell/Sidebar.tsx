@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Newspaper, HelpCircle, Home, Settings2,
   Package, ShoppingBag, Image as ImageIcon, Users,
-  ChevronLeft, ChevronRight, Tag, FolderOpen,
+  ChevronLeft, ChevronRight, Tag, FolderOpen, Lock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
