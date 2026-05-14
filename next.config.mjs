@@ -82,14 +82,26 @@ payloadConfig.webpack = (config, options) => {
     ? _payloadWebpack(config, options)
     : config;
 
-  // Apply @payload-config stub for ALL non-nodejs compilations:
-  // client bundle (!isServer) AND edge runtime (isServer + nextRuntime === 'edge').
-  // Without this, webpack traces instrumentation.ts → @payload-config →
-  // payload.config.ts → @payloadcms/db-postgres → @next/env → crypto → ERROR
-  // during the edge runtime compilation pass.
+  // For client bundle and Edge runtime, stub out @payload-config so webpack does
+  // not trace instrumentation.ts → payload.config.ts → @payloadcms/db-postgres →
+  // @next/env → crypto/path → BUILD ERROR.
+  //
+  // withPayload registers a NormalModuleReplacementPlugin that maps @payload-config
+  // to the real payload.config.ts for server builds. That plugin fires in the
+  // beforeResolve hook — BEFORE resolve.alias is consulted — so a plain alias
+  // override is insufficient. We must remove that plugin for non-Node compilations
+  // and then set the alias ourselves.
   const isNonNodeCompilation = !options.isServer || options.nextRuntime === 'edge'
 
   if (isNonNodeCompilation) {
+    result.plugins = (result.plugins ?? []).filter(plugin => {
+      if (plugin.constructor?.name === 'NormalModuleReplacementPlugin') {
+        const pattern = plugin.resourceRegExp?.source ?? ''
+        return !pattern.includes('payload-config')
+      }
+      return true
+    })
+
     result.resolve ??= {}
     result.resolve.alias = {
       ...result.resolve.alias,
