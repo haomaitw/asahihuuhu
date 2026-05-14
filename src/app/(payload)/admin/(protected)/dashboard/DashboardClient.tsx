@@ -9,11 +9,9 @@ import {
   ArrowRight,
   Image as ImageIcon,
   Settings2,
-  Users,
   TrendingUp,
   Truck,
   AlertTriangle,
-  Tag,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -23,7 +21,6 @@ type Stats = {
   pendingShipmentCount: number
   processingOrders: number
   todayOrders: number
-  totalCustomers: number
   totalRevenue: number
 }
 
@@ -132,8 +129,6 @@ const QUICK_LINKS = [
   { label: '新增商品',     href: '/admin/collections/products/create', icon: Package },
   { label: '查看訂單',     href: '/admin/collections/orders', icon: ShoppingBag },
   { label: '待出貨訂單',   href: '/admin/collections/orders?where[fulfillmentStatus][equals]=unfulfilled&where[status][equals]=paid', icon: Truck },
-  { label: '顧客管理',     href: '/admin/collections/customers', icon: Users },
-  { label: '優惠券管理',   href: '/admin/collections/coupons', icon: Tag },
   { label: '發布消息',     href: '/admin/collections/news/create', icon: Newspaper },
   { label: '媒體庫',       href: '/admin/collections/media', icon: ImageIcon },
   { label: '網站設定',     href: '/admin/globals/site-settings', icon: Settings2 },
@@ -190,13 +185,6 @@ export function DashboardClient({
           icon={ShoppingBag}
           href="/admin/collections/orders"
           variant="info"
-        />
-        <KpiCard
-          label="會員數"
-          value={stats.totalCustomers}
-          icon={Users}
-          href="/admin/collections/customers"
-          variant="neutral"
         />
         <KpiCard
           label="上架商品"
