@@ -19,6 +19,12 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PAYLOAD_SECRET=build-time-placeholder
 ENV NEXT_PUBLIC_SITE_URL=https://asahihuuhu.zeabur.app
+# Force DB connections to fail fast (connection refused) during build.
+# Without this, if Zeabur injects POSTGRES_URI into the build environment,
+# page data collection hangs for 15+ min waiting for TCP timeout.
+# Zeabur overrides these with real values at runtime.
+ENV POSTGRES_URI=postgresql://127.0.0.1:5432/build_placeholder
+ENV DATABASE_URL=postgresql://127.0.0.1:5432/build_placeholder
 
 RUN npm run build
 
@@ -44,10 +50,17 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static    ./.next/static
 # because Next.js standalone output trace often misses native .node files
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/sharp ./node_modules/sharp
 
+# ESM loader hooks: stub .css imports from Node.js-external packages at runtime.
+# @payloadcms/ui (in serverExternalPackages) pulls in react-image-crop which does
+# import './dist/ReactCrop.css'. Node.js ESM throws ERR_UNKNOWN_FILE_EXTENSION on
+# .css files, crashing every Payload admin page. The hooks return an empty module.
+COPY --from=builder --chown=nextjs:nodejs /app/src/css-noop-register.mjs ./
+COPY --from=builder --chown=nextjs:nodejs /app/src/css-noop-hooks.mjs ./
+
 USER nextjs
 
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["node", "--import", "./css-noop-register.mjs", "server.js"]
