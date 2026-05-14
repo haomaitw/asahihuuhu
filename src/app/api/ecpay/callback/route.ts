@@ -4,16 +4,6 @@ import configPromise from '@payload-config'
 import { generateCheckMacValue } from '@/lib/ecpay'
 import { sendOrderConfirmation } from '@/lib/email'
 
-// Points rule: NT$10 spent = 1 point
-const POINTS_PER_NT = 10
-
-// Tier thresholds (by totalSpent)
-function computeTier(totalSpent: number): string {
-  if (totalSpent >= 10000) return 'gold'
-  if (totalSpent >= 3000) return 'silver'
-  return 'regular'
-}
-
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData()
@@ -36,11 +26,9 @@ export async function POST(req: NextRequest) {
     const merchantTradeNo = params['MerchantTradeNo']
     const ecpayTradeNo = params['TradeNo'] ?? ''
     const isPaid = rtnCode === '1'
-    const status = isPaid ? 'paid' : 'failed'
 
     const payload = await getPayload({ config: configPromise })
 
-    // Find the order
     const result = await payload.find({
       collection: 'orders',
       where: { orderNumber: { equals: merchantTradeNo } },
@@ -53,17 +41,12 @@ export async function POST(req: NextRequest) {
       return new NextResponse('0|Error', { status: 200 })
     }
 
-    // Already processed — idempotency guard
+    // Idempotency guard
     if (order.status === 'paid') {
       return new NextResponse('1|OK', { status: 200 })
     }
 
     if (isPaid) {
-      const totalAmount: number = Number(order.totalAmount ?? 0)
-      const pointsEarned = Math.floor(totalAmount / POINTS_PER_NT)
-      const customerId = typeof order.customer === 'object' ? order.customer?.id : order.customer
-
-      // Update order
       await payload.update({
         collection: 'orders',
         id: order.id,
@@ -71,7 +54,6 @@ export async function POST(req: NextRequest) {
           status: 'paid',
           ecpayTradeNo,
           paidAt: new Date().toISOString(),
-          pointsEarned,
         },
         overrideAccess: true,
       })
@@ -99,47 +81,6 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Award loyalty points to customer (if order is linked to a customer account)
-      if (customerId) {
-        const customerResult = await payload.findByID({
-          collection: 'customers',
-          id: customerId,
-          overrideAccess: true,
-        })
-        const customer = customerResult as any
-        const currentPoints: number = Number(customer.points ?? 0)
-        const currentTotalSpent: number = Number(customer.totalSpent ?? 0)
-        const newTotalSpent = currentTotalSpent + totalAmount
-        const newPoints = currentPoints + pointsEarned
-
-        // Update customer points + totalSpent + tier
-        await payload.update({
-          collection: 'customers',
-          id: customerId,
-          data: {
-            points: newPoints,
-            totalSpent: newTotalSpent,
-            tier: computeTier(newTotalSpent),
-          },
-          overrideAccess: true,
-        })
-
-        // Record point transaction
-        if (pointsEarned > 0) {
-          await payload.create({
-            collection: 'point-transactions',
-            data: {
-              customer: customerId,
-              order: order.id,
-              type: 'earn',
-              points: pointsEarned,
-              balance: newPoints,
-              description: `訂單 ${merchantTradeNo} 消費累點`,
-            },
-            overrideAccess: true,
-          })
-        }
-      }
       // Send order confirmation email (non-blocking)
       if (order.customerEmail) {
         sendOrderConfirmation({
@@ -152,8 +93,6 @@ export async function POST(req: NextRequest) {
             unitPrice: i.unitPrice,
           })),
           subtotal: order.subtotal ?? order.totalAmount ?? 0,
-          couponDiscount: order.couponDiscount ?? 0,
-          pointsRedeemed: order.pointsRedeemed ?? 0,
           shippingFee: order.shippingFee ?? 0,
           totalAmount: order.totalAmount ?? 0,
         }).catch((e) => console.error('[email] order confirmation failed:', e))

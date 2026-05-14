@@ -4,10 +4,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
-  LayoutDashboard, Newspaper, HelpCircle, Home, Info, Settings2,
+  LayoutDashboard, Newspaper, HelpCircle, Home, Settings2,
   Package, ShoppingBag, Image as ImageIcon, Users,
-  ChevronLeft, ChevronRight, Tag, FolderOpen, UserCircle,
-  UsersRound, Ticket, Coins, Truck, QrCode, ChefHat, Lock,
+  ChevronLeft, ChevronRight, Tag, FolderOpen,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -39,7 +38,6 @@ const NAV: NavGroup[] = [
       { label: '最新消息', href: '/admin/collections/news', icon: Newspaper },
       { label: '常見問答', href: '/admin/collections/faqs', icon: HelpCircle },
       { label: '首頁設定', href: '/admin/globals/home-page', icon: Home },
-      { label: '關於設定', href: '/admin/globals/about-page', icon: Info },
       { label: '網站設定', href: '/admin/globals/site-settings', icon: Settings2 },
     ],
   },
@@ -48,9 +46,6 @@ const NAV: NavGroup[] = [
     items: [
       { label: '商品管理', href: '/admin/collections/products', icon: Package },
       { label: '訂單管理', href: '/admin/collections/orders', icon: ShoppingBag },
-      { label: '顧客管理', href: '/admin/collections/customers', icon: UsersRound },
-      { label: '優惠券', href: '/admin/collections/coupons', icon: Ticket },
-      { label: '點數記錄', href: '/admin/collections/point-transactions', icon: Coins },
     ],
   },
   {
@@ -61,36 +56,15 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    group: '人員管理',
-    items: [
-      { label: '團隊成員', href: '/admin/collections/staff', icon: UserCircle },
-    ],
-  },
-  {
     group: '資產',
     items: [
       { label: '媒體庫', href: '/admin/collections/media', icon: ImageIcon },
     ],
   },
   {
-    group: '桌邊服務',
-    superAdminOnly: true,
+    group: '帳號管理',
     items: [
-      { label: 'QR 碼點餐', href: '/admin/dine-in', icon: QrCode, locked: true },
-      { label: '廚房顯示', href: '/admin/kitchen', icon: ChefHat, locked: true },
-    ],
-  },
-  {
-    group: '員工管理',
-    items: [
-      { label: '帳號管理', href: '/admin/collections/users', icon: Users },
-    ],
-  },
-  {
-    group: '代管商專區',
-    superAdminOnly: true,
-    items: [
-      { label: '功能開關', href: '/admin/globals/feature-flags', icon: Lock, superAdminOnly: true },
+      { label: '用戶管理', href: '/admin/collections/users', icon: Users },
     ],
   },
 ]

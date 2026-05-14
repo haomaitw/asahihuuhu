@@ -54,10 +54,10 @@ export function ResultProcessing({ orderNumber, locale }: Props) {
           手動重新整理
         </button>
         <a
-          href={`/${locale}/account/orders`}
+          href={`/${locale}/track`}
           className="text-xs text-ink/40 hover:text-ink/60 underline"
         >
-          前往訂單記錄查看
+          前往訂單查詢
         </a>
       </div>
     </div>
