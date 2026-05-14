@@ -1,7 +1,7 @@
 import { withPayload } from '@payloadcms/next/withPayload';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname, resolve } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
@@ -72,5 +72,24 @@ const nextConfig = {
 };
 
 const payloadConfig = withPayload(nextConfig);
+
+// Stub @payload-config for Edge runtime webpack compilation only.
+// instrumentation.ts is compiled for both Node.js AND Edge runtimes. Without this,
+// webpack traces: @payload-config → payload.config.ts → pg → @next/env → crypto → BUILD ERROR.
+// The stub returns an empty module; register() exits early in Edge runtime anyway.
+// Node.js compilation resolves @payload-config to the real compiled file via the
+// tsconfig path alias — no stub needed there.
+const _payloadWebpack = payloadConfig.webpack
+payloadConfig.webpack = (config, options) => {
+  const result = typeof _payloadWebpack === 'function' ? _payloadWebpack(config, options) : config
+  if (options.nextRuntime === 'edge') {
+    result.resolve ??= {}
+    result.resolve.alias = {
+      ...result.resolve.alias,
+      '@payload-config': resolve(__dirname, 'src/payload-config-stub.js'),
+    }
+  }
+  return result
+}
 
 export default withNextIntl(payloadConfig);

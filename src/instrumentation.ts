@@ -10,12 +10,15 @@ export async function register() {
   if (!process.env.POSTGRES_URI && !process.env.DATABASE_URL) return
 
   try {
-    // webpackIgnore: true prevents webpack from statically tracing these imports
-    // during Edge runtime compilation (where Node.js modules are unavailable).
-    // At Node.js runtime they resolve normally; Edge runtime returns early above.
     const { createRequire } = await import(/* webpackIgnore: true */ 'module')
     const { getPayload } = await import(/* webpackIgnore: true */ 'payload')
-    const { default: configPromise } = await import(/* webpackIgnore: true */ '@payload-config')
+    // @payload-config must NOT use webpackIgnore — it is a tsconfig path alias, not
+    // a real npm package. webpackIgnore emits the literal string "@payload-config" into
+    // the compiled JS, which Node.js cannot resolve at runtime ("not a valid package name").
+    // Instead, the Edge compilation is handled by stubbing @payload-config via a
+    // webpack alias in next.config.mjs (Edge only). For Node.js, webpack resolves the
+    // tsconfig alias to the actual compiled file path, which works correctly at runtime.
+    const { default: configPromise } = await import('@payload-config')
     const { sql } = await import(/* webpackIgnore: true */ 'drizzle-orm')
 
     const payload = await getPayload({ config: configPromise })
