@@ -7,7 +7,18 @@ export const metadata: Metadata = { title: 'Dashboard' }
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  const payload = await getPayload({ config: configPromise })
+  let payload: Awaited<ReturnType<typeof getPayload>> | null = null
+  try {
+    payload = await getPayload({ config: configPromise })
+  } catch {
+    return (
+      <DashboardClient
+        stats={{ totalProducts: 0, pendingShipmentCount: 0, processingOrders: 0, todayOrders: 0, totalCustomers: 0, totalRevenue: 0 }}
+        recentOrders={[]}
+        lowStockProducts={[]}
+      />
+    )
+  }
 
   let stats = {
     totalProducts: 0,
@@ -30,10 +41,10 @@ export default async function DashboardPage() {
 
     const [products, customers, pendingShipment, processingOrders, allPaid, todayResult] =
       await Promise.all([
-        payload.find({ collection: 'products', limit: 0, overrideAccess: true }),
-        payload.find({ collection: 'customers', limit: 0, overrideAccess: true }),
+        payload!.find({ collection: 'products', limit: 0, overrideAccess: true }),
+        payload!.find({ collection: 'customers', limit: 0, overrideAccess: true }),
         // pendingShipment: paid but unfulfilled
-        payload.find({
+        payload!.find({
           collection: 'orders',
           where: {
             and: [
@@ -44,21 +55,21 @@ export default async function DashboardPage() {
           limit: 0,
           overrideAccess: true,
         }),
-        payload.find({
+        payload!.find({
           collection: 'orders',
           where: { fulfillmentStatus: { equals: 'processing' } },
           limit: 0,
           overrideAccess: true,
         }),
         // Get all paid orders to sum totalRevenue
-        payload.find({
+        payload!.find({
           collection: 'orders',
           where: { status: { equals: 'paid' } },
           limit: 9999,
           overrideAccess: true,
         }),
         // Today's orders
-        payload.find({
+        payload!.find({
           collection: 'orders',
           where: {
             and: [
@@ -77,7 +88,7 @@ export default async function DashboardPage() {
     )
 
     // lowStock: products where trackStock=true and stock <= lowStockThreshold
-    const allProducts = await payload.find({
+    const allProducts = await payload!.find({
       collection: 'products',
       where: { trackStock: { equals: true } },
       limit: 100,
@@ -106,7 +117,7 @@ export default async function DashboardPage() {
 
   // Fetch recent orders (last 8)
   try {
-    const result = await payload.find({
+    const result = await payload!.find({
       collection: 'orders',
       limit: 8,
       sort: '-createdAt',
