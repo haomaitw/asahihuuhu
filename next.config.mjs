@@ -109,8 +109,11 @@ payloadConfig.webpack = (config, options) => {
     }
   }
 
-  // Belt-and-suspenders fallback stubs — only needed for client bundle
-  if (!options.isServer) {
+  // Stub out all Node.js built-ins for every non-Node.js compilation (client
+  // bundle AND Edge runtime). The Edge runtime does not have path/crypto/etc.,
+  // so if webpack traces the payload chain past our @payload-config alias, these
+  // fallbacks prevent "Module not found" build errors.
+  if (isNonNodeCompilation) {
     result.resolve ??= {}
     result.resolve.fallback = {
       ...result.resolve.fallback,
@@ -122,6 +125,10 @@ payloadConfig.webpack = (config, options) => {
       net: false,
       tls: false,
       child_process: false,
+      module: false,
+      util: false,
+      url: false,
+      events: false,
     }
   }
 
