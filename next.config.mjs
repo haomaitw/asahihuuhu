@@ -82,21 +82,39 @@ payloadConfig.webpack = (config, options) => {
     ? _payloadWebpack(config, options)
     : config;
 
-  if (!options.isServer) {
-    result.resolve ??= {};
+  // For client bundle and Edge runtime, stub out @payload-config so webpack does
+  // not trace instrumentation.ts → payload.config.ts → @payloadcms/db-postgres →
+  // @next/env → crypto/path → BUILD ERROR.
+  //
+  // withPayload registers a NormalModuleReplacementPlugin that maps @payload-config
+  // to the real payload.config.ts for server builds. That plugin fires in the
+  // beforeResolve hook — BEFORE resolve.alias is consulted — so a plain alias
+  // override is insufficient. We must remove that plugin for non-Node compilations
+  // and then set the alias ourselves.
+  const isNonNodeCompilation = !options.isServer || options.nextRuntime === 'edge'
 
-    // Redirect @payload-config to an empty stub on the client bundle.
-    // withPayload should do this automatically, but it's not working in this
-    // version combination — so we override it explicitly. This cuts the entire
-    // pg → pg-connection-string → fs dependency chain from the browser bundle.
+  if (isNonNodeCompilation) {
+    result.plugins = (result.plugins ?? []).filter(plugin => {
+      if (plugin.constructor?.name === 'NormalModuleReplacementPlugin') {
+        const pattern = plugin.resourceRegExp?.source ?? ''
+        return !pattern.includes('payload-config')
+      }
+      return true
+    })
+
+    result.resolve ??= {}
     result.resolve.alias = {
       ...result.resolve.alias,
       '@payload-config': resolve(__dirname, 'src/payload-config-stub.js'),
-    };
+    }
+  }
 
-    // Belt-and-suspenders: stub out Node.js built-ins so any other
-    // server-only code that still slips through gets an empty module
-    // instead of a build error.
+  // Stub out all Node.js built-ins for every non-Node.js compilation (client
+  // bundle AND Edge runtime). The Edge runtime does not have path/crypto/etc.,
+  // so if webpack traces the payload chain past our @payload-config alias, these
+  // fallbacks prevent "Module not found" build errors.
+  if (isNonNodeCompilation) {
+    result.resolve ??= {}
     result.resolve.fallback = {
       ...result.resolve.fallback,
       stream: false,
@@ -107,7 +125,11 @@ payloadConfig.webpack = (config, options) => {
       net: false,
       tls: false,
       child_process: false,
-    };
+      module: false,
+      util: false,
+      url: false,
+      events: false,
+    }
   }
 
   return result;
