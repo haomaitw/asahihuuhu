@@ -10,10 +10,13 @@ export async function register() {
   if (!process.env.POSTGRES_URI && !process.env.DATABASE_URL) return
 
   try {
-    const { createRequire } = await import('module')
-    const { getPayload } = await import('payload')
-    const { default: configPromise } = await import('@payload-config')
-    const { sql } = await import('drizzle-orm')
+    // webpackIgnore: true prevents webpack from statically tracing these imports
+    // during Edge runtime compilation (where Node.js modules are unavailable).
+    // At Node.js runtime they resolve normally; Edge runtime returns early above.
+    const { createRequire } = await import(/* webpackIgnore: true */ 'module')
+    const { getPayload } = await import(/* webpackIgnore: true */ 'payload')
+    const { default: configPromise } = await import(/* webpackIgnore: true */ '@payload-config')
+    const { sql } = await import(/* webpackIgnore: true */ 'drizzle-orm')
 
     const payload = await getPayload({ config: configPromise })
     const db = (payload as any).db

@@ -1,7 +1,7 @@
 import { withPayload } from '@payloadcms/next/withPayload';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+import { dirname } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
@@ -71,68 +71,6 @@ const nextConfig = {
   devIndicators: false,
 };
 
-// Apply withPayload first, then patch webpack AFTER so our changes
-// cannot be overridden by withPayload's own webpack logic.
 const payloadConfig = withPayload(nextConfig);
-const _payloadWebpack = payloadConfig.webpack;
-
-payloadConfig.webpack = (config, options) => {
-  // Run withPayload's webpack modifications first
-  const result = typeof _payloadWebpack === 'function'
-    ? _payloadWebpack(config, options)
-    : config;
-
-  // For client bundle and Edge runtime, stub out @payload-config so webpack does
-  // not trace instrumentation.ts → payload.config.ts → @payloadcms/db-postgres →
-  // @next/env → crypto/path → BUILD ERROR.
-  //
-  // withPayload registers a NormalModuleReplacementPlugin that maps @payload-config
-  // to the real payload.config.ts for server builds. That plugin fires in the
-  // beforeResolve hook — BEFORE resolve.alias is consulted — so a plain alias
-  // override is insufficient. We must remove that plugin for non-Node compilations
-  // and then set the alias ourselves.
-  const isNonNodeCompilation = !options.isServer || options.nextRuntime === 'edge'
-
-  if (isNonNodeCompilation) {
-    result.plugins = (result.plugins ?? []).filter(plugin => {
-      if (plugin.constructor?.name === 'NormalModuleReplacementPlugin') {
-        const pattern = plugin.resourceRegExp?.source ?? ''
-        return !pattern.includes('payload-config')
-      }
-      return true
-    })
-
-    result.resolve ??= {}
-    result.resolve.alias = {
-      ...result.resolve.alias,
-      '@payload-config': resolve(__dirname, 'src/payload-config-stub.js'),
-    }
-  }
-
-  // Stub out all Node.js built-ins for every non-Node.js compilation (client
-  // bundle AND Edge runtime). The Edge runtime does not have path/crypto/etc.,
-  // so if webpack traces the payload chain past our @payload-config alias, these
-  // fallbacks prevent "Module not found" build errors.
-  if (isNonNodeCompilation) {
-    result.resolve ??= {}
-    result.resolve.fallback = {
-      ...result.resolve.fallback,
-      stream: false,
-      crypto: false,
-      fs: false,
-      os: false,
-      path: false,
-      net: false,
-      tls: false,
-      child_process: false,
-      module: false,
-      util: false,
-      url: false,
-      events: false,
-    }
-  }
-
-  return result;
-};
 
 export default withNextIntl(payloadConfig);

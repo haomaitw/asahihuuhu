@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Newspaper, HelpCircle, Home, Settings2,
   Package, ShoppingBag, Image as ImageIcon, Users,
-  ChevronLeft, ChevronRight, Tag, FolderOpen,
+  ChevronLeft, ChevronRight, Tag, FolderOpen, Lock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -15,14 +15,16 @@ type NavItem = {
   href: string
   icon: React.ComponentType<{ className?: string }>
   badge?: number
-  superAdminOnly?: boolean
   locked?: boolean
+  // roles that can see this item; undefined = all roles
+  roles?: string[]
 }
 
 type NavGroup = {
   group: string
   items: NavItem[]
-  superAdminOnly?: boolean
+  // roles that can see this group; undefined = all roles
+  roles?: string[]
 }
 
 const NAV: NavGroup[] = [
@@ -33,7 +35,15 @@ const NAV: NavGroup[] = [
     ],
   },
   {
+    group: '商城',
+    items: [
+      { label: '商品管理', href: '/admin/collections/products', icon: Package, roles: ['super-admin', 'admin'] },
+      { label: '訂單管理', href: '/admin/collections/orders', icon: ShoppingBag },
+    ],
+  },
+  {
     group: '內容管理',
+    roles: ['super-admin', 'admin'],
     items: [
       { label: '最新消息', href: '/admin/collections/news', icon: Newspaper },
       { label: '常見問答', href: '/admin/collections/faqs', icon: HelpCircle },
@@ -42,14 +52,8 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    group: '商城',
-    items: [
-      { label: '商品管理', href: '/admin/collections/products', icon: Package },
-      { label: '訂單管理', href: '/admin/collections/orders', icon: ShoppingBag },
-    ],
-  },
-  {
     group: '分類管理',
+    roles: ['super-admin', 'admin'],
     items: [
       { label: '商品分類', href: '/admin/collections/product-categories', icon: Tag },
       { label: '文章分類', href: '/admin/collections/news-categories', icon: FolderOpen },
@@ -57,12 +61,14 @@ const NAV: NavGroup[] = [
   },
   {
     group: '資產',
+    roles: ['super-admin', 'admin'],
     items: [
       { label: '媒體庫', href: '/admin/collections/media', icon: ImageIcon },
     ],
   },
   {
     group: '帳號管理',
+    roles: ['super-admin'],
     items: [
       { label: '用戶管理', href: '/admin/collections/users', icon: Users },
     ],
@@ -129,8 +135,6 @@ function SidebarContent({
   pathname: string
   role?: string
 }) {
-  const isSuperAdmin = role === 'super-admin'
-
   return (
     <div className="flex h-full flex-col bg-adm-bg-base border-r border-adm-border-subtle">
       {/* Logo */}
@@ -150,7 +154,7 @@ function SidebarContent({
         />
         {!collapsed && (
           <span className="ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded bg-adm-brand-100 text-adm-brand-700 shrink-0">
-            {isSuperAdmin ? '代管商' : '客戶'}
+            {role === 'super-admin' ? '代管商' : role === 'admin' ? '客戶' : '員工'}
           </span>
         )}
       </div>
@@ -158,9 +162,10 @@ function SidebarContent({
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-5">
         {NAV.map((section) => {
-          // Hide super-admin-only sections from regular admins
-          if (section.superAdminOnly && !isSuperAdmin) return null
-          const visibleItems = section.items.filter((item) => !item.superAdminOnly || isSuperAdmin)
+          if (section.roles && !section.roles.includes(role ?? '')) return null
+          const visibleItems = section.items.filter(
+            (item) => !item.roles || item.roles.includes(role ?? '')
+          )
           if (!visibleItems.length) return null
 
           return (

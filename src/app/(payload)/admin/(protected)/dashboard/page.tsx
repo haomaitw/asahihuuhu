@@ -7,25 +7,11 @@ export const metadata: Metadata = { title: 'Dashboard' }
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  let payload: Awaited<ReturnType<typeof getPayload>> | null = null
-  try {
-    payload = await getPayload({ config: configPromise })
-  } catch {
-    return (
-      <DashboardClient
-        stats={{ totalProducts: 0, pendingShipmentCount: 0, processingOrders: 0, todayOrders: 0, totalCustomers: 0, totalRevenue: 0 }}
-        recentOrders={[]}
-        lowStockProducts={[]}
-      />
-    )
-  }
-
   let stats = {
     totalProducts: 0,
     pendingShipmentCount: 0,
     processingOrders: 0,
     todayOrders: 0,
-    totalCustomers: 0,
     totalRevenue: 0,
   }
 
@@ -33,18 +19,17 @@ export default async function DashboardPage() {
   let recentOrders: any[] = []
 
   try {
-    // Today's date range
+    const payload = await getPayload({ config: configPromise })
+
     const todayStart = new Date()
     todayStart.setHours(0, 0, 0, 0)
     const todayEnd = new Date()
     todayEnd.setHours(23, 59, 59, 999)
 
-    const [products, customers, pendingShipment, processingOrders, allPaid, todayResult] =
+    const [products, pendingShipment, processingOrders, allPaid, todayResult] =
       await Promise.all([
-        payload!.find({ collection: 'products', limit: 0, overrideAccess: true }),
-        payload!.find({ collection: 'customers', limit: 0, overrideAccess: true }),
-        // pendingShipment: paid but unfulfilled
-        payload!.find({
+        payload.find({ collection: 'products', limit: 0, overrideAccess: true }),
+        payload.find({
           collection: 'orders',
           where: {
             and: [
@@ -55,21 +40,19 @@ export default async function DashboardPage() {
           limit: 0,
           overrideAccess: true,
         }),
-        payload!.find({
+        payload.find({
           collection: 'orders',
           where: { fulfillmentStatus: { equals: 'processing' } },
           limit: 0,
           overrideAccess: true,
         }),
-        // Get all paid orders to sum totalRevenue
-        payload!.find({
+        payload.find({
           collection: 'orders',
           where: { status: { equals: 'paid' } },
           limit: 9999,
           overrideAccess: true,
         }),
-        // Today's orders
-        payload!.find({
+        payload.find({
           collection: 'orders',
           where: {
             and: [
@@ -87,55 +70,48 @@ export default async function DashboardPage() {
       0,
     )
 
-    // lowStock: products where trackStock=true and stock <= lowStockThreshold
-    const allProducts = await payload!.find({
+    const allProducts = await payload.find({
       collection: 'products',
       where: { trackStock: { equals: true } },
       limit: 100,
       overrideAccess: true,
     })
-    const lowStockDocs = allProducts.docs.filter(
-      (p: any) => (p.stock ?? 0) <= (p.lowStockThreshold ?? 5),
-    )
-    lowStockProducts = lowStockDocs.map((p: any) => ({
-      id: p.id,
-      name: p.name ?? '未命名商品',
-      stock: p.stock ?? 0,
-    }))
+    lowStockProducts = allProducts.docs
+      .filter((p: any) => (p.stock ?? 0) <= (p.lowStockThreshold ?? 5))
+      .map((p: any) => ({
+        id: p.id,
+        name: p.name ?? '未命名商品',
+        stock: p.stock ?? 0,
+      }))
 
     stats = {
       totalProducts: products.totalDocs,
       pendingShipmentCount: pendingShipment.totalDocs,
       processingOrders: processingOrders.totalDocs,
       todayOrders: todayResult.totalDocs,
-      totalCustomers: customers.totalDocs,
       totalRevenue,
     }
-  } catch {
-    // DB not ready — show zeros
-  }
 
-  // Fetch recent orders (last 8)
-  try {
-    const result = await payload!.find({
+    const result = await payload.find({
       collection: 'orders',
       limit: 8,
       sort: '-createdAt',
       overrideAccess: true,
     })
     recentOrders = result.docs.map((o: any) => ({
-      id:                String(o.id),
-      orderNumber:       o.orderNumber       ?? null,
-      status:            o.status            ?? null,
+      id: String(o.id),
+      orderNumber: o.orderNumber ?? null,
+      status: o.status ?? null,
       fulfillmentStatus: o.fulfillmentStatus ?? null,
-      totalAmount:       o.totalAmount != null ? Number(o.totalAmount) : null,
-      createdAt:         o.createdAt ? String(o.createdAt) : null,
-      customerName:      typeof o.customer === 'object' && o.customer !== null
-                           ? (o.customer?.name ?? null)
-                           : null,
+      totalAmount: o.totalAmount != null ? Number(o.totalAmount) : null,
+      createdAt: o.createdAt ? String(o.createdAt) : null,
+      customerName:
+        typeof o.customer === 'object' && o.customer !== null
+          ? (o.customer?.name ?? null)
+          : null,
     }))
   } catch {
-    // ignore
+    // DB not ready — show zeros
   }
 
   return (
