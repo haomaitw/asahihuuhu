@@ -7,15 +7,15 @@ import { useTranslations } from 'next-intl'
 import { ShoppingBag, Truck, Snowflake, ChevronLeft, CheckCircle2, Bell } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import type { CmsProduct, CmsProductDetail } from '@/lib/cms-products'
-import { RichText } from '@/components/RichText'
 
 type Props = {
   product: CmsProductDetail
   locale: string
   relatedProducts?: CmsProduct[]
+  children?: React.ReactNode
 }
 
-export function ProductDetailClient({ product, locale, relatedProducts = [] }: Props) {
+export function ProductDetailClient({ product, locale, relatedProducts = [], children }: Props) {
   const { addItem, items } = useCartStore()
   const t = useTranslations()
 
@@ -290,11 +290,11 @@ export function ProductDetailClient({ product, locale, relatedProducts = [] }: P
         </div>
 
         {/* ── Description ─────────────────────────────────────────── */}
-        {product.description && (
+        {children && (
           <div className="mt-16 lg:mt-24 border-t border-paper-100 pt-12">
             <h2 className="font-serif text-2xl tracking-wider mb-8 text-center">商品詳情</h2>
             <div className="max-w-2xl mx-auto prose prose-sm prose-ink leading-relaxed">
-              <RichText data={product.description} />
+              {children}
             </div>
           </div>
         )}

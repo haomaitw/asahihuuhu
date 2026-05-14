@@ -1,3 +1,4 @@
+import 'server-only'
 /**
  * Email utility — sends transactional emails via the Payload nodemailer adapter.
  * All functions are server-side only.

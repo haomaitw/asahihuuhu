@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { setRequestLocale } from 'next-intl/server'
 import { getProductBySlug, getProducts } from '@/lib/cms-products'
 import { ProductDetailClient } from './ProductDetailClient'
+import { RichText } from '@/components/RichText'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,5 +73,9 @@ export default async function ProductDetailPage({ params }: Props) {
     // DB not ready / ignore
   }
 
-  return <ProductDetailClient product={product!} locale={locale} relatedProducts={relatedProducts} />
+  return (
+    <ProductDetailClient product={product!} locale={locale} relatedProducts={relatedProducts}>
+      {product!.description ? <RichText data={product!.description} /> : null}
+    </ProductDetailClient>
+  )
 }
