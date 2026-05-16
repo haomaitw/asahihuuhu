@@ -10,15 +10,20 @@ export default async function FeatureFlagsPage() {
   const cookieStore = await cookies()
   const sessionCookie = cookieStore.get('__session')?.value
 
-  if (sessionCookie) {
-    try {
-      const decoded = await adminAuth.verifySessionCookie(sessionCookie, true)
-      const role = (decoded as any).role as string | undefined
-      if (role !== 'super-admin') redirect('/admin/dashboard')
-    } catch {
-      redirect('/admin/dashboard')
-    }
-  } else {
+  if (!sessionCookie) redirect('/admin/dashboard')
+
+  try {
+    const decoded = await adminAuth.verifySessionCookie(sessionCookie, true)
+    const uid = decoded.uid
+
+    // Firestore is source of truth for role
+    let role: string | undefined
+    const userDoc = await adminDb.collection('users').doc(uid).get()
+    if (userDoc.exists) role = (userDoc.data() as any)?.role
+    if (!role) role = (decoded as any).role
+
+    if (role !== 'super-admin') redirect('/admin/dashboard')
+  } catch {
     redirect('/admin/dashboard')
   }
 

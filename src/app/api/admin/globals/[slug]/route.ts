@@ -8,7 +8,7 @@ type Params = { params: Promise<{ slug: string }> }
  * Slugs that require super-admin access for writes.
  * All other slugs can be written by admin+.
  */
-const SUPER_ADMIN_ONLY_SLUGS = ['feature-flags']
+const SUPER_ADMIN_ONLY_SLUGS = ['feature-flags', 'site-settings']
 
 /**
  * GET /api/admin/globals/[slug]
