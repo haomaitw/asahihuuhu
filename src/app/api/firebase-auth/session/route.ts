@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { adminAuth } from '@/lib/firebase/admin'
+import { adminAuth, adminDb } from '@/lib/firebase/admin'
 
 const SESSION_DAYS = 5
 const SESSION_MS = SESSION_DAYS * 24 * 60 * 60 * 1000
@@ -11,7 +11,20 @@ export async function POST(request: Request) {
     if (!idToken) return NextResponse.json({ error: 'idToken required' }, { status: 400 })
 
     const decoded = await adminAuth.verifyIdToken(idToken)
-    const role = (decoded as any).role as string | undefined
+    const uid = decoded.uid
+
+    // Look up role from Firestore users collection (source of truth)
+    let role: string | undefined
+    const userDoc = await adminDb.collection('users').doc(uid).get()
+    if (userDoc.exists) {
+      role = (userDoc.data() as any)?.role
+    }
+
+    // Fall back to custom claims if Firestore doc doesn't exist yet
+    if (!role) {
+      role = (decoded as any).role
+    }
+
     if (!role || !['super-admin', 'admin', 'staff'].includes(role)) {
       return NextResponse.json({ error: '無後台存取權限' }, { status: 403 })
     }
