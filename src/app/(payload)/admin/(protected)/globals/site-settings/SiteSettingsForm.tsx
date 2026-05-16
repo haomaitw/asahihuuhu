@@ -23,6 +23,7 @@ const TABS = [
   { key: 'basic',       label: '基本資料'     },
   { key: 'hours',       label: '營業時間'     },
   { key: 'tcat',        label: '黑貓出貨設定' },
+  { key: 'payment',     label: '綠界 / ECPay' },
   { key: 'email',       label: 'Email 設定'   },
   { key: 'seo',         label: 'SEO'          },
 ] as const
@@ -232,7 +233,7 @@ function LocaleTabs({
 
 // ── Main form ─────────────────────────────────────────────────────────────────
 
-export function SiteSettingsForm({ initialData }: { initialData?: any }) {
+export function SiteSettingsForm({ initialData, ecpayInfo }: { initialData?: any; ecpayInfo?: { merchantId: string; isTest: boolean; configured: boolean } }) {
   const [form, setForm]     = React.useState<FormState>(() => initForm(initialData))
   const [tab, setTab]       = React.useState<TabKey>('maintenance')
   const [locale, setLocale] = React.useState<LocaleKey>('zh-TW')
@@ -648,6 +649,60 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
                 ]}
               />
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Tab: 綠界 / ECPay ───────────────────────────────────── */}
+      {tab === 'payment' && (
+        <Card>
+          <SectionHeader
+            title="綠界 / ECPay 金流設定"
+            description="金流 API 金鑰由系統環境變數管理，如需修改請至 Zeabur 後台更新以下環境變數"
+          />
+          <CardContent className="p-5 space-y-5">
+            {/* Status indicator */}
+            <div className={cn(
+              'flex items-center gap-3 rounded-adm-lg border px-4 py-3',
+              ecpayInfo?.configured
+                ? 'border-adm-success-500/30 bg-adm-success-50'
+                : 'border-adm-warning-500/30 bg-adm-warning-50'
+            )}>
+              <span className={cn(
+                'h-2.5 w-2.5 rounded-full shrink-0',
+                ecpayInfo?.configured ? 'bg-adm-success-500' : 'bg-adm-warning-500'
+              )} />
+              <div>
+                <p className="text-sm font-medium text-adm-text-primary">
+                  {ecpayInfo?.configured ? '金流已設定' : '金流尚未設定'}
+                </p>
+                <p className="text-xs text-adm-text-tertiary mt-0.5">
+                  {ecpayInfo?.configured
+                    ? `Merchant ID: ${ecpayInfo.merchantId}　模式：${ecpayInfo.isTest ? '測試' : '正式'}`
+                    : '請在 Zeabur 設定 ECPAY_MERCHANT_ID、ECPAY_HASH_KEY、ECPAY_HASH_IV'}
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-adm-lg bg-adm-bg-sunken px-4 py-4 space-y-2">
+              <p className="text-xs font-semibold text-adm-text-secondary uppercase tracking-wider">需設定的環境變數</p>
+              {[
+                { key: 'ECPAY_MERCHANT_ID', desc: '綠界特店編號' },
+                { key: 'ECPAY_HASH_KEY', desc: '金鑰 HashKey' },
+                { key: 'ECPAY_HASH_IV', desc: '金鑰 HashIV' },
+                { key: 'ECPAY_IS_TEST', desc: '測試模式（true/false，測試用 true）' },
+                { key: 'ECPAY_LOGISTICS_MERCHANT_ID', desc: '綠界物流特店編號（出貨用，可與上方相同）' },
+              ].map(({ key, desc }) => (
+                <div key={key} className="flex items-start gap-3">
+                  <code className="font-mono text-xs bg-adm-bg-base border border-adm-border-default rounded px-1.5 py-0.5 text-adm-brand-600 shrink-0">{key}</code>
+                  <span className="text-xs text-adm-text-tertiary">{desc}</span>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-xs text-adm-text-tertiary">
+              修改環境變數後，請至 Zeabur 重新部署應用程式使設定生效。
+            </p>
           </CardContent>
         </Card>
       )}

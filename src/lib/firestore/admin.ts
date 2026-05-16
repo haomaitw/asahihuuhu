@@ -173,11 +173,38 @@ export async function getShopPage(locale: Locale = 'zh-TW'): Promise<any> {
 }
 
 export async function getAboutPage(locale: Locale = 'zh-TW'): Promise<any> {
-  return getSettingsDoc('about-page')
+  const data = await getSettingsDoc('about-page')
+  if (!data) return null
+  return {
+    ...data,
+    heroSubtitle: localized((data as any).heroSubtitle, locale),
+    storyP1: localized((data as any).storyP1, locale),
+    storyP2: localized((data as any).storyP2, locale),
+    storyP3: localized((data as any).storyP3, locale),
+  }
 }
 
 export async function getFeatureFlags(): Promise<any> {
   return getSettingsDoc('feature-flags')
+}
+
+// ── Menu Items ────────────────────────────────────────────────────────────────
+
+export async function getMenuItems(locale: Locale = 'zh-TW'): Promise<any[]> {
+  const snap = await adminDb.collection('menu-items').orderBy('category').orderBy('order', 'asc').get()
+  if (snap.empty) return []
+  return snap.docs.map((d: any) => {
+    const data = d.data()
+    return {
+      id: d.id,
+      name: localized(data.name, locale),
+      category: data.category,
+      image: data.image ?? null,
+      badge: data.badge ?? null,
+      order: data.order ?? 0,
+      isAvailable: data.isAvailable ?? true,
+    }
+  }).filter((item: any) => item.isAvailable)
 }
 
 // ── Orders ───────────────────────────────────────────────────────────────────

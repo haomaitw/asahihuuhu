@@ -36,17 +36,33 @@
     },
     "about": {
       "lede": "From the morning sun rising over the Okinawa sea to the golden dusk over the Tamsui harbor — a couple built their most tender promise around one bowl of artisan shaved ice."
+    },
+    "lineup": {
+      "title": "Our Menu"
     }
   },
   "lineup": {
     "title": "Line Up",
     "description": "Each kakigori is crafted from whole-block ice, shaved by a Japanese artisan machine into crystals as fine as winter snow. Paired with handmade, additive-free sauces — a meeting of Okinawa technique and Taiwanese ingredients.",
-    "kakigori": { "title": "Kakigōri" },
-    "crepes": { "title": "Japanese Crepes" },
-    "drinks": { "title": "Drinks" },
-    "goods": { "title": "Goods" },
-    "addOns": { "title": "Add-ons" },
-    "shavedIce": { "eyebrow": "SHAVED ICE", "title": "Kakigōri" }
+    "kakigori": {
+      "title": "Kakigōri"
+    },
+    "crepes": {
+      "title": "Japanese Crepes"
+    },
+    "drinks": {
+      "title": "Drinks"
+    },
+    "goods": {
+      "title": "Goods"
+    },
+    "addOns": {
+      "title": "Add-ons"
+    },
+    "shavedIce": {
+      "eyebrow": "SHAVED ICE",
+      "title": "Kakigōri"
+    }
   },
   "menu": {
     "kakigori": {

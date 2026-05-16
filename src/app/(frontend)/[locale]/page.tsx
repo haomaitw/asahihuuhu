@@ -16,6 +16,7 @@ import {
   placeholderSeasonal,
   placeholderNews,
 } from '@/lib/placeholder-data';
+import { menu } from '@/lib/menu-data';
 import { getProducts } from '@/lib/cms-products';
 import { getNewsItems, getHomePageGlobal } from '@/lib/cms';
 
@@ -188,11 +189,50 @@ function HomeContent({
         </section>
       </Reveal>
 
+      <WaveDivider fill="#d5e9f7" />
+
+      {/* ── Menu Highlights ──────────────────────────────────────────── */}
+      <Reveal direction="up" delay={80}>
+        <section className="bg-sea-100 py-20 md:py-28">
+          <div className="container-content flex flex-col items-center gap-14">
+            <AnimateIn>
+              <SectionTitle eyebrow="LINE UP" title={t('home.lineup.title')} align="center" />
+            </AnimateIn>
+            <AnimateIn delay={100} className="w-full grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {menu.flatMap((cat) => cat.items.filter((i) => i.image)).slice(0, 4).map((item) => (
+                <Link key={item.id} href="/line-up" className="group flex flex-col items-center gap-3">
+                  <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-paper-100 shadow-sm">
+                    <Image
+                      src={item.image!}
+                      alt={t(item.nameKey as any)}
+                      fill
+                      sizes="(max-width:768px) 50vw, 25vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    {item.badge && (
+                      <span className="absolute top-2 left-2 rounded-full bg-sea-400 px-2.5 py-0.5 text-[10px] font-sans font-medium tracking-wider text-white uppercase">
+                        {item.badge === 'new' ? 'NEW' : t('badge.seasonal')}
+                      </span>
+                    )}
+                  </div>
+                  <p className="font-sans text-xs tracking-[0.12em] text-ink/70 text-center leading-snug">
+                    {t(item.nameKey as any)}
+                  </p>
+                </Link>
+              ))}
+            </AnimateIn>
+            <AnimateIn delay={250}>
+              <SeeMoreLink href="/line-up" label={t('common.seeMore')} />
+            </AnimateIn>
+          </div>
+        </section>
+      </Reveal>
+
       {/* ── Brand Story Teaser ───────────────────────────────────────── */}
-      <WaveDivider fill="#16364f" />
+      <WaveDivider fill="#2c1a08" />
 
       <Reveal direction="up" delay={60}>
-        <section className="py-20 md:py-28" style={{ background: '#16364f' }}>
+        <section className="py-20 md:py-28" style={{ background: '#2c1a08' }}>
           <div className="container-content">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
 
@@ -231,7 +271,7 @@ function HomeContent({
                 {/* Accent image */}
                 <div
                   className="absolute -bottom-6 -left-6 w-[48%] aspect-square rounded-2xl overflow-hidden shadow-xl border-4"
-                  style={{ borderColor: '#16364f' }}
+                  style={{ borderColor: '#2c1a08' }}
                 >
                   <Image
                     src="/asahi/67d79a869b7cba72b493e155_img-top-about2.png"
