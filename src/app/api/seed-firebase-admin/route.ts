@@ -1,14 +1,14 @@
 /**
  * POST /api/seed-firebase-admin
  *
- * action: "create"  → create a Firebase Auth user + set custom claim role: "super-admin"
- * action: "promote" → set custom claim role: "super-admin" on existing user by email
+ * action: "create"  → create a Firebase Auth user + Firestore users doc
+ * action: "promote" → set role on existing user by email
  * action: "clear"   → delete ALL Firebase Auth users (use with caution!)
  *
  * Body: { secret, action, email, password, name, role }
  */
 import { NextResponse } from 'next/server'
-import { adminAuth } from '@/lib/firebase/admin'
+import { adminAuth, adminDb } from '@/lib/firebase/admin'
 
 export async function POST(request: Request) {
   try {
@@ -28,7 +28,13 @@ export async function POST(request: Request) {
     if (action === 'promote') {
       if (!email) return NextResponse.json({ error: 'email required' }, { status: 400 })
       const user = await adminAuth.getUserByEmail(email)
-      await adminAuth.setCustomUserClaims(user.uid, { role: role })
+      await adminAuth.setCustomUserClaims(user.uid, { role })
+      await adminDb.collection('users').doc(user.uid).set({
+        email,
+        name: name ?? email,
+        role,
+        updatedAt: new Date().toISOString(),
+      }, { merge: true })
       return NextResponse.json({ ok: true, message: `${email} promoted to ${role}` })
     }
 
@@ -48,6 +54,13 @@ export async function POST(request: Request) {
     }
 
     await adminAuth.setCustomUserClaims(uid, { role })
+    await adminDb.collection('users').doc(uid).set({
+      email,
+      name: name ?? email,
+      role,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }, { merge: true })
 
     return NextResponse.json({
       ok: true,
