@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 export default async function UsersPage() {
   // Verify the session cookie and get the current user from Firestore
   const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get('session')?.value
+  const sessionCookie = cookieStore.get('__session')?.value
 
   if (!sessionCookie) redirect('/admin/login')
 
