@@ -41,7 +41,7 @@ export default function LoginPage() {
       } else if (code === 'auth/too-many-requests') {
         setError('登入嘗試過多，請稍後再試')
       } else {
-        setError('無法連線，請稍後再試')
+        setError(`連線失敗 (${code || err?.message || 'unknown'})`)
       }
     } finally {
       setLoading(false)
