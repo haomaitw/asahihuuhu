@@ -1,8 +1,7 @@
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+import { adminDb } from '@/lib/firebase/admin'
 
-export async function getAdminPayload() {
-  return getPayload({ config: configPromise })
+export async function getAdminDb() {
+  return adminDb
 }
 
 export const STATUS_LABELS: Record<string, { label: string; variant: 'warning' | 'info' | 'danger' | 'neutral' | 'success' }> = {

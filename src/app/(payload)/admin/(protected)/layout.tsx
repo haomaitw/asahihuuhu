@@ -1,31 +1,32 @@
 import type React from 'react'
-import { headers } from 'next/headers'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+import { adminAuth } from '@/lib/firebase/admin'
 import { AdminShell } from '@/components/admin-shell/AdminShell'
 import { Toaster } from 'sonner'
 
+const ALLOWED_ROLES = ['super-admin', 'admin', 'staff']
+
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const headersList = await headers()
+  const cookieStore = await cookies()
+  const sessionCookie = cookieStore.get('__session')?.value
+
+  if (!sessionCookie) redirect('/admin/login')
+
   let user: { id: string; name?: string; email?: string; role?: string } | null = null
   try {
-    const payload = await getPayload({ config: configPromise })
-    const result = await payload.auth({ headers: headersList })
-    if (result.user) {
-      const u = result.user as any
-      user = {
-        id:    String(u.id),
-        name:  u.name  ?? undefined,
-        email: u.email ?? undefined,
-        role:  u.role  ?? undefined,
-      }
+    const decoded = await adminAuth.verifySessionCookie(sessionCookie, true)
+    const role = (decoded as any).role as string | undefined
+    if (!role || !ALLOWED_ROLES.includes(role)) redirect('/admin/login')
+    user = {
+      id:    decoded.uid,
+      email: decoded.email ?? undefined,
+      name:  decoded.name  ?? undefined,
+      role,
     }
   } catch {
-    // DB not ready — fall through to redirect
+    redirect('/admin/login')
   }
-  const ALLOWED_ROLES = ['super-admin', 'admin', 'staff']
-  if (!user || !ALLOWED_ROLES.includes((user as any).role)) redirect('/admin/login')
 
   return (
     <AdminShell user={user}>

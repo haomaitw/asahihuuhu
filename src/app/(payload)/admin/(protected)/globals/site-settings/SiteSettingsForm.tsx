@@ -242,9 +242,7 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
   React.useEffect(() => {
     Promise.all(
       LOCALES.map(async ({ key }) => {
-        const r = await fetch(`/api/globals/site-settings?locale=${key}&depth=0`, {
-          credentials: 'include',
-        })
+        const r = await fetch(`/api/admin/globals/site-settings?locale=${key}&depth=0`)
         if (!r.ok) return { key, data: null }
         return { key, data: await r.json() }
       }),
@@ -327,10 +325,9 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
       // Per-locale POSTs for localized fields
       await Promise.all(
         LOCALES.map(({ key }) =>
-          fetch(`/api/globals/site-settings?locale=${key}`, {
+          fetch(`/api/admin/globals/site-settings?locale=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify({
               ...nonLocalizedBody,
               // Strip empty strings from email-type fields to avoid Payload validation errors

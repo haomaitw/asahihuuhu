@@ -1,9 +1,7 @@
 'use server'
-import { handleServerFunctions } from '@payloadcms/next/layouts'
-import config from '@payload-config'
-import { importMap } from './importMap'
-import type { ServerFunctionClientArgs } from 'payload'
 
-export async function serverFunction(args: ServerFunctionClientArgs) {
-  return handleServerFunctions({ ...args, config, importMap })
+// Payload server functions removed — Firebase migration complete.
+// This file is kept as a stub to avoid breaking any static imports.
+export async function serverFunction(_args: unknown): Promise<unknown> {
+  return null
 }

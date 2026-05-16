@@ -1,11 +1,16 @@
-import { getAdminPayload } from '@/app/(payload)/admin/_lib/payload'
+import { adminDb } from '@/lib/firebase/admin'
 import { HomePageForm } from './HomePageForm'
 
 export const metadata = { title: '首頁設定' }
 export const dynamic = 'force-dynamic'
 
 export default async function HomePageSettingsPage() {
-  const payload = await getAdminPayload()
-  const data = await payload.findGlobal({ slug: 'home-page', locale: 'zh-TW' })
+  let data: any = null
+  try {
+    const snap = await adminDb.collection('settings').doc('home-page').get()
+    data = snap.exists ? snap.data() : null
+  } catch {
+    // DB not ready yet — render form with empty defaults
+  }
   return <HomePageForm initialData={data as any} />
 }

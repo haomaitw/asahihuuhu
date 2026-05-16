@@ -1,65 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { headers } from 'next/headers'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+import { cookies } from 'next/headers'
+import { adminDb, adminAuth } from '@/lib/firebase/admin'
 
-/**
- * GET /api/orders
- * - Customers: returns their own orders (filtered by customer ID)
- * - Admins: supports ?where[customer][equals]=X&sort=...&limit=N
- */
 export async function GET(req: NextRequest) {
   try {
-    const headersList = await headers()
-    const payload = await getPayload({ config: configPromise })
+    const cookieStore = await cookies()
+    const session = cookieStore.get('__session')?.value
 
-    let currentUser: any = null
-    try {
-      const { user } = await payload.auth({ headers: headersList })
-      currentUser = user
-    } catch {}
-
-    if (!currentUser) {
-      return NextResponse.json({ error: '請先登入' }, { status: 401 })
+    let isAdmin = false
+    if (session) {
+      try {
+        const decoded = await adminAuth.verifySessionCookie(session, true)
+        const role = (decoded as any).role
+        if (['super-admin', 'admin', 'staff'].includes(role)) isAdmin = true
+      } catch {}
     }
 
-    const sp = req.nextUrl.searchParams
-    const sort = (sp.get('sort') ?? '-createdAt') as string
-    const limit = Math.min(parseInt(sp.get('limit') ?? '20', 10), 100)
-
-    let where: any = {}
-    let overrideAccess = false
-
-    if (currentUser.collection === 'customers') {
-      // Customer: always filter to their own orders
-      where = { customer: { equals: currentUser.id } }
-    } else if (currentUser.collection === 'users') {
-      // Admin: build where from query params (Payload-style)
-      overrideAccess = true
-      // Parse where[field][operator]=value patterns
-      sp.forEach((value, key) => {
-        if (key.startsWith('where[')) {
-          const match = key.match(/^where\[([^\]]+)\]\[([^\]]+)\]$/)
-          if (match) {
-            const [, field, operator] = match
-            where[field] = { [operator]: value }
-          }
-        }
-      })
-    } else {
+    if (!isAdmin) {
       return NextResponse.json({ error: '無權限' }, { status: 403 })
     }
 
-    const result = await payload.find({
-      collection: 'orders',
-      where,
-      sort,
-      limit,
-      depth: 0,
-      overrideAccess,
-    })
+    const snap = await adminDb.collection('orders').orderBy('createdAt', 'desc').limit(100).get()
+    const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
 
-    return NextResponse.json(result)
+    return NextResponse.json({ docs, totalDocs: docs.length })
   } catch (err: any) {
     console.error('[api/orders]', err)
     return NextResponse.json({ error: err?.message ?? 'Server error' }, { status: 500 })

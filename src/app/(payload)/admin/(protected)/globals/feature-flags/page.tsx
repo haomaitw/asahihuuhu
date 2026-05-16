@@ -1,31 +1,33 @@
-import { headers } from 'next/headers'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+import { adminAuth, adminDb } from '@/lib/firebase/admin'
 import { FeatureFlagsForm } from './FeatureFlagsForm'
 
 export const metadata = { title: '功能開關' }
 export const dynamic = 'force-dynamic'
 
 export default async function FeatureFlagsPage() {
-  const headersList = await headers()
-  const payload = await getPayload({ config: configPromise })
+  const cookieStore = await cookies()
+  const sessionCookie = cookieStore.get('__session')?.value
 
-  let user: any = null
-  try {
-    const result = await payload.auth({ headers: headersList })
-    user = result.user
-  } catch {}
-
-  if (!user || user.role !== 'super-admin') {
+  if (sessionCookie) {
+    try {
+      const decoded = await adminAuth.verifySessionCookie(sessionCookie, true)
+      const role = (decoded as any).role as string | undefined
+      if (role !== 'super-admin') redirect('/admin/dashboard')
+    } catch {
+      redirect('/admin/dashboard')
+    }
+  } else {
     redirect('/admin/dashboard')
   }
 
   let data: any = null
   try {
-    data = await payload.findGlobal({ slug: 'feature-flags' })
+    const snap = await adminDb.collection('settings').doc('feature-flags').get()
+    if (snap.exists) data = { id: snap.id, ...snap.data() }
   } catch {
-    // DB table not ready — render form with defaults
+    // collection not ready — render form with defaults
   }
 
   return <FeatureFlagsForm initialData={data} />

@@ -1,4 +1,4 @@
-import { getAdminPayload } from '@/app/(payload)/admin/_lib/payload'
+import { adminDb } from '@/lib/firebase/admin'
 import { FAQForm } from '../FAQForm'
 import { notFound } from 'next/navigation'
 
@@ -7,11 +7,8 @@ export const dynamic = 'force-dynamic'
 
 export default async function EditFAQPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const payload = await getAdminPayload()
-  try {
-    const faq = await payload.findByID({ collection: 'faqs', id, locale: 'zh-TW' })
-    return <FAQForm initialData={faq} id={id} />
-  } catch {
-    notFound()
-  }
+  const snap = await adminDb.collection('faqs').doc(id).get()
+  const faq = snap.exists ? { id: snap.id, ...snap.data() } : null
+  if (!faq) notFound()
+  return <FAQForm initialData={faq} id={id} />
 }
