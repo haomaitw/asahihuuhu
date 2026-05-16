@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers'
-import { adminAuth } from '@/lib/firebase/admin'
+import { adminAuth, adminDb } from '@/lib/firebase/admin'
 
 export interface AdminSessionUser {
   uid: string
@@ -7,16 +7,15 @@ export interface AdminSessionUser {
   role: string
 }
 
+const ALLOWED_ROLES = ['super-admin', 'admin', 'staff'] as const
+
 /**
  * Verify the Firebase session cookie and check role membership.
- *
- * @param allowedRoles  Roles that are permitted to proceed.
- *                      Defaults to all admin-facing roles.
- * @returns             The decoded session payload, or null if the session is
- *                      missing, invalid, or the user's role is not allowed.
+ * Role is read from Firestore users/{uid} (source of truth) with fallback
+ * to custom claims embedded in the session cookie.
  */
 export async function verifyAdminSession(
-  allowedRoles: string[] = ['super-admin', 'admin', 'staff'],
+  allowedRoles: string[] = [...ALLOWED_ROLES],
 ): Promise<AdminSessionUser | null> {
   const cookieStore = await cookies()
   const session = cookieStore.get('__session')?.value
@@ -24,9 +23,24 @@ export async function verifyAdminSession(
 
   try {
     const decoded = await adminAuth.verifySessionCookie(session, true)
-    const role = (decoded as any).role as string | undefined
+    const uid = decoded.uid
+
+    // Firestore is the source of truth for role
+    let role: string | undefined
+    try {
+      const userDoc = await adminDb.collection('users').doc(uid).get()
+      if (userDoc.exists) {
+        role = (userDoc.data() as any)?.role
+      }
+    } catch {
+      // Firestore unavailable — fall back to claims
+    }
+
+    // Fall back to custom claims in the token
+    if (!role) role = (decoded as any).role as string | undefined
+
     if (!role || !allowedRoles.includes(role)) return null
-    return { uid: decoded.uid, email: decoded.email, role }
+    return { uid, email: decoded.email, role }
   } catch {
     return null
   }
