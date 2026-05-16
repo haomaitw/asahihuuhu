@@ -1,12 +1,11 @@
 'use client'
 import * as React from 'react'
 import { toast } from 'sonner'
-import { Film, Image as ImageIcon } from 'lucide-react'
+import { Film, Image as ImageIcon, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const LOCALES = [{ key: 'zh-TW', label: '中文' }, { key: 'en', label: 'EN' }, { key: 'ja', label: 'JA' }]
@@ -26,17 +25,29 @@ type FormState = {
   storyImage3: MediaRef
 }
 
+function toLocStr(val: any): LocalizedStr {
+  if (!val) return { 'zh-TW': '', en: '', ja: '' }
+  if (typeof val === 'string') return { 'zh-TW': val, en: '', ja: '' }
+  return { 'zh-TW': val['zh-TW'] ?? '', en: val.en ?? '', ja: val.ja ?? '' }
+}
+
+function toRef(d: any): MediaRef {
+  if (!d) return null
+  if (typeof d === 'string') return { id: d, url: d }
+  return { id: d.id ?? d.url ?? '', url: d.url ?? '', mimeType: d.mimeType, filename: d.filename }
+}
+
 function initForm(data?: any): FormState {
   return {
-    heroSubtitle: { 'zh-TW': data?.heroSubtitle ?? '', en: '', ja: '' },
-    storyP1:      { 'zh-TW': data?.storyP1 ?? '', en: '', ja: '' },
-    storyP2:      { 'zh-TW': data?.storyP2 ?? '', en: '', ja: '' },
-    storyP3:      { 'zh-TW': data?.storyP3 ?? '', en: '', ja: '' },
-    heroVideo:    null,
-    heroPoster:   null,
-    storyImage1:  null,
-    storyImage2:  null,
-    storyImage3:  null,
+    heroSubtitle: toLocStr(data?.heroSubtitle),
+    storyP1:      toLocStr(data?.storyP1),
+    storyP2:      toLocStr(data?.storyP2),
+    storyP3:      toLocStr(data?.storyP3),
+    heroVideo:    toRef(data?.heroVideo),
+    heroPoster:   toRef(data?.heroPoster),
+    storyImage1:  toRef(data?.storyImage1),
+    storyImage2:  toRef(data?.storyImage2),
+    storyImage3:  toRef(data?.storyImage3),
   }
 }
 
@@ -57,7 +68,7 @@ function MediaUploadField({
       const fd = new FormData()
       fd.append('file', file)
       fd.append('alt', file.name.replace(/\.[^.]+$/, ''))
-      const r = await fetch('/api/media', { method: 'POST', body: fd, credentials: 'include' })
+      const r = await fetch('/api/admin/media', { method: 'POST', body: fd, credentials: 'include' })
       const { doc } = await r.json()
       onChange({ id: doc.id, url: doc.url ?? '', mimeType: doc.mimeType, filename: doc.filename })
       toast.success('上傳成功')
@@ -106,51 +117,32 @@ export function AboutPageForm({ initialData }: { initialData?: any }) {
   const [loading, setLoading] = React.useState(false)
 
   React.useEffect(() => {
-    Promise.all(LOCALES.map(async ({ key }) => {
-      const r = await fetch(`/api/globals/about-page?locale=${key}&depth=1`, { credentials: 'include' })
-      return { key, data: await r.json() }
-    })).then((results) => {
-      const g = (k: string, f: string) => results.find((r) => r.key === k)?.data[f] ?? ''
-      const zhData = results.find((r) => r.key === 'zh-TW')?.data
-      const toRef = (d: any): MediaRef => d ? { id: d.id ?? d, url: d.url ?? '', mimeType: d.mimeType, filename: d.filename } : null
-      setForm({
-        heroSubtitle: { 'zh-TW': g('zh-TW', 'heroSubtitle'), en: g('en', 'heroSubtitle'), ja: g('ja', 'heroSubtitle') },
-        storyP1:      { 'zh-TW': g('zh-TW', 'storyP1'),      en: g('en', 'storyP1'),      ja: g('ja', 'storyP1') },
-        storyP2:      { 'zh-TW': g('zh-TW', 'storyP2'),      en: g('en', 'storyP2'),      ja: g('ja', 'storyP2') },
-        storyP3:      { 'zh-TW': g('zh-TW', 'storyP3'),      en: g('en', 'storyP3'),      ja: g('ja', 'storyP3') },
-        heroVideo:    toRef(zhData?.heroVideo),
-        heroPoster:   toRef(zhData?.heroPoster),
-        storyImage1:  toRef(zhData?.storyImage1),
-        storyImage2:  toRef(zhData?.storyImage2),
-        storyImage3:  toRef(zhData?.storyImage3),
-      })
-    })
+    fetch('/api/admin/globals/about-page', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((data) => setForm(initForm(data)))
+      .catch(() => {})
   }, [])
 
   const handleSave = async () => {
     setLoading(true)
     try {
-      const sharedPayload = {
-        heroVideo:   form.heroVideo?.id ?? null,
-        heroPoster:  form.heroPoster?.id ?? null,
-        storyImage1: form.storyImage1?.id ?? null,
-        storyImage2: form.storyImage2?.id ?? null,
-        storyImage3: form.storyImage3?.id ?? null,
-      }
-      await Promise.all(LOCALES.map(({ key }) =>
-        fetch(`/api/globals/about-page?locale=${key}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            ...sharedPayload,
-            heroSubtitle: form.heroSubtitle[key as keyof LocalizedStr],
-            storyP1:      form.storyP1[key as keyof LocalizedStr],
-            storyP2:      form.storyP2[key as keyof LocalizedStr],
-            storyP3:      form.storyP3[key as keyof LocalizedStr],
-          }),
-        })
-      ))
+      const res = await fetch('/api/admin/globals/about-page', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          heroSubtitle: form.heroSubtitle,
+          storyP1:      form.storyP1,
+          storyP2:      form.storyP2,
+          storyP3:      form.storyP3,
+          heroVideo:    form.heroVideo ?? null,
+          heroPoster:   form.heroPoster ?? null,
+          storyImage1:  form.storyImage1 ?? null,
+          storyImage2:  form.storyImage2 ?? null,
+          storyImage3:  form.storyImage3 ?? null,
+        }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       toast.success('關於設定已儲存')
     } catch { toast.error('儲存失敗') } finally { setLoading(false) }
   }

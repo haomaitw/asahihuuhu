@@ -99,7 +99,7 @@ export function FeatureFlagsForm({ initialData }: { initialData?: any }) {
   async function handleSave() {
     setSaving(true)
     try {
-      const res = await fetch('/api/globals/feature-flags', {
+      const res = await fetch('/api/admin/globals/feature-flags', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

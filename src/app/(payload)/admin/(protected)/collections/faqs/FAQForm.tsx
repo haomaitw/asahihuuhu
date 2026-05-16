@@ -19,10 +19,16 @@ type FormState = {
   order: string
 }
 
+function toLocStr(val: any): LocalizedStr {
+  if (!val) return { 'zh-TW': '', en: '', ja: '' }
+  if (typeof val === 'string') return { 'zh-TW': val, en: '', ja: '' }
+  return { 'zh-TW': val['zh-TW'] ?? '', en: val.en ?? '', ja: val.ja ?? '' }
+}
+
 function initForm(data?: any): FormState {
   return {
-    question: { 'zh-TW': data?.question ?? '', en: '', ja: '' },
-    answer:   { 'zh-TW': data?.answer ?? '', en: '', ja: '' },
+    question: toLocStr(data?.question),
+    answer:   toLocStr(data?.answer),
     order:    data?.order?.toString() ?? '0',
   }
 }
@@ -37,40 +43,44 @@ export function FAQForm({ initialData, id }: { initialData?: any; id?: string })
 
   React.useEffect(() => {
     if (!id) return
-    Promise.all(LOCALES.map(async ({ key }) => {
-      const r = await fetch(`/api/faqs/${id}?locale=${key}`, { credentials: 'include' })
-      return { key, data: await r.json() }
-    })).then((results) => {
-      setForm((prev) => ({
-        ...prev,
-        question: { 'zh-TW': results.find((r) => r.key === 'zh-TW')?.data.question ?? prev.question['zh-TW'], en: results.find((r) => r.key === 'en')?.data.question ?? '', ja: results.find((r) => r.key === 'ja')?.data.question ?? '' },
-        answer:   { 'zh-TW': results.find((r) => r.key === 'zh-TW')?.data.answer ?? prev.answer['zh-TW'],   en: results.find((r) => r.key === 'en')?.data.answer ?? '',   ja: results.find((r) => r.key === 'ja')?.data.answer ?? '' },
-      }))
-    })
+    fetch(`/api/admin/faqs/${id}`, { credentials: 'include' })
+      .then((r) => r.json())
+      .then((data) => setForm(initForm(data)))
+      .catch(() => {})
   }, [id])
 
   const handleSave = async () => {
     setLoading(true)
     try {
-      await Promise.all(LOCALES.map(({ key }) =>
-        fetch(isEdit ? `/api/faqs/${id}?locale=${key}` : `/api/faqs?locale=${key}`, {
-          method: isEdit ? 'PATCH' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ question: form.question[key as keyof LocalizedStr], answer: form.answer[key as keyof LocalizedStr], order: parseInt(form.order) || 0 }),
-        })
-      ))
+      const r = await fetch(isEdit ? `/api/admin/faqs/${id}` : '/api/admin/faqs', {
+        method: isEdit ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          question: form.question,
+          answer:   form.answer,
+          order:    parseInt(form.order) || 0,
+        }),
+      })
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}))
+        throw new Error(err?.error ?? '儲存失敗')
+      }
       toast.success(isEdit ? '問答已更新' : '問答已建立')
       router.push('/admin/collections/faqs')
       router.refresh()
-    } catch { toast.error('儲存失敗') } finally { setLoading(false) }
+    } catch (err: any) {
+      toast.error(err?.message ?? '儲存失敗')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDelete = async () => {
     if (!id || !confirm('確定刪除？')) return
     setDeleting(true)
     try {
-      await fetch(`/api/faqs/${id}`, { method: 'DELETE', credentials: 'include' })
+      await fetch(`/api/admin/faqs/${id}`, { method: 'DELETE', credentials: 'include' })
       toast.success('問答已刪除')
       router.push('/admin/collections/faqs')
       router.refresh()
