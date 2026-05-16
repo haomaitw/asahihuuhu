@@ -178,9 +178,9 @@ export function Topbar({ user, onMenuClick }: { user: User; onMenuClick: () => v
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuLabel>{user?.email ?? '未知帳號'}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/admin/collections/users')}>
                 <User className="h-4 w-4" />
-                個人資料
+                帳號管理
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

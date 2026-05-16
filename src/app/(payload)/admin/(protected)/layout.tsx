@@ -32,7 +32,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
     user = {
       id:    uid,
       email: decoded.email ?? undefined,
-      name:  decoded.name  ?? (userDoc.data() as any)?.name ?? undefined,
+      name:  (userDoc.data() as any)?.name ?? decoded.name ?? undefined,
       role,
     }
   } catch {
