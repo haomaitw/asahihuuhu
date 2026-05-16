@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Plus, UserCircle } from 'lucide-react'
-import { getAdminPayload } from '@/app/(payload)/admin/_lib/payload'
+import { adminDb } from '@/lib/firebase/admin'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -9,14 +9,9 @@ export const metadata = { title: '團隊成員' }
 export const dynamic = 'force-dynamic'
 
 export default async function StaffPage() {
-  const payload = await getAdminPayload()
-  const { docs, totalDocs } = await payload.find({
-    collection: 'staff',
-    locale: 'zh-TW',
-    limit: 100,
-    sort: 'order',
-    depth: 1,
-  })
+  const snap = await adminDb.collection('staff').orderBy('order', 'asc').limit(100).get()
+  const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as any[]
+  const totalDocs = docs.length
 
   return (
     <div className="space-y-6">
@@ -39,15 +34,19 @@ export default async function StaffPage() {
               <div key={member.id} className="flex items-center gap-4 px-5 py-4 hover:bg-adm-brand-50/40 transition-colors">
                 {member.photo?.url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={member.photo.url} alt={member.name ?? ''} className="h-10 w-10 rounded-full object-cover bg-adm-bg-sunken shrink-0" />
+                  <img src={member.photo.url} alt={typeof member.name === 'object' ? (member.name?.['zh-TW'] ?? '') : (member.name ?? '')} className="h-10 w-10 rounded-full object-cover bg-adm-bg-sunken shrink-0" />
                 ) : (
                   <div className="h-10 w-10 rounded-full bg-adm-bg-sunken flex items-center justify-center shrink-0">
                     <UserCircle className="h-6 w-6 text-adm-text-tertiary" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-adm-text-primary">{member.name ?? '—'}</p>
-                  <p className="text-xs text-adm-text-tertiary">{member.position ?? ''}</p>
+                  <p className="text-sm font-medium text-adm-text-primary">
+                    {typeof member.name === 'object' ? (member.name?.['zh-TW'] ?? '') : (member.name ?? '—')}
+                  </p>
+                  <p className="text-xs text-adm-text-tertiary">
+                    {typeof member.position === 'object' ? (member.position?.['zh-TW'] ?? '') : (member.position ?? '')}
+                  </p>
                 </div>
                 <span className="text-xs tabular-nums text-adm-text-disabled w-6 shrink-0 text-right">{member.order ?? 0}</span>
                 <Link href={`/admin/collections/staff/${member.id}`} className="text-xs text-adm-brand-600 hover:underline shrink-0">

@@ -1,4 +1,4 @@
-import { getAdminPayload } from '@/app/(payload)/admin/_lib/payload'
+import { adminDb } from '@/lib/firebase/admin'
 import { notFound } from 'next/navigation'
 import { CustomerDetailClient } from './CustomerDetailClient'
 
@@ -7,15 +7,8 @@ export const dynamic = 'force-dynamic'
 
 export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const payload = await getAdminPayload()
-  try {
-    const customer = await payload.findByID({
-      collection: 'customers',
-      id,
-      overrideAccess: true,
-    })
-    return <CustomerDetailClient customer={customer as any} />
-  } catch {
-    notFound()
-  }
+  const snap = await adminDb.collection('customers').doc(id).get()
+  if (!snap.exists) notFound()
+  const customer = { id: snap.id, ...snap.data() }
+  return <CustomerDetailClient customer={customer as any} />
 }

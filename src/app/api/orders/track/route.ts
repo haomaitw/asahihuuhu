@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+import { adminDb } from '@/lib/firebase/admin'
 
-/**
- * GET /api/orders/track?orderNumber=XXX&email=YYY
- *
- * Public endpoint — no auth required.
- * Matches on both orderNumber AND customerEmail to prevent enumeration attacks.
- * Returns only safe, non-sensitive fields.
- */
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const orderNumber = searchParams.get('orderNumber')?.trim()
@@ -19,29 +11,22 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const payload = await getPayload({ config: configPromise })
+    const snap = await adminDb
+      .collection('orders')
+      .where('orderNumber', '==', orderNumber)
+      .limit(1)
+      .get()
 
-    const { docs } = await payload.find({
-      collection: 'orders',
-      where: {
-        and: [
-          { orderNumber: { equals: orderNumber } },
-          { customerEmail: { equals: email } },
-        ],
-      },
-      overrideAccess: true,
-      limit: 1,
-      depth: 1,
-    })
-
-    if (!docs.length) {
-      // Always return 404 — never reveal whether the order exists without matching email
+    if (snap.empty) {
       return NextResponse.json({ error: '找不到符合的訂單' }, { status: 404 })
     }
 
-    const order = docs[0] as any
+    const order = snap.docs[0].data() as any
 
-    // Return only safe fields — no full address, no internal IDs
+    if ((order.customerEmail ?? '').toLowerCase() !== email) {
+      return NextResponse.json({ error: '找不到符合的訂單' }, { status: 404 })
+    }
+
     return NextResponse.json({
       orderNumber: order.orderNumber,
       status: order.status,
@@ -53,9 +38,9 @@ export async function GET(req: NextRequest) {
       shippingDistrict: order.shippingAddress?.district ?? null,
       items: Array.isArray(order.items)
         ? order.items.map((item: any) => ({
-            productName: item.productName ?? item.product?.name ?? '商品',
+            productName: item.productName ?? '商品',
             quantity: item.quantity ?? 1,
-            unitPrice: item.unitPrice ?? item.price ?? 0,
+            unitPrice: item.unitPrice ?? 0,
           }))
         : [],
     })

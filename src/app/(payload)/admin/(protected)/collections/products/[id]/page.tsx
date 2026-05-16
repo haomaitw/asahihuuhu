@@ -1,4 +1,4 @@
-import { getAdminPayload } from '@/app/(payload)/admin/_lib/payload'
+import { adminDb } from '@/lib/firebase/admin'
 import { ProductForm } from '../ProductForm'
 import { notFound } from 'next/navigation'
 
@@ -7,11 +7,8 @@ export const dynamic = 'force-dynamic'
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const payload = await getAdminPayload()
-  try {
-    const product = await payload.findByID({ collection: 'products', id, locale: 'zh-TW', depth: 1 })
-    return <ProductForm initialData={product} id={id} />
-  } catch {
-    notFound()
-  }
+  const snap = await adminDb.collection('products').doc(id).get()
+  const data = snap.exists ? { id: snap.id, ...snap.data() } : null
+  if (!data) notFound()
+  return <ProductForm initialData={data} id={id} />
 }

@@ -1,6 +1,6 @@
 import { Coins } from 'lucide-react'
 import Link from 'next/link'
-import { getAdminPayload } from '@/app/(payload)/admin/_lib/payload'
+import { adminDb } from '@/lib/firebase/admin'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -18,14 +18,9 @@ const TYPE_LABELS: Record<string, { label: string; variant: 'success' | 'warning
 }
 
 export default async function PointTransactionsPage() {
-  const payload = await getAdminPayload()
-  const { docs, totalDocs } = await payload.find({
-    collection: 'point-transactions',
-    limit: 200,
-    sort: '-createdAt',
-    overrideAccess: true,
-    depth: 1,
-  })
+  const snap = await adminDb.collection('point-transactions').orderBy('createdAt', 'desc').limit(200).get()
+  const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as any[]
+  const totalDocs = docs.length
 
   return (
     <div className="space-y-6">

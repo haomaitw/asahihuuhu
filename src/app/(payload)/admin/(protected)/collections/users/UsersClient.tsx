@@ -93,7 +93,7 @@ export function UsersClient({ initialUsers, currentUserEmail, currentUserRole }:
   // ── Re-fetch helper (uses custom endpoint)
   async function refreshUsers() {
     try {
-      const res = await fetch('/api/admin/users', { credentials: 'include' })
+      const res = await fetch('/api/admin/users')
       if (!res.ok) {
         toast.error('無法重新整理帳號列表，請重新整理頁面')
         return
@@ -117,7 +117,6 @@ export function UsersClient({ initialUsers, currentUserEmail, currentUserRole }:
       const res = await fetch('/api/admin/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({
           name: createName,
           email: createEmail,
@@ -168,7 +167,6 @@ export function UsersClient({ initialUsers, currentUserEmail, currentUserRole }:
       const res = await fetch(`/api/admin/users/${editUser.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify(body),
       })
       if (!res.ok) {
@@ -198,7 +196,6 @@ export function UsersClient({ initialUsers, currentUserEmail, currentUserRole }:
     try {
       const res = await fetch(`/api/admin/users/${deleteUser.id}`, {
         method: 'DELETE',
-        credentials: 'include',
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))

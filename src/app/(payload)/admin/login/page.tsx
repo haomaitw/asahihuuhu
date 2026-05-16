@@ -2,6 +2,8 @@
 import * as React from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '@/lib/firebase/client'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -17,21 +19,30 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/users/login', {
+      const credential = await signInWithEmailAndPassword(auth, email, password)
+      const idToken = await credential.user.getIdToken()
+
+      const res = await fetch('/api/firebase-auth/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include',
+        body: JSON.stringify({ idToken }),
       })
       if (res.ok) {
         router.push('/admin/dashboard')
         router.refresh()
       } else {
         const data = await res.json().catch(() => ({}))
-        setError(data?.errors?.[0]?.message ?? '帳號或密碼錯誤')
+        setError(data?.error ?? '無後台存取權限')
       }
-    } catch {
-      setError('無法連線，請稍後再試')
+    } catch (err: any) {
+      const code = err?.code ?? ''
+      if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+        setError('帳號或密碼錯誤')
+      } else if (code === 'auth/too-many-requests') {
+        setError('登入嘗試過多，請稍後再試')
+      } else {
+        setError('無法連線，請稍後再試')
+      }
     } finally {
       setLoading(false)
     }

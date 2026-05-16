@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Plus, Tag } from 'lucide-react'
-import { getAdminPayload } from '@/app/(payload)/admin/_lib/payload'
+import { adminDb } from '@/lib/firebase/admin'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -16,13 +16,9 @@ const TYPE_LABELS: Record<string, { label: string; variant: 'brand' | 'info' | '
 }
 
 export default async function CouponsPage() {
-  const payload = await getAdminPayload()
-  const { docs, totalDocs } = await payload.find({
-    collection: 'coupons',
-    limit: 100,
-    sort: '-createdAt',
-    overrideAccess: true,
-  })
+  const snap = await adminDb.collection('coupons').orderBy('createdAt', 'desc').limit(100).get()
+  const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as any[]
+  const totalDocs = docs.length
 
   return (
     <div className="space-y-6">

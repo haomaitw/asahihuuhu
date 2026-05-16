@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Plus, Newspaper } from 'lucide-react'
-import { getAdminPayload, STATUS_LABELS } from '@/app/(payload)/admin/_lib/payload'
+import { adminDb } from '@/lib/firebase/admin'
+import { STATUS_LABELS } from '@/app/(payload)/admin/_lib/payload'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -10,13 +11,9 @@ export const metadata = { title: '最新消息' }
 export const dynamic = 'force-dynamic'
 
 export default async function NewsPage() {
-  const payload = await getAdminPayload()
-  const { docs, totalDocs } = await payload.find({
-    collection: 'news',
-    locale: 'zh-TW',
-    limit: 100,
-    sort: '-date',
-  })
+  const snap = await adminDb.collection('news').orderBy('date', 'desc').limit(100).get()
+  const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  const totalDocs = docs.length
 
   return (
     <div className="space-y-6">

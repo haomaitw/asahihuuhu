@@ -1,30 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { headers } from 'next/headers'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+import { cookies } from 'next/headers'
+import { adminAuth, adminDb } from '@/lib/firebase/admin'
 import { sendShippingNotification, sendOrderMessage } from '@/lib/email'
 
-/**
- * POST /api/admin/send-order-email
- * Admin sends an email to a customer about their order.
- *
- * Body:
- *   type: 'shipping' | 'message'
- *   orderId: string
- *   subject?: string   (for 'message' type)
- *   message?: string   (for 'message' type)
- */
 export async function POST(req: NextRequest) {
-  const headersList = await headers()
-  const payload = await getPayload({ config: configPromise })
-
-  let currentUser: any = null
+  // Verify Firebase session
+  const cookieStore = await cookies()
+  const session = cookieStore.get('__session')?.value
+  if (!session) return NextResponse.json({ error: '請先登入' }, { status: 401 })
   try {
-    const { user } = await payload.auth({ headers: headersList })
-    currentUser = user
-  } catch {}
-
-  if (!currentUser || currentUser.collection !== 'users') {
+    const decoded = await adminAuth.verifySessionCookie(session, true)
+    const role = (decoded as any).role
+    if (!['super-admin', 'admin', 'staff'].includes(role)) {
+      return NextResponse.json({ error: '無權限' }, { status: 403 })
+    }
+  } catch {
     return NextResponse.json({ error: '請先登入' }, { status: 401 })
   }
 
@@ -35,15 +25,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '缺少必要參數' }, { status: 400 })
   }
 
-  const order = await payload.findByID({
-    collection: 'orders',
-    id: orderId,
-    overrideAccess: true,
-  }) as any
-
-  if (!order) {
+  const orderSnap = await adminDb.collection('orders').doc(orderId).get()
+  if (!orderSnap.exists) {
     return NextResponse.json({ error: '找不到訂單' }, { status: 404 })
   }
+  const order = orderSnap.data() as any
 
   if (!order.customerEmail) {
     return NextResponse.json({ error: '此訂單沒有顧客 Email' }, { status: 400 })

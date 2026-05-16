@@ -95,7 +95,7 @@ export function Topbar({ user, onMenuClick }: { user: User; onMenuClick: () => v
   }, [])
 
   const handleSignOut = async () => {
-    await fetch('/api/users/logout', { method: 'POST' })
+    await fetch('/api/firebase-auth/logout', { method: 'POST' })
     router.push('/admin/login')
   }
 
