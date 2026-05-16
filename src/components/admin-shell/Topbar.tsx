@@ -1,7 +1,7 @@
 'use client'
 import * as React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu, Search, ExternalLink, LogOut, User } from 'lucide-react'
+import { Menu, Search, ExternalLink, LogOut, User, Users } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -75,7 +75,7 @@ const COMMAND_ITEMS = [
   },
 ]
 
-type User = { id: string | number; name?: string; email?: string } | null
+type User = { id: string | number; name?: string; email?: string; role?: string } | null
 
 export function Topbar({ user, onMenuClick }: { user: User; onMenuClick: () => void }) {
   const router = useRouter()
@@ -178,8 +178,12 @@ export function Topbar({ user, onMenuClick }: { user: User; onMenuClick: () => v
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuLabel>{user?.email ?? '未知帳號'}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push('/admin/collections/users')}>
+              <DropdownMenuItem onClick={() => router.push('/admin/profile')}>
                 <User className="h-4 w-4" />
+                個人資料
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/admin/collections/users')}>
+                <Users className="h-4 w-4" />
                 帳號管理
               </DropdownMenuItem>
               <DropdownMenuSeparator />
