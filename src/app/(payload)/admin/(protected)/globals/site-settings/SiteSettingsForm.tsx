@@ -1,6 +1,7 @@
 'use client'
 import * as React from 'react'
 import { toast } from 'sonner'
+import { Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -54,6 +55,8 @@ type MaintenanceState = {
 type FormState = {
   // non-localized
   maintenanceMode: MaintenanceState
+  faviconUrl:      string
+  ogImageUrl:      string
   phone:           string
   lineId:          string
   googleMapsUrl:   string
@@ -87,6 +90,8 @@ function initForm(data?: any): FormState {
         ja:      '',
       },
     },
+    faviconUrl:      data?.faviconUrl      ?? '',
+    ogImageUrl:      data?.ogImageUrl      ?? '',
     phone:           data?.phone           ?? '',
     lineId:          data?.lineId          ?? '',
     googleMapsUrl:   data?.googleMapsUrl   ?? '',
@@ -234,10 +239,33 @@ function LocaleTabs({
 // ── Main form ─────────────────────────────────────────────────────────────────
 
 export function SiteSettingsForm({ initialData, ecpayInfo }: { initialData?: any; ecpayInfo?: { merchantId: string; isTest: boolean; configured: boolean } }) {
-  const [form, setForm]     = React.useState<FormState>(() => initForm(initialData))
-  const [tab, setTab]       = React.useState<TabKey>('maintenance')
-  const [locale, setLocale] = React.useState<LocaleKey>('zh-TW')
+  const [form, setForm]       = React.useState<FormState>(() => initForm(initialData))
+  const [tab, setTab]         = React.useState<TabKey>('maintenance')
+  const [locale, setLocale]   = React.useState<LocaleKey>('zh-TW')
   const [loading, setLoading] = React.useState(false)
+  const [uploading, setUploading] = React.useState<'favicon' | 'ogImage' | null>(null)
+  const faviconRef = React.useRef<HTMLInputElement>(null)
+  const ogImageRef = React.useRef<HTMLInputElement>(null)
+
+  const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'faviconUrl' | 'ogImageUrl') => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(field === 'faviconUrl' ? 'favicon' : 'ogImage')
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('alt', file.name.replace(/\.[^.]+$/, ''))
+      const r = await fetch('/api/admin/media', { method: 'POST', body: fd, credentials: 'include' })
+      const { doc } = await r.json()
+      setForm((p) => ({ ...p, [field]: doc.url ?? '' }))
+      toast.success('圖示已上傳')
+    } catch {
+      toast.error('上傳失敗')
+    } finally {
+      setUploading(null)
+      e.target.value = ''
+    }
+  }
 
   // Hydrate from Firestore via single GET
   React.useEffect(() => {
@@ -255,6 +283,8 @@ export function SiteSettingsForm({ initialData, ecpayInfo }: { initialData?: any
               ja:      d.maintenanceMode?.message?.ja        ?? '',
             },
           },
+          faviconUrl:   d.faviconUrl   ?? prev.faviconUrl,
+          ogImageUrl:   d.ogImageUrl   ?? prev.ogImageUrl,
           phone:        d.phone        ?? prev.phone,
           lineId:       d.lineId       ?? prev.lineId,
           googleMapsUrl:   d.googleMapsUrl   ?? prev.googleMapsUrl,
@@ -295,6 +325,8 @@ export function SiteSettingsForm({ initialData, ecpayInfo }: { initialData?: any
       // Non-localized fields + tcat — spread into each per-locale request
       const nonLocalizedBody = {
         maintenanceMode: { enabled: form.maintenanceMode.enabled },
+        faviconUrl:      form.faviconUrl  || null,
+        ogImageUrl:      form.ogImageUrl  || null,
         phone:           form.phone,
         lineId:          form.lineId,
         googleMapsUrl:   form.googleMapsUrl,
@@ -471,6 +503,65 @@ export function SiteSettingsForm({ initialData, ecpayInfo }: { initialData?: any
       {/* ── Tab: 基本資料 ──────────────────────────────────────────── */}
       {tab === 'basic' && (
         <div className="space-y-4">
+          {/* Icon / Favicon */}
+          <Card>
+            <SectionHeader
+              title="網站圖示"
+              description="Favicon 顯示於瀏覽器分頁；OG 圖片用於社群媒體分享預覽（建議 1200×630px）"
+            />
+            <CardContent className="p-5 space-y-5">
+              {/* Favicon row */}
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-adm-md border border-adm-border-default bg-adm-bg-sunken flex items-center justify-center overflow-hidden shrink-0">
+                  {form.faviconUrl
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={form.faviconUrl} alt="favicon" className="h-10 w-10 object-contain" />
+                    : <span className="text-2xl">🌐</span>}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-adm-text-primary">Favicon <span className="font-normal text-adm-text-tertiary text-xs">（.ico / .png，建議 32×32）</span></p>
+                  {form.faviconUrl && <p className="text-xs text-adm-text-tertiary truncate mt-0.5">{form.faviconUrl}</p>}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {form.faviconUrl && (
+                    <button onClick={() => setForm((p) => ({ ...p, faviconUrl: '' }))} className="text-adm-text-tertiary hover:text-adm-danger-500 transition-colors">
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                  <Button variant="secondary" size="sm" loading={uploading === 'favicon'} onClick={() => faviconRef.current?.click()}>
+                    <Upload className="h-3.5 w-3.5" /> 上傳
+                  </Button>
+                </div>
+                <input ref={faviconRef} type="file" accept="image/*,.ico" className="hidden" onChange={(e) => handleIconUpload(e, 'faviconUrl')} />
+              </div>
+
+              {/* OG Image row */}
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-20 rounded-adm-md border border-adm-border-default bg-adm-bg-sunken flex items-center justify-center overflow-hidden shrink-0">
+                  {form.ogImageUrl
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={form.ogImageUrl} alt="og" className="h-full w-full object-cover" />
+                    : <span className="text-xl">🖼️</span>}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-adm-text-primary">社群分享圖 (OG Image) <span className="font-normal text-adm-text-tertiary text-xs">（建議 1200×630px）</span></p>
+                  {form.ogImageUrl && <p className="text-xs text-adm-text-tertiary truncate mt-0.5">{form.ogImageUrl}</p>}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {form.ogImageUrl && (
+                    <button onClick={() => setForm((p) => ({ ...p, ogImageUrl: '' }))} className="text-adm-text-tertiary hover:text-adm-danger-500 transition-colors">
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                  <Button variant="secondary" size="sm" loading={uploading === 'ogImage'} onClick={() => ogImageRef.current?.click()}>
+                    <Upload className="h-3.5 w-3.5" /> 上傳
+                  </Button>
+                </div>
+                <input ref={ogImageRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleIconUpload(e, 'ogImageUrl')} />
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <SectionHeader title="聯絡資訊" />
             <CardContent className="p-5 space-y-4">
