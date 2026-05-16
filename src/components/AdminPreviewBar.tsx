@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { Settings } from 'lucide-react'
 
 export function AdminPreviewBar({ maintenanceOn }: { maintenanceOn: boolean }) {
@@ -14,13 +15,13 @@ export function AdminPreviewBar({ maintenanceOn }: { maintenanceOn: boolean }) {
         <span className={`h-1.5 w-1.5 rounded-full ${maintenanceOn ? 'bg-red-300 animate-pulse' : 'bg-emerald-400'}`} />
         {maintenanceOn ? '維護模式開啟中（僅管理員可見前台）' : '後台預覽模式'}
       </div>
-      <a
+      <Link
         href="/admin/dashboard"
         className="flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity"
       >
         <Settings className="h-3.5 w-3.5" />
         返回後台
-      </a>
+      </Link>
     </div>
   )
 }
