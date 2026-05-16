@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Newspaper, HelpCircle, Home, Settings2,
   Package, ShoppingBag, Image as ImageIcon, Users,
   ChevronLeft, ChevronRight, Tag, FolderOpen, Lock,
+  Info, ShoppingCart, UserCircle, Sliders, Ticket,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -39,6 +40,7 @@ const NAV: NavGroup[] = [
     items: [
       { label: '商品管理', href: '/admin/collections/products', icon: Package, roles: ['super-admin', 'admin'] },
       { label: '訂單管理', href: '/admin/collections/orders', icon: ShoppingBag },
+      { label: '優惠券', href: '/admin/collections/coupons', icon: Ticket, roles: ['super-admin', 'admin'] },
     ],
   },
   {
@@ -48,7 +50,9 @@ const NAV: NavGroup[] = [
       { label: '最新消息', href: '/admin/collections/news', icon: Newspaper },
       { label: '常見問答', href: '/admin/collections/faqs', icon: HelpCircle },
       { label: '首頁設定', href: '/admin/globals/home-page', icon: Home },
-      { label: '網站設定', href: '/admin/globals/site-settings', icon: Settings2 },
+      { label: '關於頁面', href: '/admin/globals/about-page', icon: Info },
+      { label: '商店頁面', href: '/admin/globals/shop-page', icon: ShoppingCart },
+      { label: '成員介紹', href: '/admin/collections/staff', icon: UserCircle },
     ],
   },
   {
@@ -67,8 +71,16 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    group: '帳號管理',
+    group: '進階設定',
     roles: ['super-admin'],
+    items: [
+      { label: '功能開關', href: '/admin/globals/feature-flags', icon: Sliders },
+      { label: '網站設定', href: '/admin/globals/site-settings', icon: Settings2 },
+    ],
+  },
+  {
+    group: '帳號管理',
+    roles: ['super-admin', 'admin'],
     items: [
       { label: '用戶管理', href: '/admin/collections/users', icon: Users },
     ],

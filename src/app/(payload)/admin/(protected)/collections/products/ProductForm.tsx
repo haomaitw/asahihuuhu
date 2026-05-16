@@ -3,7 +3,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Trash2, Upload, X, Plus } from 'lucide-react'
+import { Trash2, Upload, X, Plus, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -121,7 +121,7 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
     fd.append('file', file)
     fd.append('alt', file.name.replace(/\.[^.]+$/, ''))
     toast.promise(
-      fetch('/api/admin/media', { method: 'POST', body: fd }).then(async (r) => {
+      fetch('/api/admin/media', { method: 'POST', body: fd, credentials: 'include' }).then(async (r) => {
         const { doc } = await r.json()
         setForm((prev) => ({ ...prev, images: [...prev.images, doc] }))
       }),
@@ -141,14 +141,13 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
   }
 
   const handleSave = async () => {
-    if (!form.slug.trim() || !form.price) {
-      toast.error('請填寫 Slug 與售價')
+    if (!form.price) {
+      toast.error('請填寫售價')
       return
     }
     setLoading(true)
     try {
       const payload: Record<string, any> = {
-        slug:              form.slug.trim(),
         price:             parseFloat(form.price),
         isAvailable:       form.isAvailable,
         images:            form.images,
@@ -158,6 +157,7 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
         name:              form.name,
         shortDescription:  form.shortDescription,
       }
+      if (form.slug.trim()) payload.slug = form.slug.trim()
       if (form.comparePrice) payload.comparePrice = parseFloat(form.comparePrice)
       if (form.categoryId)   payload.category = form.categoryId
 
@@ -222,6 +222,17 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
           </p>
         </div>
         <div className="flex gap-2">
+          {isEdit && form.slug && (
+            <a
+              href={`/zh-TW/shop/${form.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="secondary" size="md" type="button">
+                <ExternalLink className="h-4 w-4" /> 前台預覽
+              </Button>
+            </a>
+          )}
           {isEdit && (
             <Button variant="danger" size="md" loading={deleting} onClick={handleDelete}>
               <Trash2 className="h-4 w-4" /> 刪除
@@ -277,13 +288,16 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
         </div>
         <CardContent className="p-5 space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Slug（網址識別碼）"
-              value={form.slug}
-              onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') }))}
-              placeholder="product-slug"
-              className="font-mono"
-            />
+            <div className="space-y-1.5">
+              <Label>Slug（網址識別碼，選填）</Label>
+              <input
+                value={form.slug}
+                onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') }))}
+                placeholder="留空自動產生"
+                className={cn(inputCls, 'font-mono')}
+              />
+              <p className="text-xs text-adm-text-tertiary">留空則以商品 ID 自動填入</p>
+            </div>
             <div className="space-y-1.5">
               <Label>分類</Label>
               <select

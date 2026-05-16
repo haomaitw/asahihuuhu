@@ -36,6 +36,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const now = new Date().toISOString()
     const ref = await adminDb.collection('products').add({ ...body, createdAt: now, updatedAt: now })
+    // Auto-generate slug from doc ID if not provided
+    if (!body.slug) {
+      await ref.update({ slug: ref.id })
+    }
     const created = await ref.get()
     return NextResponse.json({ ok: true, doc: { id: created.id, ...created.data() } }, { status: 201 })
   } catch (err: any) {
