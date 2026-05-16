@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Plus, HelpCircle } from 'lucide-react'
-import { getAdminPayload } from '@/app/(payload)/admin/_lib/payload'
+import { adminDb } from '@/lib/firebase/admin'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -9,13 +9,9 @@ export const metadata = { title: '常見問答' }
 export const dynamic = 'force-dynamic'
 
 export default async function FAQsPage() {
-  const payload = await getAdminPayload()
-  const { docs, totalDocs } = await payload.find({
-    collection: 'faqs',
-    locale: 'zh-TW',
-    limit: 100,
-    sort: 'order',
-  })
+  const snap = await adminDb.collection('faqs').orderBy('order').limit(100).get()
+  const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  const totalDocs = docs.length
 
   return (
     <div className="space-y-6">

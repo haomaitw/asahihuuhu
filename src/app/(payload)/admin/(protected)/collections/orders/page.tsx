@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ShoppingBag } from 'lucide-react'
-import { getAdminPayload, STATUS_LABELS, FULFILLMENT_LABELS } from '@/app/(payload)/admin/_lib/payload'
+import { adminDb } from '@/lib/firebase/admin'
+import { STATUS_LABELS, FULFILLMENT_LABELS } from '@/app/(payload)/admin/_lib/payload'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -9,13 +10,9 @@ export const metadata = { title: '訂單管理' }
 export const dynamic = 'force-dynamic'
 
 export default async function OrdersPage() {
-  const payload = await getAdminPayload()
-  const { docs, totalDocs } = await payload.find({
-    collection: 'orders',
-    limit: 100,
-    sort: '-createdAt',
-    overrideAccess: true,
-  })
+  const snap = await adminDb.collection('orders').orderBy('createdAt', 'desc').limit(100).get()
+  const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  const totalDocs = docs.length
 
   return (
     <div className="space-y-6">

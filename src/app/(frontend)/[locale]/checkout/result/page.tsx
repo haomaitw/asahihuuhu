@@ -1,7 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import Link from 'next/link'
-import { getPayload } from 'payload'
-import config from '@payload-config'
+import { adminDb } from '@/lib/firebase/admin'
 import { ResultProcessing } from './ResultProcessing'
 
 export const dynamic = 'force-dynamic'
@@ -26,14 +25,8 @@ export default async function ResultPage({
   let order: any = null
   if (orderNumber) {
     try {
-      const payload = await getPayload({ config })
-      const result = await payload.find({
-        collection: 'orders',
-        where: { orderNumber: { equals: orderNumber } },
-        limit: 1,
-        overrideAccess: true,
-      })
-      order = result.docs[0] ?? null
+      const snap = await adminDb.collection('orders').where('orderNumber', '==', orderNumber).limit(1).get()
+      order = snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() }
     } catch {}
   }
 

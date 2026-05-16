@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+import { adminDb } from '@/lib/firebase/admin'
 import { generateCheckMacValue } from '@/lib/ecpay'
 import { sendOrderConfirmation } from '@/lib/email'
 
@@ -26,20 +25,17 @@ export async function POST(req: NextRequest) {
     const merchantTradeNo = params['MerchantTradeNo']
     const ecpayTradeNo = params['TradeNo'] ?? ''
     const isPaid = rtnCode === '1'
+    const now = new Date().toISOString()
 
-    const payload = await getPayload({ config: configPromise })
-
-    const result = await payload.find({
-      collection: 'orders',
-      where: { orderNumber: { equals: merchantTradeNo } },
-      overrideAccess: true,
-    })
-
-    const order = result.docs[0] as any
-    if (!order) {
+    // Find order by orderNumber
+    const snap = await adminDb.collection('orders').where('orderNumber', '==', merchantTradeNo).limit(1).get()
+    if (snap.empty) {
       console.error('[ecpay/callback] Order not found:', merchantTradeNo)
       return new NextResponse('0|Error', { status: 200 })
     }
+
+    const orderDoc = snap.docs[0]
+    const order = { id: orderDoc.id, ...orderDoc.data() } as any
 
     // Idempotency guard
     if (order.status === 'paid') {
@@ -47,34 +43,20 @@ export async function POST(req: NextRequest) {
     }
 
     if (isPaid) {
-      await payload.update({
-        collection: 'orders',
-        id: order.id,
-        data: {
-          status: 'paid',
-          ecpayTradeNo,
-          paidAt: new Date().toISOString(),
-        },
-        overrideAccess: true,
-      })
+      await orderDoc.ref.update({ status: 'paid', ecpayTradeNo, paidAt: now, updatedAt: now })
 
-      // Decrement stock for each item (only if trackStock === true)
+      // Decrement stock
       for (const item of order.items ?? []) {
         if (!item.productId) continue
         try {
-          const product = await payload.findByID({
-            collection: 'products',
-            id: String(item.productId),
-            overrideAccess: true,
-          }) as any
-          if (product?.trackStock) {
-            const newStock = Math.max(0, (product.stock ?? 0) - (item.quantity ?? 1))
-            await payload.update({
-              collection: 'products',
-              id: String(item.productId),
-              data: { stock: newStock },
-              overrideAccess: true,
-            })
+          const productSnap = await adminDb.collection('products').where('slug', '==', item.productId).limit(1).get()
+          if (!productSnap.empty) {
+            const productDoc = productSnap.docs[0]
+            const product = productDoc.data() as any
+            if (product?.trackStock) {
+              const newStock = Math.max(0, (product.stock ?? 0) - (item.quantity ?? 1))
+              await productDoc.ref.update({ stock: newStock, updatedAt: now })
+            }
           }
         } catch (e) {
           console.error('[ecpay/callback] stock decrement failed for product', item.productId, e)
@@ -98,12 +80,7 @@ export async function POST(req: NextRequest) {
         }).catch((e) => console.error('[email] order confirmation failed:', e))
       }
     } else {
-      await payload.update({
-        collection: 'orders',
-        id: order.id,
-        data: { status: 'failed', ecpayTradeNo },
-        overrideAccess: true,
-      })
+      await orderDoc.ref.update({ status: 'failed', ecpayTradeNo, updatedAt: now })
     }
 
     return new NextResponse('1|OK', { status: 200 })

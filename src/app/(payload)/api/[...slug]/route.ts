@@ -1,16 +1,10 @@
-import {
-  REST_DELETE,
-  REST_GET,
-  REST_OPTIONS,
-  REST_PATCH,
-  REST_POST,
-  REST_PUT,
-} from '@payloadcms/next/routes';
-import config from '@payload-config';
+import { NextResponse } from 'next/server'
 
-export const GET     = REST_GET(config);
-export const POST    = REST_POST(config);
-export const DELETE  = REST_DELETE(config);
-export const PATCH   = REST_PATCH(config);
-export const PUT     = REST_PUT(config);
-export const OPTIONS = REST_OPTIONS(config);
+// Payload REST API handler removed — Firebase migration complete.
+// All API routes are now under /api/admin/* using Firebase Auth.
+export async function GET()     { return NextResponse.json({ error: 'Not found' }, { status: 404 }) }
+export async function POST()    { return NextResponse.json({ error: 'Not found' }, { status: 404 }) }
+export async function DELETE()  { return NextResponse.json({ error: 'Not found' }, { status: 404 }) }
+export async function PATCH()   { return NextResponse.json({ error: 'Not found' }, { status: 404 }) }
+export async function PUT()     { return NextResponse.json({ error: 'Not found' }, { status: 404 }) }
+export async function OPTIONS() { return NextResponse.json({ error: 'Not found' }, { status: 404 }) }

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Plus, Package } from 'lucide-react'
-import { getAdminPayload } from '@/app/(payload)/admin/_lib/payload'
+import { getAllProducts } from '@/lib/firestore/admin'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -10,13 +10,8 @@ export const metadata = { title: '商品管理' }
 export const dynamic = 'force-dynamic'
 
 export default async function ProductsPage() {
-  const payload = await getAdminPayload()
-  const { docs, totalDocs } = await payload.find({
-    collection: 'products',
-    locale: 'zh-TW',
-    limit: 100,
-    sort: '-createdAt',
-  })
+  const docs = await getAllProducts('zh-TW').catch(() => [])
+  const totalDocs = docs.length
 
   return (
     <div className="space-y-6">

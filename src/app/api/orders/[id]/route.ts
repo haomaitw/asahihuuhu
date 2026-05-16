@@ -1,60 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { headers } from 'next/headers'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+import { cookies } from 'next/headers'
+import { adminDb, adminAuth } from '@/lib/firebase/admin'
 import { sendShippingNotification } from '@/lib/email'
 
 type Params = { params: Promise<{ id: string }> }
 
-/**
- * PATCH /api/orders/[id]
- * Update order status, fulfillmentStatus, trackingNumber, adminNote.
- * Admin (users collection) only.
- */
 export async function PATCH(req: NextRequest, { params }: Params) {
   try {
     const { id } = await params
-    const headersList = await headers()
-    const payload = await getPayload({ config: configPromise })
-
-    // Auth check
-    let currentUser: any = null
+    const cookieStore = await cookies()
+    const session = cookieStore.get('__session')?.value
+    if (!session) return NextResponse.json({ error: '無權限' }, { status: 403 })
     try {
-      const { user } = await payload.auth({ headers: headersList })
-      currentUser = user
-    } catch {}
-
-    if (!currentUser || currentUser.collection !== 'users') {
+      const decoded = await adminAuth.verifySessionCookie(session, true)
+      const role = (decoded as any).role
+      if (!['super-admin', 'admin', 'staff'].includes(role)) {
+        return NextResponse.json({ error: '無權限' }, { status: 403 })
+      }
+    } catch {
       return NextResponse.json({ error: '無權限' }, { status: 403 })
     }
 
     const body = await req.json()
     const { status, fulfillmentStatus, trackingNumber, adminNote } = body
 
-    // Fetch current order to detect status changes
-    const existing = await payload.findByID({
-      collection: 'orders',
-      id,
-      overrideAccess: true,
-    }) as any
+    const orderRef = adminDb.collection('orders').doc(id)
+    const existingSnap = await orderRef.get()
+    if (!existingSnap.exists) return NextResponse.json({ error: '找不到訂單' }, { status: 404 })
+    const existing = existingSnap.data() as any
 
-    const updateData: Record<string, any> = {}
+    const updateData: Record<string, any> = { updatedAt: new Date().toISOString() }
     if (status !== undefined) updateData.status = status
     if (fulfillmentStatus !== undefined) updateData.fulfillmentStatus = fulfillmentStatus
     if (trackingNumber !== undefined) updateData.trackingNumber = trackingNumber
     if (adminNote !== undefined) updateData.adminNote = adminNote
 
-    const updated = await payload.update({
-      collection: 'orders',
-      id,
-      data: updateData,
-      overrideAccess: true,
-    })
+    await orderRef.update(updateData)
 
-    // Send shipping notification email when order transitions to 'shipped'
-    const wasNotShipped = existing?.fulfillmentStatus !== 'shipped'
-    const isNowShipped = fulfillmentStatus === 'shipped'
-    if (wasNotShipped && isNowShipped && existing?.customerEmail) {
+    // Send shipping notification when order becomes 'shipped'
+    if (existing.fulfillmentStatus !== 'shipped' && fulfillmentStatus === 'shipped' && existing.customerEmail) {
       sendShippingNotification({
         orderNumber: existing.orderNumber,
         customerName: existing.customerName ?? '顧客',
@@ -65,7 +49,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }).catch((e) => console.error('[email] shipping notification failed:', e))
     }
 
-    return NextResponse.json({ ok: true, doc: updated })
+    return NextResponse.json({ ok: true })
   } catch (err: any) {
     console.error('[api/orders/[id] PATCH]', err)
     return NextResponse.json({ error: err?.message ?? 'Server error' }, { status: 500 })

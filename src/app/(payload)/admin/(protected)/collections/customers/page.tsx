@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Users } from 'lucide-react'
-import { getAdminPayload } from '@/app/(payload)/admin/_lib/payload'
+import { adminDb } from '@/lib/firebase/admin'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -20,24 +20,19 @@ export default async function CustomersPage({
   searchParams: Promise<{ q?: string }>
 }) {
   const { q } = await searchParams
-  const payload = await getAdminPayload()
 
-  const where: Record<string, any> = q
-    ? {
-        or: [
-          { name: { like: q } },
-          { email: { like: q } },
-        ],
-      }
-    : {}
+  const snap = await adminDb.collection('customers').orderBy('createdAt', 'desc').limit(100).get()
+  let docs = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as any[]
 
-  const { docs, totalDocs } = await payload.find({
-    collection: 'customers',
-    limit: 100,
-    sort: '-createdAt',
-    overrideAccess: true,
-    where,
-  })
+  if (q) {
+    const lower = q.toLowerCase()
+    docs = docs.filter((c: any) =>
+      (c.name ?? '').toLowerCase().includes(lower) ||
+      (c.email ?? '').toLowerCase().includes(lower),
+    )
+  }
+
+  const totalDocs = docs.length
 
   return (
     <div className="space-y-6">

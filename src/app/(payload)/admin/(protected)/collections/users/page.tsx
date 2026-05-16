@@ -1,20 +1,24 @@
-import { headers } from 'next/headers'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+import { adminAuth, adminDb } from '@/lib/firebase/admin'
 import { UsersClient } from './UsersClient'
 
 export const metadata = { title: '帳號管理' }
 export const dynamic = 'force-dynamic'
 
 export default async function UsersPage() {
-  const headersList = await headers()
-  const payload = await getPayload({ config: configPromise })
+  // Verify the session cookie and get the current user from Firestore
+  const cookieStore = await cookies()
+  const sessionCookie = cookieStore.get('__session')?.value
+
+  if (!sessionCookie) redirect('/admin/login')
 
   let currentUser: any = null
   try {
-    const result = await payload.auth({ headers: headersList })
-    currentUser = result.user
+    const decoded = await adminAuth.verifySessionCookie(sessionCookie, true)
+    const snap = await adminDb.collection('users').doc(decoded.uid).get()
+    if (!snap.exists) redirect('/admin/login')
+    currentUser = { id: snap.id, ...snap.data() }
   } catch {
     redirect('/admin/login')
   }
@@ -26,27 +30,30 @@ export default async function UsersPage() {
     redirect('/admin/dashboard')
   }
 
+  // Fetch users from Firestore
   // super-admin sees all; admin only sees staff
-  const where =
-    currentUser.role === 'super-admin'
-      ? undefined
-      : { role: { equals: 'staff' } }
+  let usersSnap
+  if (currentUser.role === 'super-admin') {
+    usersSnap = await adminDb.collection('users').orderBy('createdAt', 'desc').limit(100).get()
+  } else {
+    usersSnap = await adminDb
+      .collection('users')
+      .where('role', '==', 'staff')
+      .orderBy('createdAt', 'desc')
+      .limit(100)
+      .get()
+  }
 
-  const { docs } = await payload.find({
-    collection: 'users',
-    where,
-    limit: 100,
-    sort: '-createdAt',
-    overrideAccess: true,
+  const users = usersSnap.docs.map((d) => {
+    const data = d.data()
+    return {
+      id: d.id,
+      name: data.name ?? null,
+      email: data.email,
+      role: data.role ?? 'staff',
+      createdAt: data.createdAt ? String(data.createdAt) : undefined,
+    }
   })
-
-  const users = docs.map((u: any) => ({
-    id: u.id,
-    name: u.name ?? null,
-    email: u.email,
-    role: u.role ?? 'staff',
-    createdAt: u.createdAt ? String(u.createdAt) : undefined,
-  }))
 
   return (
     <div className="space-y-6">

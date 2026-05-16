@@ -76,7 +76,7 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
 
   // Fetch categories
   React.useEffect(() => {
-    fetch('/api/product-categories?limit=50&sort=order', { credentials: 'include' })
+    fetch('/api/admin/product-categories?limit=50&sort=order')
       .then((r) => r.json())
       .then((d) => setCategories(d.docs ?? []))
       .catch(() => {})
@@ -87,7 +87,7 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
     if (!id) return
     Promise.all(
       LOCALES.map(async ({ key }) => {
-        const res = await fetch(`/api/products/${id}?locale=${key}&depth=1`, { credentials: 'include' })
+        const res = await fetch(`/api/admin/products/${id}?locale=${key}&depth=1`)
         return { key, data: await res.json() }
       })
     ).then((results) => {
@@ -114,7 +114,7 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
   }, [id])
 
   const fetchMedia = async () => {
-    const res = await fetch('/api/media?limit=100', { credentials: 'include' })
+    const res = await fetch('/api/admin/media?limit=100')
     const data = await res.json()
     setMediaItems(data.docs ?? [])
     setMediaOpen(true)
@@ -127,7 +127,7 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
     fd.append('file', file)
     fd.append('alt', file.name.replace(/\.[^.]+$/, ''))
     toast.promise(
-      fetch('/api/media', { method: 'POST', body: fd, credentials: 'include' }).then(async (r) => {
+      fetch('/api/admin/media', { method: 'POST', body: fd }).then(async (r) => {
         const { doc } = await r.json()
         setForm((prev) => ({ ...prev, images: [...prev.images, doc] }))
       }),
@@ -168,10 +168,9 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
       // Save each locale (non-localized fields only need saving once but we repeat for simplicity)
       const responses = await Promise.all(
         LOCALES.map(({ key }) =>
-          fetch(isEdit ? `/api/products/${id}?locale=${key}` : `/api/products?locale=${key}`, {
+          fetch(isEdit ? `/api/admin/products/${id}?locale=${key}` : `/api/admin/products?locale=${key}`, {
             method: isEdit ? 'PATCH' : 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify({
               ...basePayload,
               name: form.name[key as keyof LocalizedStr],
@@ -202,7 +201,7 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
     if (!id || !confirm('確定刪除此商品？此操作無法復原。')) return
     setDeleting(true)
     try {
-      await fetch(`/api/products/${id}`, { method: 'DELETE', credentials: 'include' })
+      await fetch(`/api/admin/products/${id}`, { method: 'DELETE' })
       toast.success('商品已刪除')
       router.push('/admin/collections/products')
       router.refresh()

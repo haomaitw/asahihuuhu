@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+import { adminDb } from '@/lib/firebase/admin'
 import { DashboardClient } from './DashboardClient'
 
 export const metadata: Metadata = { title: 'Dashboard' }
@@ -14,111 +13,51 @@ export default async function DashboardPage() {
     todayOrders: 0,
     totalRevenue: 0,
   }
-
-  let lowStockProducts: { id: string | number; name: string; stock: number }[] = []
+  let lowStockProducts: { id: string; name: string; stock: number }[] = []
   let recentOrders: any[] = []
 
   try {
-    const payload = await getPayload({ config: configPromise })
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const todayIso = today.toISOString()
 
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
-    const todayEnd = new Date()
-    todayEnd.setHours(23, 59, 59, 999)
+    const [productsSnap, ordersSnap] = await Promise.all([
+      adminDb.collection('products').get(),
+      adminDb.collection('orders').orderBy('createdAt', 'desc').limit(500).get(),
+    ])
 
-    const [products, pendingShipment, processingOrders, allPaid, todayResult] =
-      await Promise.all([
-        payload.find({ collection: 'products', limit: 0, overrideAccess: true }),
-        payload.find({
-          collection: 'orders',
-          where: {
-            and: [
-              { status: { equals: 'paid' } },
-              { fulfillmentStatus: { equals: 'unfulfilled' } },
-            ],
-          },
-          limit: 0,
-          overrideAccess: true,
-        }),
-        payload.find({
-          collection: 'orders',
-          where: { fulfillmentStatus: { equals: 'processing' } },
-          limit: 0,
-          overrideAccess: true,
-        }),
-        payload.find({
-          collection: 'orders',
-          where: { status: { equals: 'paid' } },
-          limit: 9999,
-          overrideAccess: true,
-        }),
-        payload.find({
-          collection: 'orders',
-          where: {
-            and: [
-              { createdAt: { greater_than_equal: todayStart.toISOString() } },
-              { createdAt: { less_than_equal: todayEnd.toISOString() } },
-            ],
-          },
-          limit: 0,
-          overrideAccess: true,
-        }),
-      ])
+    const products = productsSnap.docs.map((d) => ({ id: d.id, ...d.data() } as any))
+    const orders = ordersSnap.docs.map((d) => ({ id: d.id, ...d.data() } as any))
 
-    const totalRevenue = allPaid.docs.reduce(
-      (sum: number, o: any) => sum + (Number(o.totalAmount) || 0),
-      0,
-    )
+    const paidOrders = orders.filter((o: any) => o.status === 'paid')
+    stats = {
+      totalProducts: products.length,
+      pendingShipmentCount: paidOrders.filter((o: any) => o.fulfillmentStatus === 'unfulfilled').length,
+      processingOrders: orders.filter((o: any) => o.fulfillmentStatus === 'processing').length,
+      todayOrders: orders.filter((o: any) => (o.createdAt ?? '') >= todayIso).length,
+      totalRevenue: paidOrders.reduce((sum: number, o: any) => sum + (Number(o.totalAmount) || 0), 0),
+    }
 
-    const allProducts = await payload.find({
-      collection: 'products',
-      where: { trackStock: { equals: true } },
-      limit: 100,
-      overrideAccess: true,
-    })
-    lowStockProducts = allProducts.docs
-      .filter((p: any) => (p.stock ?? 0) <= (p.lowStockThreshold ?? 5))
+    lowStockProducts = products
+      .filter((p: any) => p.trackStock && (p.stock ?? 0) <= (p.lowStockThreshold ?? 3))
       .map((p: any) => ({
         id: p.id,
-        name: p.name ?? '未命名商品',
+        name: typeof p.name === 'object' ? (p.name['zh-TW'] ?? p.id) : (p.name ?? p.id),
         stock: p.stock ?? 0,
       }))
 
-    stats = {
-      totalProducts: products.totalDocs,
-      pendingShipmentCount: pendingShipment.totalDocs,
-      processingOrders: processingOrders.totalDocs,
-      todayOrders: todayResult.totalDocs,
-      totalRevenue,
-    }
-
-    const result = await payload.find({
-      collection: 'orders',
-      limit: 8,
-      sort: '-createdAt',
-      overrideAccess: true,
-    })
-    recentOrders = result.docs.map((o: any) => ({
-      id: String(o.id),
+    recentOrders = orders.slice(0, 8).map((o: any) => ({
+      id: o.id,
       orderNumber: o.orderNumber ?? null,
       status: o.status ?? null,
       fulfillmentStatus: o.fulfillmentStatus ?? null,
       totalAmount: o.totalAmount != null ? Number(o.totalAmount) : null,
-      createdAt: o.createdAt ? String(o.createdAt) : null,
-      customerName:
-        typeof o.customer === 'object' && o.customer !== null
-          ? (o.customer?.name ?? null)
-          : null,
+      createdAt: o.createdAt ?? null,
+      customerName: o.customerName ?? null,
     }))
   } catch {
-    // DB not ready — show zeros
+    // Firestore not ready — show zeros
   }
 
-  return (
-    <DashboardClient
-      stats={stats}
-      recentOrders={recentOrders}
-      lowStockProducts={lowStockProducts}
-    />
-  )
+  return <DashboardClient stats={stats} recentOrders={recentOrders} lowStockProducts={lowStockProducts} />
 }

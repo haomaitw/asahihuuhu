@@ -1,16 +1,16 @@
-import { getAdminPayload } from '@/app/(payload)/admin/_lib/payload'
+import { adminDb } from '@/lib/firebase/admin'
 import { SiteSettingsForm } from './SiteSettingsForm'
 
 export const metadata = { title: '網站設定' }
 export const dynamic = 'force-dynamic'
 
 export default async function SiteSettingsPage() {
-  const payload = await getAdminPayload()
   let data: any = null
   try {
-    data = await payload.findGlobal({ slug: 'site-settings', locale: 'zh-TW' })
+    const snap = await adminDb.collection('settings').doc('site-settings').get()
+    data = snap.exists ? snap.data() : null
   } catch {
-    // DB table not ready yet — render form with empty defaults
+    // DB not ready yet — render form with empty defaults
   }
   return <SiteSettingsForm initialData={data} />
 }

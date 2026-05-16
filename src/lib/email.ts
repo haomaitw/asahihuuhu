@@ -1,10 +1,6 @@
 import 'server-only'
-/**
- * Email utility — sends transactional emails via the Payload nodemailer adapter.
- * All functions are server-side only.
- */
-import { getPayload } from 'payload'
-import config from '@payload-config'
+import nodemailer from 'nodemailer'
+import { adminDb } from '@/lib/firebase/admin'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -52,8 +48,28 @@ function wrap(body: string, title: string) {
 
 async function send(to: string, subject: string, html: string) {
   try {
-    const payload = await getPayload({ config })
-    await payload.sendEmail({ to, subject, html })
+    // Load email settings from Firestore
+    const snap = await adminDb.collection('settings').doc('site-settings').get()
+    const emailSettings = (snap.data() as any)?.emailSettings ?? {}
+    const fromAddress = emailSettings.fromAddress || process.env.EMAIL_FROM || 'noreply@asahihuuhu.com'
+    const fromName = emailSettings.fromName || '朝日夫婦'
+
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_SMTP_HOST,
+      port: Number(process.env.EMAIL_SMTP_PORT ?? 465),
+      secure: process.env.EMAIL_SMTP_SECURE !== 'false',
+      auth: {
+        user: process.env.EMAIL_SMTP_USER,
+        pass: process.env.EMAIL_SMTP_PASS,
+      },
+    })
+
+    await transporter.sendMail({
+      from: `"${fromName}" <${fromAddress}>`,
+      to,
+      subject,
+      html,
+    })
     return { ok: true }
   } catch (err: any) {
     console.error('[email] send failed:', err?.message)

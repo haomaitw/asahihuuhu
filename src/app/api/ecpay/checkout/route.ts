@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+import { adminDb } from '@/lib/firebase/admin'
 import { generateOrderNumber, buildEcpayForm } from '@/lib/ecpay'
 import type { CartItem } from '@/store/cart'
 
@@ -12,47 +11,30 @@ export async function POST(req: NextRequest) {
       customerName: string
       customerEmail: string
       customerPhone: string
-      shippingAddress?: {
-        zip?: string
-        city?: string
-        district?: string
-        address?: string
-      }
+      shippingAddress?: { zip?: string; city?: string; district?: string; address?: string }
       couponCode?: string
       couponDiscount?: number
       pointsRedeemed?: number
-      customerId?: string
       note?: string
     }
 
     const {
       items, locale, customerName, customerEmail, customerPhone,
-      shippingAddress, couponCode, couponDiscount = 0,
-      pointsRedeemed = 0, customerId, note,
+      shippingAddress, couponCode, couponDiscount = 0, pointsRedeemed = 0, note,
     } = body
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: '購物車是空的' }, { status: 400 })
     }
 
-    const payload = await getPayload({ config: configPromise })
-
-    // 結帳前驗證庫存
+    // Validate stock from Firestore
     for (const item of items) {
       try {
-        const result = await payload.find({
-          collection: 'products',
-          where: { slug: { equals: item.id } },
-          limit: 1,
-          overrideAccess: true,
-        })
-        const product = result.docs[0] as any
+        const snap = await adminDb.collection('products').where('slug', '==', item.id).limit(1).get()
+        const product = snap.docs[0]?.data() as any
         if (!product) continue
         if (!product.isAvailable) {
-          return NextResponse.json(
-            { error: `「${item.name}」目前無法購買` },
-            { status: 400 },
-          )
+          return NextResponse.json({ error: `「${item.name}」目前無法購買` }, { status: 400 })
         }
         if (product.trackStock && (product.stock ?? 0) < item.quantity) {
           const left = product.stock ?? 0
@@ -62,59 +44,49 @@ export async function POST(req: NextRequest) {
           )
         }
       } catch {
-        // 查詢失敗不阻擋結帳
+        // Query failure doesn't block checkout
       }
     }
 
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
-    const shippingFee = 120 // 黑貓宅急便冷凍宅配固定運費
+    const shippingFee = 120
     const totalAmount = Math.max(1, subtotal + shippingFee - couponDiscount - pointsRedeemed)
     const orderNumber = generateOrderNumber()
+    const now = new Date().toISOString()
 
-    // Create order in Payload
-    await payload.create({
-      collection: 'orders',
-      data: {
-        orderNumber,
-        status: 'pending_payment',
-        fulfillmentStatus: 'unfulfilled',
-        customerName,
-        customerEmail,
-        customerPhone,
-        ...(customerId ? { customer: customerId } : {}),
-        shippingAddress: shippingAddress ?? {},
-        items: items.map((i) => ({
-          productId: i.id,
-          productName: i.name,
-          quantity: i.quantity,
-          unitPrice: i.price,
-        })),
-        subtotal,
-        shippingFee,
-        couponCode: couponCode ?? '',
-        couponDiscount,
-        pointsRedeemed,
-        totalAmount,
-        ...(note ? { note } : {}),
-      },
+    // Create order in Firestore
+    await adminDb.collection('orders').add({
+      orderNumber,
+      status: 'pending_payment',
+      fulfillmentStatus: 'unfulfilled',
+      customerName,
+      customerEmail,
+      customerPhone,
+      shippingAddress: shippingAddress ?? {},
+      items: items.map((i) => ({
+        productId: i.id,
+        productName: i.name,
+        quantity: i.quantity,
+        unitPrice: i.price,
+      })),
+      subtotal,
+      shippingFee,
+      couponCode: couponCode ?? '',
+      couponDiscount,
+      pointsRedeemed,
+      totalAmount,
+      note: note ?? '',
+      createdAt: now,
+      updatedAt: now,
     })
 
-    // If coupon used, increment its usage count
+    // Increment coupon usage count
     if (couponCode) {
-      const couponResult = await payload.find({
-        collection: 'coupons',
-        where: { code: { equals: couponCode.toUpperCase() } },
-        limit: 1,
-        overrideAccess: true,
-      })
-      if (couponResult.docs[0]) {
-        const coupon = couponResult.docs[0] as any
-        await payload.update({
-          collection: 'coupons',
-          id: coupon.id,
-          data: { currentUses: (coupon.currentUses ?? 0) + 1 },
-          overrideAccess: true,
-        })
+      const couponSnap = await adminDb.collection('coupons').where('code', '==', couponCode.toUpperCase()).limit(1).get()
+      if (!couponSnap.empty) {
+        const couponRef = couponSnap.docs[0].ref
+        const currentUses = (couponSnap.docs[0].data() as any).currentUses ?? 0
+        await couponRef.update({ currentUses: currentUses + 1 })
       }
     }
 

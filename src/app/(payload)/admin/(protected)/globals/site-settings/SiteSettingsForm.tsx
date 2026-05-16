@@ -238,73 +238,52 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
   const [locale, setLocale] = React.useState<LocaleKey>('zh-TW')
   const [loading, setLoading] = React.useState(false)
 
-  // Hydrate localized fields from API on mount
+  // Hydrate from Firestore via single GET
   React.useEffect(() => {
-    Promise.all(
-      LOCALES.map(async ({ key }) => {
-        const r = await fetch(`/api/globals/site-settings?locale=${key}&depth=0`, {
-          credentials: 'include',
-        })
-        if (!r.ok) return { key, data: null }
-        return { key, data: await r.json() }
-      }),
-    ).then((results) => {
-      setForm((prev) => {
-        const next = { ...prev }
-        // non-localized — take from zh-TW response (same in all)
-        const base = results.find((r) => r.key === 'zh-TW')?.data
-        if (base) {
-          // Maintenance mode (non-localized enabled flag)
-          next.maintenanceMode = {
-            enabled: base.maintenanceMode?.enabled ?? prev.maintenanceMode.enabled,
-            message: { ...prev.maintenanceMode.message },
-          }
-          next.phone           = base.phone           ?? prev.phone
-          next.lineId          = base.lineId          ?? prev.lineId
-          next.googleMapsUrl   = base.googleMapsUrl   ?? prev.googleMapsUrl
-          next.googleMapsEmbed = base.googleMapsEmbed ?? prev.googleMapsEmbed
-          next.facebookUrl     = base.facebookUrl     ?? prev.facebookUrl
-          next.instagramUrl    = base.instagramUrl    ?? prev.instagramUrl
-          if (base.tcat) {
-            next.tcat = {
-              senderName:      base.tcat.senderName      ?? prev.tcat.senderName,
-              senderPhone:     base.tcat.senderPhone      ?? prev.tcat.senderPhone,
-              senderCellPhone: base.tcat.senderCellPhone  ?? prev.tcat.senderCellPhone,
-              senderZip:       base.tcat.senderZip        ?? prev.tcat.senderZip,
-              senderAddress:   base.tcat.senderAddress    ?? prev.tcat.senderAddress,
-              temperature:     base.tcat.temperature      ?? prev.tcat.temperature,
-              distance:        base.tcat.distance         ?? prev.tcat.distance,
-            }
-          }
-          if (base.emailSettings) {
-            next.emailSettings = {
-              fromAddress:              base.emailSettings.fromAddress              ?? prev.emailSettings.fromAddress,
-              fromName:                 base.emailSettings.fromName                 ?? prev.emailSettings.fromName,
-              orderConfirmationEnabled: base.emailSettings.orderConfirmationEnabled ?? prev.emailSettings.orderConfirmationEnabled,
-              replyTo:                  base.emailSettings.replyTo                  ?? prev.emailSettings.replyTo,
-            }
-          }
-        }
-        // localized fields
-        for (const { key } of LOCALES) {
-          const d = results.find((r) => r.key === key)?.data
-          if (!d) continue
-          const k = key as LocaleKey
-          next.address        = { ...next.address,        [k]: d.address        ?? '' }
-          next.contact        = { ...next.contact,        [k]: d.contact        ?? '' }
-          next.hoursWeekday   = { ...next.hoursWeekday,   [k]: d.hoursWeekday   ?? '' }
-          next.hoursWeekend   = { ...next.hoursWeekend,   [k]: d.hoursWeekend   ?? '' }
-          next.hoursClosed    = { ...next.hoursClosed,    [k]: d.hoursClosed    ?? '' }
-          next.seoDescription = { ...next.seoDescription, [k]: d.seoDescription ?? '' }
-          // Localized maintenance message
-          next.maintenanceMode.message = {
-            ...next.maintenanceMode.message,
-            [k]: d.maintenanceMode?.message ?? '',
-          }
-        }
-        return next
+    fetch('/api/admin/globals/site-settings', { credentials: 'include' })
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => {
+        if (!d) return
+        setForm((prev) => ({
+          ...prev,
+          maintenanceMode: {
+            enabled: d.maintenanceMode?.enabled ?? prev.maintenanceMode.enabled,
+            message: {
+              'zh-TW': d.maintenanceMode?.message?.['zh-TW'] ?? '',
+              en:      d.maintenanceMode?.message?.en        ?? '',
+              ja:      d.maintenanceMode?.message?.ja        ?? '',
+            },
+          },
+          phone:        d.phone        ?? prev.phone,
+          lineId:       d.lineId       ?? prev.lineId,
+          googleMapsUrl:   d.googleMapsUrl   ?? prev.googleMapsUrl,
+          googleMapsEmbed: d.googleMapsEmbed ?? prev.googleMapsEmbed,
+          facebookUrl:  d.facebookUrl  ?? prev.facebookUrl,
+          instagramUrl: d.instagramUrl ?? prev.instagramUrl,
+          address:      { 'zh-TW': d.address?.['zh-TW'] ?? '', en: d.address?.en ?? '', ja: d.address?.ja ?? '' },
+          contact:      { 'zh-TW': d.contact?.['zh-TW'] ?? '', en: d.contact?.en ?? '', ja: d.contact?.ja ?? '' },
+          hoursWeekday: { 'zh-TW': d.hoursWeekday?.['zh-TW'] ?? '', en: d.hoursWeekday?.en ?? '', ja: d.hoursWeekday?.ja ?? '' },
+          hoursWeekend: { 'zh-TW': d.hoursWeekend?.['zh-TW'] ?? '', en: d.hoursWeekend?.en ?? '', ja: d.hoursWeekend?.ja ?? '' },
+          hoursClosed:  { 'zh-TW': d.hoursClosed?.['zh-TW']  ?? '', en: d.hoursClosed?.en  ?? '', ja: d.hoursClosed?.ja  ?? '' },
+          seoDescription: { 'zh-TW': d.seoDescription?.['zh-TW'] ?? '', en: d.seoDescription?.en ?? '', ja: d.seoDescription?.ja ?? '' },
+          tcat: d.tcat ? {
+            senderName:      d.tcat.senderName      ?? prev.tcat.senderName,
+            senderPhone:     d.tcat.senderPhone      ?? prev.tcat.senderPhone,
+            senderCellPhone: d.tcat.senderCellPhone  ?? prev.tcat.senderCellPhone,
+            senderZip:       d.tcat.senderZip        ?? prev.tcat.senderZip,
+            senderAddress:   d.tcat.senderAddress    ?? prev.tcat.senderAddress,
+            temperature:     d.tcat.temperature      ?? prev.tcat.temperature,
+            distance:        d.tcat.distance         ?? prev.tcat.distance,
+          } : prev.tcat,
+          emailSettings: d.emailSettings ? {
+            fromAddress:              d.emailSettings.fromAddress              ?? prev.emailSettings.fromAddress,
+            fromName:                 d.emailSettings.fromName                 ?? prev.emailSettings.fromName,
+            orderConfirmationEnabled: d.emailSettings.orderConfirmationEnabled ?? prev.emailSettings.orderConfirmationEnabled,
+            replyTo:                  d.emailSettings.replyTo                  ?? prev.emailSettings.replyTo,
+          } : prev.emailSettings,
+        }))
       })
-    }).catch(() => {/* ignore */})
+      .catch(() => {/* ignore */})
   }, [])
 
   // ── Save ──────────────────────────────────────────────────────────────────
@@ -324,41 +303,34 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
         tcat:            form.tcat,
       }
 
-      // Per-locale POSTs for localized fields
-      await Promise.all(
-        LOCALES.map(({ key }) =>
-          fetch(`/api/globals/site-settings?locale=${key}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-              ...nonLocalizedBody,
-              // Strip empty strings from email-type fields to avoid Payload validation errors
-              emailSettings: {
-                ...form.emailSettings,
-                fromAddress: form.emailSettings.fromAddress || undefined,
-                replyTo:     form.emailSettings.replyTo     || undefined,
-              },
-              maintenanceMode: {
-                enabled: form.maintenanceMode.enabled,
-                message: form.maintenanceMode.message[key],
-              },
-              address:        form.address[key],
-              contact:        form.contact[key],
-              hoursWeekday:   form.hoursWeekday[key],
-              hoursWeekend:   form.hoursWeekend[key],
-              hoursClosed:    form.hoursClosed[key],
-              seoDescription: form.seoDescription[key],
-            }),
-          }).then(async (r) => {
-            if (!r.ok) {
-              const body = await r.json().catch(() => ({}))
-              const msg = body?.errors?.[0]?.message ?? body?.message ?? `HTTP ${r.status}`
-              throw new Error(msg)
-            }
-          }),
-        ),
-      )
+      // Single PATCH with all locales embedded as objects
+      const r = await fetch('/api/admin/globals/site-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...nonLocalizedBody,
+          emailSettings: {
+            ...form.emailSettings,
+            fromAddress: form.emailSettings.fromAddress || undefined,
+            replyTo:     form.emailSettings.replyTo     || undefined,
+          },
+          maintenanceMode: {
+            enabled: form.maintenanceMode.enabled,
+            message: form.maintenanceMode.message,
+          },
+          address:        form.address,
+          contact:        form.contact,
+          hoursWeekday:   form.hoursWeekday,
+          hoursWeekend:   form.hoursWeekend,
+          hoursClosed:    form.hoursClosed,
+          seoDescription: form.seoDescription,
+        }),
+        credentials: 'include',
+      })
+      if (!r.ok) {
+        const body = await r.json().catch(() => ({}))
+        throw new Error(body?.error ?? `HTTP ${r.status}`)
+      }
 
       toast.success('設定已儲存')
     } catch (err: any) {

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Plus, Tag } from 'lucide-react'
-import { getAdminPayload } from '@/app/(payload)/admin/_lib/payload'
+import { adminDb } from '@/lib/firebase/admin'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -9,13 +9,9 @@ export const metadata = { title: '商品分類' }
 export const dynamic = 'force-dynamic'
 
 export default async function ProductCategoriesPage() {
-  const payload = await getAdminPayload()
-  const { docs, totalDocs } = await payload.find({
-    collection: 'product-categories',
-    locale: 'zh-TW',
-    limit: 100,
-    sort: 'order',
-  })
+  const snap = await adminDb.collection('product-categories').orderBy('order', 'asc').limit(100).get()
+  const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as any[]
+  const totalDocs = docs.length
 
   return (
     <div className="space-y-6">

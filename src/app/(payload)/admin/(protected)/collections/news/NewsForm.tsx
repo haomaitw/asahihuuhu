@@ -12,27 +12,16 @@ import { cn } from '@/lib/utils'
 
 const LOCALES = [{ key: 'zh-TW', label: '中文' }, { key: 'en', label: 'EN' }, { key: 'ja', label: 'JA' }]
 
-// Convert plain text to Payload Lexical JSON
-function toRichText(text: string) {
-  const paragraphs = (text || '').split('\n').filter((p) => p.trim())
-  if (paragraphs.length === 0) paragraphs.push('')
-  return {
-    root: {
-      type: 'root', version: 1, direction: 'ltr', format: '', indent: 0,
-      children: paragraphs.map((p) => ({
-        type: 'paragraph', version: 1, direction: 'ltr', format: '', indent: 0,
-        children: [{ type: 'text', version: 1, text: p, format: 0, style: '', mode: 'normal', detail: 0 }],
-      })),
-    },
+// Extract plain text from either a plain string or legacy Payload Lexical JSON
+function fromBody(body: any): string {
+  if (!body) return ''
+  if (typeof body === 'string') return body
+  if (body?.root?.children) {
+    return body.root.children
+      .map((node: any) => node.children?.map((c: any) => c.text ?? '').join('') ?? '')
+      .join('\n')
   }
-}
-
-// Extract plain text from Payload Lexical JSON
-function fromRichText(richText: any): string {
-  if (!richText?.root?.children) return ''
-  return richText.root.children
-    .map((node: any) => node.children?.map((c: any) => c.text ?? '').join('') ?? '')
-    .join('\n')
+  return ''
 }
 
 type LocalizedStr = { 'zh-TW': string; en: string; ja: string }
@@ -51,7 +40,7 @@ function initForm(data?: any): FormState {
     slug: data?.slug ?? '',
     date: data?.date ? new Date(data.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
     status: data?.status ?? 'draft',
-    body: { 'zh-TW': fromRichText(data?.body), en: '', ja: '' },
+    body: { 'zh-TW': fromBody(data?.body), en: '', ja: '' },
   }
 }
 
@@ -65,44 +54,47 @@ export function NewsForm({ initialData, id }: { initialData?: any; id?: string }
 
   React.useEffect(() => {
     if (!id) return
-    Promise.all(LOCALES.map(async ({ key }) => {
-      const r = await fetch(`/api/news/${id}?locale=${key}`, { credentials: 'include' })
-      return { key, data: await r.json() }
-    })).then((results) => {
-      setForm((prev) => ({
-        ...prev,
-        title: {
-          'zh-TW': results.find((r) => r.key === 'zh-TW')?.data.title ?? prev.title['zh-TW'],
-          en:      results.find((r) => r.key === 'en')?.data.title ?? '',
-          ja:      results.find((r) => r.key === 'ja')?.data.title ?? '',
-        },
-        body: {
-          'zh-TW': fromRichText(results.find((r) => r.key === 'zh-TW')?.data.body),
-          en:      fromRichText(results.find((r) => r.key === 'en')?.data.body),
-          ja:      fromRichText(results.find((r) => r.key === 'ja')?.data.body),
-        },
-      }))
-    })
+    fetch(`/api/admin/news/${id}`, { credentials: 'include' })
+      .then((r) => r.json())
+      .then((data) => {
+        setForm((prev) => ({
+          ...prev,
+          title: {
+            'zh-TW': data.title?.['zh-TW'] ?? prev.title['zh-TW'],
+            en:      data.title?.en ?? '',
+            ja:      data.title?.ja ?? '',
+          },
+          body: {
+            'zh-TW': fromBody(data.body?.['zh-TW'] ?? data.body),
+            en:      fromBody(data.body?.en ?? ''),
+            ja:      fromBody(data.body?.ja ?? ''),
+          },
+          slug:   data.slug ?? prev.slug,
+          date:   data.date ? new Date(data.date).toISOString().split('T')[0] : prev.date,
+          status: data.status ?? prev.status,
+        }))
+      })
   }, [id])
 
   const handleSave = async () => {
     if (!form.slug) { toast.error('請填寫 Slug'); return }
     setLoading(true)
     try {
-      await Promise.all(LOCALES.map(({ key }) =>
-        fetch(isEdit ? `/api/news/${id}?locale=${key}` : `/api/news?locale=${key}`, {
-          method: isEdit ? 'PATCH' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            title: form.title[key as keyof LocalizedStr],
-            slug: form.slug,
-            date: form.date,
-            status: form.status,
-            body: toRichText(form.body[key as keyof LocalizedStr]),
-          }),
-        })
-      ))
+      const url = isEdit ? `/api/admin/news/${id}` : '/api/admin/news'
+      const method = isEdit ? 'PATCH' : 'POST'
+      const payload = {
+        title:  { 'zh-TW': form.title['zh-TW'], en: form.title.en, ja: form.title.ja },
+        body:   { 'zh-TW': form.body['zh-TW'],  en: form.body.en,  ja: form.body.ja },
+        slug:   form.slug,
+        date:   form.date,
+        status: form.status,
+      }
+      await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      })
       toast.success(isEdit ? '消息已更新' : '消息已建立')
       router.push('/admin/collections/news')
       router.refresh()
@@ -113,7 +105,7 @@ export function NewsForm({ initialData, id }: { initialData?: any; id?: string }
     if (!id || !confirm('確定刪除？')) return
     setDeleting(true)
     try {
-      await fetch(`/api/news/${id}`, { method: 'DELETE', credentials: 'include' })
+      await fetch(`/api/admin/news/${id}`, { method: 'DELETE', credentials: 'include' })
       toast.success('消息已刪除')
       router.push('/admin/collections/news')
       router.refresh()
