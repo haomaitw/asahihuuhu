@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { adminAuth } from '@/lib/firebase/admin'
+import { adminAuth, adminDb } from '@/lib/firebase/admin'
 import { verifyAdminSession } from '@/lib/firebase/auth-helpers'
 
 /**
  * GET /api/admin/users
- * List Firebase Auth users with their custom-claim roles.
- * super-admin sees all users; admin sees only staff accounts.
+ * List users from Firestore (source of truth for role+name).
+ * super-admin sees all; admin sees only staff.
  */
 export async function GET() {
   const user = await verifyAdminSession(['super-admin', 'admin'])
@@ -14,21 +14,29 @@ export async function GET() {
   }
 
   try {
-    const listResult = await adminAuth.listUsers(1000)
-    const docs = listResult.users
-      .map((u) => ({
-        uid: u.uid,
-        email: u.email ?? null,
-        displayName: u.displayName ?? null,
-        role: (u.customClaims as any)?.role ?? null,
-        disabled: u.disabled,
-        createdAt: u.metadata.creationTime,
-        lastSignIn: u.metadata.lastSignInTime ?? null,
-      }))
-      .filter((u) => {
-        // admin only sees staff accounts
-        if (user.role === 'super-admin') return true
-        return u.role === 'staff'
+    let snap
+    if (user.role === 'super-admin') {
+      snap = await adminDb.collection('users').limit(200).get()
+    } else {
+      snap = await adminDb.collection('users').where('role', '==', 'staff').limit(200).get()
+    }
+
+    const docs = snap.docs
+      .map((d) => {
+        const data = d.data()
+        return {
+          id: d.id,
+          name: data.name ?? null,
+          email: data.email ?? '',
+          role: data.role ?? null,
+          createdAt: data.createdAt ? String(data.createdAt) : undefined,
+        }
+      })
+      .sort((a, b) => {
+        if (!a.createdAt && !b.createdAt) return 0
+        if (!a.createdAt) return 1
+        if (!b.createdAt) return -1
+        return b.createdAt.localeCompare(a.createdAt)
       })
 
     return NextResponse.json({ docs, totalDocs: docs.length })
@@ -39,7 +47,7 @@ export async function GET() {
 
 /**
  * POST /api/admin/users
- * Create a new Firebase Auth user and set their custom-claim role.
+ * Create a new Firebase Auth user + Firestore users doc.
  * super-admin can create any role; admin can only create staff.
  */
 export async function POST(req: NextRequest) {
@@ -49,7 +57,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { email, password, displayName, role } = body
+  const { email, password, name, role } = body
 
   if (!email || !password) {
     return NextResponse.json({ error: '請填寫 Email 和密碼' }, { status: 400 })
@@ -58,7 +66,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '密碼長度至少 8 個字元' }, { status: 400 })
   }
 
-  // admin can only create staff; super-admin can create any role
   const creatableRoles: string[] =
     caller.role === 'super-admin' ? ['super-admin', 'admin', 'staff'] : ['staff']
 
@@ -68,25 +75,42 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const newUser = await adminAuth.createUser({ email, password, displayName: displayName ?? '' })
+    const newUser = await adminAuth.createUser({
+      email,
+      password,
+      displayName: name ?? '',
+    })
     await adminAuth.setCustomUserClaims(newUser.uid, { role: targetRole })
+
+    const now = new Date().toISOString()
+    await adminDb.collection('users').doc(newUser.uid).set({
+      email,
+      name: name ?? null,
+      role: targetRole,
+      createdAt: now,
+      updatedAt: now,
+    })
 
     return NextResponse.json(
       {
         ok: true,
         doc: {
-          uid: newUser.uid,
+          id: newUser.uid,
           email: newUser.email ?? null,
-          displayName: newUser.displayName ?? null,
+          name: name ?? null,
           role: targetRole,
+          createdAt: now,
         },
       },
       { status: 201 },
     )
   } catch (err: any) {
-    const msg: string = err?.message ?? 'Server error'
     const isDuplicate =
-      err?.code === 'auth/email-already-exists' || msg.toLowerCase().includes('email already exists')
-    return NextResponse.json({ error: isDuplicate ? '此 Email 已被使用' : msg }, { status: 400 })
+      err?.code === 'auth/email-already-exists' ||
+      (err?.message ?? '').toLowerCase().includes('email already exists')
+    return NextResponse.json(
+      { error: isDuplicate ? '此 Email 已被使用' : '建立失敗' },
+      { status: 400 },
+    )
   }
 }

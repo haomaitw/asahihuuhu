@@ -26,7 +26,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   try {
     const snap = await adminDb.collection('settings').doc(slug).get()
     if (!snap.exists) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+      return NextResponse.json({})
     }
     return NextResponse.json({ id: snap.id, ...snap.data() })
   } catch (err: any) {

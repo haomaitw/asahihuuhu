@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { Noto_Sans_TC, Noto_Sans_JP, Noto_Serif_TC, Averia_Sans_Libre } from 'next/font/google';
@@ -10,6 +11,8 @@ import { CartProvider } from '@/components/CartProvider';
 import { BackToTop } from '@/components/BackToTop';
 import { getSiteSettings } from '@/lib/cms';
 import { MaintenancePage } from '@/components/MaintenancePage';
+import { AdminPreviewBar } from '@/components/AdminPreviewBar';
+import { adminAuth } from '@/lib/firebase/admin';
 import '@/app/globals.css';
 
 const notoTC = Noto_Sans_TC({
@@ -69,6 +72,18 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+async function checkAdminSession(): Promise<boolean> {
+  try {
+    const cookieStore = await cookies();
+    const session = cookieStore.get('__session')?.value;
+    if (!session) return false;
+    await adminAuth.verifySessionCookie(session, true);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default async function LocaleLayout({
   children,
   params,
@@ -83,9 +98,10 @@ export default async function LocaleLayout({
   }
 
   setRequestLocale(locale);
-  const [messages, siteSettings] = await Promise.all([
+  const [messages, siteSettings, isAdmin] = await Promise.all([
     getMessages(),
     getSiteSettings(locale).catch(() => null),
+    checkAdminSession(),
   ]);
 
   const facebookUrl  = (siteSettings as any)?.facebookUrl  ?? null;
@@ -93,11 +109,11 @@ export default async function LocaleLayout({
   const copyright    = (siteSettings as any)?.copyright    ?? null;
   const phone        = (siteSettings as any)?.phone        ?? null;
 
-  // Maintenance mode — checked here via Payload local API (reliable, no HTTP fetch)
   const maintenanceEnabled = (siteSettings as any)?.maintenanceMode?.enabled === true;
   const maintenanceMessage = (siteSettings as any)?.maintenanceMode?.message ?? null;
 
-  if (maintenanceEnabled) {
+  // Admins bypass maintenance mode and see a preview bar
+  if (maintenanceEnabled && !isAdmin) {
     return (
       <html
         lang={locale}
@@ -119,12 +135,13 @@ export default async function LocaleLayout({
     >
       {/* overflow-x-hidden: prevents marquee + any negative-margin element from
           causing horizontal scroll on iOS / Android */}
-      <body className="overflow-x-hidden">
+      <body className={`overflow-x-hidden${isAdmin ? ' pt-7' : ''}`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         <NextIntlClientProvider locale={locale} messages={messages}>
+          {isAdmin && <AdminPreviewBar maintenanceOn={maintenanceEnabled} />}
           <CartProvider>
             <PageTransitionOverlay />
             <BackToTop />

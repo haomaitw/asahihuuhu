@@ -20,12 +20,18 @@ type FormState = {
   order: number
 }
 
+function toLocStr(val: any): LocalizedStr {
+  if (!val) return { 'zh-TW': '', en: '', ja: '' }
+  if (typeof val === 'string') return { 'zh-TW': val, en: '', ja: '' }
+  return { 'zh-TW': val['zh-TW'] ?? '', en: val.en ?? '', ja: val.ja ?? '' }
+}
+
 function initForm(data?: any): FormState {
   return {
-    name:     { 'zh-TW': data?.name ?? '', en: '', ja: '' },
-    position: { 'zh-TW': data?.position ?? '', en: '', ja: '' },
-    bio:      { 'zh-TW': data?.bio ?? '', en: '', ja: '' },
-    photo:    data?.photo ? { id: data.photo.id ?? data.photo, url: data.photo.url ?? '' } : null,
+    name:     toLocStr(data?.name),
+    position: toLocStr(data?.position),
+    bio:      toLocStr(data?.bio),
+    photo:    data?.photo ? { id: data.photo.id ?? data.photo, url: data.photo.url ?? (typeof data.photo === 'string' ? data.photo : '') } : null,
     order:    data?.order ?? 0,
   }
 }
@@ -41,20 +47,10 @@ export function StaffForm({ initialData, isEdit }: { initialData?: any; isEdit?:
 
   React.useEffect(() => {
     if (!isEdit || !id) return
-    Promise.all(LOCALES.map(async ({ key }) => {
-      const r = await fetch(`/api/staff/${id}?locale=${key}&depth=1`, { credentials: 'include' })
-      return { key, data: await r.json() }
-    })).then((results) => {
-      const g = (k: string, f: string) => results.find((r) => r.key === k)?.data[f] ?? ''
-      const photoData = results.find((r) => r.key === 'zh-TW')?.data?.photo
-      setForm((prev) => ({
-        ...prev,
-        name:     { 'zh-TW': g('zh-TW', 'name'),     en: g('en', 'name'),     ja: g('ja', 'name') },
-        position: { 'zh-TW': g('zh-TW', 'position'), en: g('en', 'position'), ja: g('ja', 'position') },
-        bio:      { 'zh-TW': g('zh-TW', 'bio'),      en: g('en', 'bio'),      ja: g('ja', 'bio') },
-        photo:    photoData ? { id: photoData.id ?? photoData, url: photoData.url ?? '' } : null,
-      }))
-    })
+    fetch(`/api/admin/staff/${id}`, { credentials: 'include' })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) setForm(initForm(data)) })
+      .catch(() => {})
   }, [isEdit, id])
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,11 +61,13 @@ export function StaffForm({ initialData, isEdit }: { initialData?: any; isEdit?:
       const fd = new FormData()
       fd.append('file', file)
       fd.append('alt', file.name.replace(/\.[^.]+$/, ''))
-      const r = await fetch('/api/media', { method: 'POST', body: fd, credentials: 'include' })
+      const r = await fetch('/api/admin/media', { method: 'POST', body: fd, credentials: 'include' })
       const { doc } = await r.json()
       setForm((p) => ({ ...p, photo: { id: doc.id, url: doc.url ?? '' } }))
       toast.success('照片上傳成功')
-    } catch { toast.error('照片上傳失敗') } finally {
+    } catch {
+      toast.error('照片上傳失敗')
+    } finally {
       setUploading(false)
       if (photoRef.current) photoRef.current.value = ''
     }
@@ -79,34 +77,46 @@ export function StaffForm({ initialData, isEdit }: { initialData?: any; isEdit?:
     if (!form.name['zh-TW'].trim()) { toast.error('請填寫姓名'); return }
     setLoading(true)
     try {
-      const basePayload = { order: form.order, photo: form.photo?.id ?? null }
-      await Promise.all(LOCALES.map(({ key }) =>
-        fetch(isEdit ? `/api/staff/${id}?locale=${key}` : `/api/staff?locale=${key}`, {
-          method: isEdit ? 'PATCH' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            ...basePayload,
-            name: form.name[key as keyof LocalizedStr],
-            position: form.position[key as keyof LocalizedStr],
-            bio: form.bio[key as keyof LocalizedStr],
-          }),
-        })
-      ))
+      const payload = {
+        name:     form.name,
+        position: form.position,
+        bio:      form.bio,
+        photo:    form.photo?.url ?? null,
+        order:    form.order,
+      }
+      const url = isEdit ? `/api/admin/staff/${id}` : '/api/admin/staff'
+      const method = isEdit ? 'PATCH' : 'POST'
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data?.error ?? '儲存失敗')
+        return
+      }
       toast.success(isEdit ? '成員已更新' : '成員已建立')
       router.push('/admin/collections/staff')
       router.refresh()
-    } catch { toast.error('儲存失敗') } finally { setLoading(false) }
+    } catch {
+      toast.error('儲存失敗，請稍後再試')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDelete = async () => {
     if (!isEdit || !id || !confirm('確定刪除此成員？')) return
     try {
-      await fetch(`/api/staff/${id}`, { method: 'DELETE', credentials: 'include' })
+      await fetch(`/api/admin/staff/${id}`, { method: 'DELETE', credentials: 'include' })
       toast.success('已刪除')
       router.push('/admin/collections/staff')
       router.refresh()
-    } catch { toast.error('刪除失敗') }
+    } catch {
+      toast.error('刪除失敗')
+    }
   }
 
   const setLoc = (field: 'name' | 'position' | 'bio', val: string) =>
