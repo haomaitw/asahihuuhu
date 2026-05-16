@@ -18,7 +18,7 @@ const LOCALES = [
 
 type LocalizedStr = { 'zh-TW': string; en: string; ja: string }
 type MediaItem = { id: string | number; url?: string; filename?: string }
-type Category = { id: string | number; name: string; slug: string }
+type Category = { id: string | number; name: any; slug: string }
 
 type FormState = {
   name: LocalizedStr
@@ -40,24 +40,25 @@ function extractCategoryId(cat: any): string {
   return String(cat?.id ?? '')
 }
 
+function toLocStr(val: any): LocalizedStr {
+  if (!val) return { 'zh-TW': '', en: '', ja: '' }
+  if (typeof val === 'string') return { 'zh-TW': val, en: '', ja: '' }
+  return { 'zh-TW': val['zh-TW'] ?? '', en: val.en ?? '', ja: val.ja ?? '' }
+}
+
 function initForm(data?: any): FormState {
-  const loc = (field: string): LocalizedStr => ({
-    'zh-TW': typeof data?.[field] === 'string' ? data[field] : '',
-    en: '',
-    ja: '',
-  })
   return {
-    name: loc('name'),
-    slug: data?.slug ?? '',
-    price: data?.price?.toString() ?? '',
-    comparePrice: data?.comparePrice?.toString() ?? '',
-    categoryId: extractCategoryId(data?.category),
-    trackStock: data?.trackStock ?? true,
-    stock: data?.stock?.toString() ?? '0',
-    lowStockThreshold: data?.lowStockThreshold?.toString() ?? '3',
-    shortDescription: loc('shortDescription'),
-    isAvailable: data?.isAvailable ?? true,
-    images: (data?.images ?? []) as MediaItem[],
+    name:               toLocStr(data?.name),
+    slug:               data?.slug ?? '',
+    price:              data?.price?.toString() ?? '',
+    comparePrice:       data?.comparePrice?.toString() ?? '',
+    categoryId:         extractCategoryId(data?.category),
+    trackStock:         data?.trackStock ?? true,
+    stock:              data?.stock?.toString() ?? '0',
+    lowStockThreshold:  data?.lowStockThreshold?.toString() ?? '3',
+    shortDescription:   toLocStr(data?.shortDescription),
+    isAvailable:        data?.isAvailable ?? true,
+    images:             (data?.images ?? []) as MediaItem[],
   }
 }
 
@@ -74,7 +75,6 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
 
   const isEdit = !!id
 
-  // Fetch categories
   React.useEffect(() => {
     fetch('/api/admin/product-categories?limit=50&sort=order')
       .then((r) => r.json())
@@ -82,35 +82,29 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
       .catch(() => {})
   }, [])
 
-  // Load all locales for edit mode
   React.useEffect(() => {
     if (!id) return
-    Promise.all(
-      LOCALES.map(async ({ key }) => {
-        const res = await fetch(`/api/admin/products/${id}?locale=${key}&depth=1`)
-        return { key, data: await res.json() }
+    fetch(`/api/admin/products/${id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setForm((prev) => ({
+          ...prev,
+          slug:              data.slug ?? prev.slug,
+          price:             data.price?.toString() ?? prev.price,
+          comparePrice:      data.comparePrice?.toString() ?? '',
+          categoryId:        extractCategoryId(data.category),
+          trackStock:        data.trackStock ?? true,
+          stock:             data.stock?.toString() ?? '0',
+          lowStockThreshold: data.lowStockThreshold?.toString() ?? '3',
+          isAvailable:       data.isAvailable ?? true,
+          name:              toLocStr(data.name),
+          shortDescription:  toLocStr(data.shortDescription),
+          images: (data.images ?? []).map((img: any) =>
+            typeof img === 'string' ? { id: img, url: img } : img
+          ),
+        }))
       })
-    ).then((results) => {
-      const zhData = results.find((r) => r.key === 'zh-TW')?.data
-      setForm((prev) => ({
-        ...prev,
-        comparePrice: zhData?.comparePrice?.toString() ?? '',
-        categoryId: extractCategoryId(zhData?.category),
-        trackStock: zhData?.trackStock ?? true,
-        stock: zhData?.stock?.toString() ?? '0',
-        lowStockThreshold: zhData?.lowStockThreshold?.toString() ?? '3',
-        name: {
-          'zh-TW': results.find((r) => r.key === 'zh-TW')?.data?.name ?? prev.name['zh-TW'],
-          en:      results.find((r) => r.key === 'en')?.data?.name ?? '',
-          ja:      results.find((r) => r.key === 'ja')?.data?.name ?? '',
-        },
-        shortDescription: {
-          'zh-TW': results.find((r) => r.key === 'zh-TW')?.data?.shortDescription ?? '',
-          en:      results.find((r) => r.key === 'en')?.data?.shortDescription ?? '',
-          ja:      results.find((r) => r.key === 'ja')?.data?.shortDescription ?? '',
-        },
-      }))
-    })
+      .catch(() => {})
   }, [id])
 
   const fetchMedia = async () => {
@@ -153,38 +147,29 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
     }
     setLoading(true)
     try {
-      const basePayload: Record<string, any> = {
-        slug: form.slug.trim(),
-        price: parseFloat(form.price),
-        isAvailable: form.isAvailable,
-        images: form.images.map((img) => img.id),
-        trackStock: form.trackStock,
-        stock: parseInt(form.stock, 10) || 0,
+      const payload: Record<string, any> = {
+        slug:              form.slug.trim(),
+        price:             parseFloat(form.price),
+        isAvailable:       form.isAvailable,
+        images:            form.images,
+        trackStock:        form.trackStock,
+        stock:             parseInt(form.stock, 10) || 0,
         lowStockThreshold: parseInt(form.lowStockThreshold, 10) || 3,
+        name:              form.name,
+        shortDescription:  form.shortDescription,
       }
-      if (form.comparePrice) basePayload.comparePrice = parseFloat(form.comparePrice)
-      if (form.categoryId) basePayload.category = form.categoryId
+      if (form.comparePrice) payload.comparePrice = parseFloat(form.comparePrice)
+      if (form.categoryId)   payload.category = form.categoryId
 
-      // Save each locale (non-localized fields only need saving once but we repeat for simplicity)
-      const responses = await Promise.all(
-        LOCALES.map(({ key }) =>
-          fetch(isEdit ? `/api/admin/products/${id}?locale=${key}` : `/api/admin/products?locale=${key}`, {
-            method: isEdit ? 'PATCH' : 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...basePayload,
-              name: form.name[key as keyof LocalizedStr],
-              shortDescription: form.shortDescription[key as keyof LocalizedStr],
-            }),
-          })
-        )
-      )
+      const r = await fetch(isEdit ? `/api/admin/products/${id}` : '/api/admin/products', {
+        method: isEdit ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
 
-      for (const r of responses) {
-        if (!r.ok) {
-          const err = await r.json().catch(() => ({}))
-          throw new Error(err?.errors?.[0]?.message ?? '儲存失敗')
-        }
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}))
+        throw new Error(err?.error ?? '儲存失敗')
       }
 
       toast.success(isEdit ? '商品已更新' : '商品已建立')
@@ -217,9 +202,15 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
 
   const inputCls = 'w-full rounded-adm-md border border-adm-border-default bg-adm-bg-elevated px-3 py-2 text-sm text-adm-text-primary placeholder:text-adm-text-tertiary focus:outline-none focus:border-adm-brand-500 focus:ring-2 focus:ring-adm-brand-500/15'
 
+  const getCategoryName = (c: Category) => {
+    const n = c.name
+    if (!n) return c.slug
+    if (typeof n === 'string') return n
+    return n['zh-TW'] ?? n.en ?? c.slug
+  }
+
   return (
     <div className="space-y-6 max-w-3xl">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-adm-text-primary">
@@ -242,7 +233,6 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
         </div>
       </div>
 
-      {/* Locale tabs */}
       <div className="flex gap-1 border-b border-adm-border-subtle pb-0">
         {LOCALES.map(({ key, label }) => (
           <button
@@ -260,7 +250,6 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
         ))}
       </div>
 
-      {/* Locale-specific fields */}
       <Card>
         <CardContent className="p-5 space-y-4">
           <Input
@@ -282,7 +271,6 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
         </CardContent>
       </Card>
 
-      {/* Common fields */}
       <Card>
         <div className="px-5 py-4 border-b border-adm-border-subtle">
           <h2 className="text-sm font-semibold text-adm-text-primary">基本設定</h2>
@@ -306,7 +294,7 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
                 <option value="">— 未分類 —</option>
                 {categories.map((c) => (
                   <option key={c.id} value={String(c.id)}>
-                    {c.name} ({c.slug})
+                    {getCategoryName(c)} ({c.slug})
                   </option>
                 ))}
               </select>
@@ -345,7 +333,6 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
         </CardContent>
       </Card>
 
-      {/* Inventory */}
       <Card>
         <div className="px-5 py-4 border-b border-adm-border-subtle">
           <h2 className="text-sm font-semibold text-adm-text-primary">庫存管理</h2>
@@ -381,7 +368,6 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
         </CardContent>
       </Card>
 
-      {/* Images */}
       <Card>
         <div className="px-5 py-4 border-b border-adm-border-subtle">
           <h2 className="text-sm font-semibold text-adm-text-primary">商品圖片</h2>
@@ -392,11 +378,7 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
             {form.images.map((img) => (
               <div key={img.id} className="relative group">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={img.url ?? ''}
-                  alt=""
-                  className="h-24 w-24 rounded-adm-md object-cover bg-adm-bg-sunken"
-                />
+                <img src={img.url ?? ''} alt="" className="h-24 w-24 rounded-adm-md object-cover bg-adm-bg-sunken" />
                 <button
                   onClick={() => removeImage(img.id)}
                   className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-adm-danger-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
@@ -405,19 +387,12 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
                 </button>
               </div>
             ))}
-
             <div className="flex flex-col gap-2">
-              <button
-                onClick={fetchMedia}
-                className="h-24 w-24 rounded-adm-md border-2 border-dashed border-adm-border-strong flex flex-col items-center justify-center gap-1 text-adm-text-tertiary hover:border-adm-brand-400 hover:text-adm-brand-500 transition-colors"
-              >
+              <button onClick={fetchMedia} className="h-24 w-24 rounded-adm-md border-2 border-dashed border-adm-border-strong flex flex-col items-center justify-center gap-1 text-adm-text-tertiary hover:border-adm-brand-400 hover:text-adm-brand-500 transition-colors">
                 <Plus className="h-5 w-5" />
                 <span className="text-2xs">媒體庫</span>
               </button>
-              <button
-                onClick={() => fileRef.current?.click()}
-                className="h-24 w-24 rounded-adm-md border-2 border-dashed border-adm-border-strong flex flex-col items-center justify-center gap-1 text-adm-text-tertiary hover:border-adm-brand-400 hover:text-adm-brand-500 transition-colors"
-              >
+              <button onClick={() => fileRef.current?.click()} className="h-24 w-24 rounded-adm-md border-2 border-dashed border-adm-border-strong flex flex-col items-center justify-center gap-1 text-adm-text-tertiary hover:border-adm-brand-400 hover:text-adm-brand-500 transition-colors">
                 <Upload className="h-5 w-5" />
                 <span className="text-2xs">上傳</span>
               </button>
@@ -427,7 +402,6 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
         </CardContent>
       </Card>
 
-      {/* Media picker dialog */}
       {mediaOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-adm-bg-overlay">
           <div className="bg-adm-bg-elevated rounded-adm-2xl shadow-lg w-full max-w-2xl max-h-[80vh] flex flex-col">
@@ -443,11 +417,7 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
               ) : (
                 <div className="grid grid-cols-4 gap-3">
                   {mediaItems.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => selectMedia(item)}
-                      className="aspect-square rounded-adm-md overflow-hidden border-2 border-transparent hover:border-adm-brand-500 transition-colors"
-                    >
+                    <button key={item.id} onClick={() => selectMedia(item)} className="aspect-square rounded-adm-md overflow-hidden border-2 border-transparent hover:border-adm-brand-500 transition-colors">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={item.url ?? ''} alt={item.filename ?? ''} className="w-full h-full object-cover" />
                     </button>

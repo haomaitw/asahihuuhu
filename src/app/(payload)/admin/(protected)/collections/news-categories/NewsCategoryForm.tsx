@@ -12,9 +12,15 @@ type LocalizedStr = { 'zh-TW': string; en: string; ja: string }
 
 type FormState = { name: LocalizedStr; slug: string }
 
+function toLocStr(val: any): LocalizedStr {
+  if (!val) return { 'zh-TW': '', en: '', ja: '' }
+  if (typeof val === 'string') return { 'zh-TW': val, en: '', ja: '' }
+  return { 'zh-TW': val['zh-TW'] ?? '', en: val.en ?? '', ja: val.ja ?? '' }
+}
+
 function initForm(data?: any): FormState {
   return {
-    name: { 'zh-TW': data?.name ?? '', en: '', ja: '' },
+    name: toLocStr(data?.name),
     slug: data?.slug ?? '',
   }
 }
@@ -28,40 +34,43 @@ export function NewsCategoryForm({ initialData, isEdit }: { initialData?: any; i
 
   React.useEffect(() => {
     if (!isEdit || !id) return
-    Promise.all(LOCALES.map(async ({ key }) => {
-      const r = await fetch(`/api/news-categories/${id}?locale=${key}`, { credentials: 'include' })
-      return { key, data: await r.json() }
-    })).then((results) => {
-      const g = (k: string, f: string) => results.find((r) => r.key === k)?.data[f] ?? ''
-      setForm((prev) => ({
-        ...prev,
-        name: { 'zh-TW': g('zh-TW', 'name'), en: g('en', 'name'), ja: g('ja', 'name') },
-      }))
-    })
+    fetch(`/api/admin/news-categories/${id}`, { credentials: 'include' })
+      .then((r) => r.json())
+      .then((data) => setForm(initForm(data)))
+      .catch(() => {})
   }, [isEdit, id])
 
   const handleSave = async () => {
     if (!form.slug.trim()) { toast.error('請填寫 Slug'); return }
     setLoading(true)
     try {
-      await Promise.all(LOCALES.map(({ key }) =>
-        fetch(isEdit ? `/api/news-categories/${id}?locale=${key}` : `/api/news-categories?locale=${key}`, {
+      const r = await fetch(
+        isEdit ? `/api/admin/news-categories/${id}` : '/api/admin/news-categories',
+        {
           method: isEdit ? 'PATCH' : 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ slug: form.slug, name: form.name[key as keyof LocalizedStr] }),
-        })
-      ))
+          body: JSON.stringify({ slug: form.slug, name: form.name }),
+        }
+      )
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}))
+        throw new Error(err?.error ?? '儲存失敗')
+      }
       toast.success(isEdit ? '分類已更新' : '分類已建立')
       router.push('/admin/collections/news-categories')
       router.refresh()
-    } catch { toast.error('儲存失敗') } finally { setLoading(false) }
+    } catch (err: any) {
+      toast.error(err?.message ?? '儲存失敗')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDelete = async () => {
     if (!isEdit || !id || !confirm('確定刪除此分類？')) return
     try {
-      await fetch(`/api/news-categories/${id}`, { method: 'DELETE', credentials: 'include' })
+      await fetch(`/api/admin/news-categories/${id}`, { method: 'DELETE', credentials: 'include' })
       toast.success('已刪除')
       router.push('/admin/collections/news-categories')
       router.refresh()

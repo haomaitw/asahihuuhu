@@ -1,7 +1,7 @@
 'use client'
 import * as React from 'react'
 import { toast } from 'sonner'
-import { Upload, X, Film, Image as ImageIcon } from 'lucide-react'
+import { X, Film, Image as ImageIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -25,17 +25,29 @@ type FormState = {
   seasonalImage: MediaRef
 }
 
+function toLocStr(val: any): LocalizedStr {
+  if (!val) return { 'zh-TW': '', en: '', ja: '' }
+  if (typeof val === 'string') return { 'zh-TW': val, en: '', ja: '' }
+  return { 'zh-TW': val['zh-TW'] ?? '', en: val.en ?? '', ja: val.ja ?? '' }
+}
+
+function toRef(d: any): MediaRef {
+  if (!d) return null
+  if (typeof d === 'string') return { id: d, url: d }
+  return { id: d.id ?? d.url ?? '', url: d.url ?? '', mimeType: d.mimeType, filename: d.filename }
+}
+
 function initForm(data?: any): FormState {
   return {
-    tagline1:      { 'zh-TW': data?.tagline1 ?? '', en: '', ja: '' },
-    tagline2:      { 'zh-TW': data?.tagline2 ?? '', en: '', ja: '' },
-    heroLede:      { 'zh-TW': data?.heroLede ?? '', en: '', ja: '' },
-    seasonalTitle: { 'zh-TW': data?.seasonalTitle ?? '', en: '', ja: '' },
-    seasonalDesc:  { 'zh-TW': data?.seasonalDesc ?? '', en: '', ja: '' },
-    heroVideo:     null,
-    heroPoster:    null,
-    seasonalVideo: null,
-    seasonalImage: null,
+    tagline1:      toLocStr(data?.tagline1),
+    tagline2:      toLocStr(data?.tagline2),
+    heroLede:      toLocStr(data?.heroLede),
+    seasonalTitle: toLocStr(data?.seasonalTitle),
+    seasonalDesc:  toLocStr(data?.seasonalDesc),
+    heroVideo:     toRef(data?.heroVideo),
+    heroPoster:    toRef(data?.heroPoster),
+    seasonalVideo: toRef(data?.seasonalVideo),
+    seasonalImage: toRef(data?.seasonalImage),
   }
 }
 
@@ -60,7 +72,7 @@ function MediaUploadField({
       const fd = new FormData()
       fd.append('file', file)
       fd.append('alt', file.name.replace(/\.[^.]+$/, ''))
-      const r = await fetch('/api/media', { method: 'POST', body: fd, credentials: 'include' })
+      const r = await fetch('/api/admin/media', { method: 'POST', body: fd, credentials: 'include' })
       const { doc } = await r.json()
       onChange({ id: doc.id, url: doc.url ?? '', mimeType: doc.mimeType, filename: doc.filename })
       toast.success('上傳成功')
@@ -109,51 +121,32 @@ export function HomePageForm({ initialData }: { initialData?: any }) {
   const [loading, setLoading] = React.useState(false)
 
   React.useEffect(() => {
-    Promise.all(LOCALES.map(async ({ key }) => {
-      const r = await fetch(`/api/globals/home-page?locale=${key}&depth=1`, { credentials: 'include' })
-      return { key, data: await r.json() }
-    })).then((results) => {
-      const g = (k: string, f: string) => results.find((r) => r.key === k)?.data[f] ?? ''
-      const zhData = results.find((r) => r.key === 'zh-TW')?.data
-      const toRef = (d: any): MediaRef => d ? { id: d.id ?? d, url: d.url ?? '', mimeType: d.mimeType, filename: d.filename } : null
-      setForm({
-        tagline1:      { 'zh-TW': g('zh-TW', 'tagline1'),      en: g('en', 'tagline1'),      ja: g('ja', 'tagline1') },
-        tagline2:      { 'zh-TW': g('zh-TW', 'tagline2'),      en: g('en', 'tagline2'),      ja: g('ja', 'tagline2') },
-        heroLede:      { 'zh-TW': g('zh-TW', 'heroLede'),      en: g('en', 'heroLede'),      ja: g('ja', 'heroLede') },
-        seasonalTitle: { 'zh-TW': g('zh-TW', 'seasonalTitle'), en: g('en', 'seasonalTitle'), ja: g('ja', 'seasonalTitle') },
-        seasonalDesc:  { 'zh-TW': g('zh-TW', 'seasonalDesc'),  en: g('en', 'seasonalDesc'),  ja: g('ja', 'seasonalDesc') },
-        heroVideo:     toRef(zhData?.heroVideo),
-        heroPoster:    toRef(zhData?.heroPoster),
-        seasonalVideo: toRef(zhData?.seasonalVideo),
-        seasonalImage: toRef(zhData?.seasonalImage),
-      })
-    })
+    fetch('/api/admin/globals/home-page', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((data) => setForm(initForm(data)))
+      .catch(() => {})
   }, [])
 
   const handleSave = async () => {
     setLoading(true)
     try {
-      const sharedPayload = {
-        heroVideo:     form.heroVideo?.id ?? null,
-        heroPoster:    form.heroPoster?.id ?? null,
-        seasonalVideo: form.seasonalVideo?.id ?? null,
-        seasonalImage: form.seasonalImage?.id ?? null,
-      }
-      await Promise.all(LOCALES.map(({ key }) =>
-        fetch(`/api/globals/home-page?locale=${key}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            ...sharedPayload,
-            tagline1:      form.tagline1[key as keyof LocalizedStr],
-            tagline2:      form.tagline2[key as keyof LocalizedStr],
-            heroLede:      form.heroLede[key as keyof LocalizedStr],
-            seasonalTitle: form.seasonalTitle[key as keyof LocalizedStr],
-            seasonalDesc:  form.seasonalDesc[key as keyof LocalizedStr],
-          }),
-        })
-      ))
+      const res = await fetch('/api/admin/globals/home-page', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          tagline1:      form.tagline1,
+          tagline2:      form.tagline2,
+          heroLede:      form.heroLede,
+          seasonalTitle: form.seasonalTitle,
+          seasonalDesc:  form.seasonalDesc,
+          heroVideo:     form.heroVideo ?? null,
+          heroPoster:    form.heroPoster ?? null,
+          seasonalVideo: form.seasonalVideo ?? null,
+          seasonalImage: form.seasonalImage ?? null,
+        }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       toast.success('首頁設定已儲存')
     } catch { toast.error('儲存失敗') } finally { setLoading(false) }
   }
