@@ -4,6 +4,8 @@ import type { MenuCategory } from '@/lib/menu-data';
 
 export function MenuSection({ category }: { category: MenuCategory }) {
   const t = useTranslations();
+  // Supports both translation keys (start with 'menu.') and pre-resolved strings (CMS items)
+  const itemName = (nameKey: string) => nameKey.startsWith('menu.') ? t(nameKey as any) : nameKey
 
   return (
     <section id={category.id} className="container-content py-20 md:py-24 scroll-mt-24">
@@ -23,7 +25,7 @@ export function MenuSection({ category }: { category: MenuCategory }) {
               {item.image && (
                 <Image
                   src={item.image}
-                  alt={t(item.nameKey)}
+                  alt={itemName(item.nameKey)}
                   fill
                   sizes="(max-width: 768px) 50vw, 260px"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -37,7 +39,7 @@ export function MenuSection({ category }: { category: MenuCategory }) {
             </div>
             <div className="flex items-start gap-2 transition-colors duration-200 group-hover:text-ink">
               <span className="text-sea-400 mt-0.5 text-sm">·</span>
-              <span className="body-text leading-snug">{t(item.nameKey)}</span>
+              <span className="body-text leading-snug">{itemName(item.nameKey)}</span>
             </div>
           </article>
         ))}
@@ -52,13 +54,13 @@ export function MenuSection({ category }: { category: MenuCategory }) {
                 {item.image && (
                   <Image
                     src={item.image}
-                    alt={t(item.nameKey)}
+                    alt={itemName(item.nameKey)}
                     width={120}
                     height={120}
                     className="object-contain drop-shadow-sm"
                   />
                 )}
-                <span className="body-text text-xs">{t(item.nameKey)}</span>
+                <span className="body-text text-xs">{itemName(item.nameKey)}</span>
               </div>
             ))}
           </div>

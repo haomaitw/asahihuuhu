@@ -1,6 +1,7 @@
 'use client'
 import * as React from 'react'
 import { toast } from 'sonner'
+import { Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -23,6 +24,7 @@ const TABS = [
   { key: 'basic',       label: '基本資料'     },
   { key: 'hours',       label: '營業時間'     },
   { key: 'tcat',        label: '黑貓出貨設定' },
+  { key: 'payment',     label: '綠界 / ECPay' },
   { key: 'email',       label: 'Email 設定'   },
   { key: 'seo',         label: 'SEO'          },
 ] as const
@@ -53,6 +55,8 @@ type MaintenanceState = {
 type FormState = {
   // non-localized
   maintenanceMode: MaintenanceState
+  faviconUrl:      string
+  ogImageUrl:      string
   phone:           string
   lineId:          string
   googleMapsUrl:   string
@@ -86,6 +90,8 @@ function initForm(data?: any): FormState {
         ja:      '',
       },
     },
+    faviconUrl:      data?.faviconUrl      ?? '',
+    ogImageUrl:      data?.ogImageUrl      ?? '',
     phone:           data?.phone           ?? '',
     lineId:          data?.lineId          ?? '',
     googleMapsUrl:   data?.googleMapsUrl   ?? '',
@@ -232,11 +238,34 @@ function LocaleTabs({
 
 // ── Main form ─────────────────────────────────────────────────────────────────
 
-export function SiteSettingsForm({ initialData }: { initialData?: any }) {
-  const [form, setForm]     = React.useState<FormState>(() => initForm(initialData))
-  const [tab, setTab]       = React.useState<TabKey>('maintenance')
-  const [locale, setLocale] = React.useState<LocaleKey>('zh-TW')
+export function SiteSettingsForm({ initialData, ecpayInfo }: { initialData?: any; ecpayInfo?: { merchantId: string; isTest: boolean; configured: boolean } }) {
+  const [form, setForm]       = React.useState<FormState>(() => initForm(initialData))
+  const [tab, setTab]         = React.useState<TabKey>('maintenance')
+  const [locale, setLocale]   = React.useState<LocaleKey>('zh-TW')
   const [loading, setLoading] = React.useState(false)
+  const [uploading, setUploading] = React.useState<'favicon' | 'ogImage' | null>(null)
+  const faviconRef = React.useRef<HTMLInputElement>(null)
+  const ogImageRef = React.useRef<HTMLInputElement>(null)
+
+  const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'faviconUrl' | 'ogImageUrl') => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(field === 'faviconUrl' ? 'favicon' : 'ogImage')
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('alt', file.name.replace(/\.[^.]+$/, ''))
+      const r = await fetch('/api/admin/media', { method: 'POST', body: fd, credentials: 'include' })
+      const { doc } = await r.json()
+      setForm((p) => ({ ...p, [field]: doc.url ?? '' }))
+      toast.success('圖示已上傳')
+    } catch {
+      toast.error('上傳失敗')
+    } finally {
+      setUploading(null)
+      e.target.value = ''
+    }
+  }
 
   // Hydrate from Firestore via single GET
   React.useEffect(() => {
@@ -254,6 +283,8 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
               ja:      d.maintenanceMode?.message?.ja        ?? '',
             },
           },
+          faviconUrl:   d.faviconUrl   ?? prev.faviconUrl,
+          ogImageUrl:   d.ogImageUrl   ?? prev.ogImageUrl,
           phone:        d.phone        ?? prev.phone,
           lineId:       d.lineId       ?? prev.lineId,
           googleMapsUrl:   d.googleMapsUrl   ?? prev.googleMapsUrl,
@@ -294,6 +325,8 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
       // Non-localized fields + tcat — spread into each per-locale request
       const nonLocalizedBody = {
         maintenanceMode: { enabled: form.maintenanceMode.enabled },
+        faviconUrl:      form.faviconUrl  || null,
+        ogImageUrl:      form.ogImageUrl  || null,
         phone:           form.phone,
         lineId:          form.lineId,
         googleMapsUrl:   form.googleMapsUrl,
@@ -470,6 +503,65 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
       {/* ── Tab: 基本資料 ──────────────────────────────────────────── */}
       {tab === 'basic' && (
         <div className="space-y-4">
+          {/* Icon / Favicon */}
+          <Card>
+            <SectionHeader
+              title="網站圖示"
+              description="Favicon 顯示於瀏覽器分頁；OG 圖片用於社群媒體分享預覽（建議 1200×630px）"
+            />
+            <CardContent className="p-5 space-y-5">
+              {/* Favicon row */}
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-adm-md border border-adm-border-default bg-adm-bg-sunken flex items-center justify-center overflow-hidden shrink-0">
+                  {form.faviconUrl
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={form.faviconUrl} alt="favicon" className="h-10 w-10 object-contain" />
+                    : <span className="text-2xl">🌐</span>}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-adm-text-primary">Favicon <span className="font-normal text-adm-text-tertiary text-xs">（.ico / .png，建議 32×32）</span></p>
+                  {form.faviconUrl && <p className="text-xs text-adm-text-tertiary truncate mt-0.5">{form.faviconUrl}</p>}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {form.faviconUrl && (
+                    <button onClick={() => setForm((p) => ({ ...p, faviconUrl: '' }))} className="text-adm-text-tertiary hover:text-adm-danger-500 transition-colors">
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                  <Button variant="secondary" size="sm" loading={uploading === 'favicon'} onClick={() => faviconRef.current?.click()}>
+                    <Upload className="h-3.5 w-3.5" /> 上傳
+                  </Button>
+                </div>
+                <input ref={faviconRef} type="file" accept="image/*,.ico" className="hidden" onChange={(e) => handleIconUpload(e, 'faviconUrl')} />
+              </div>
+
+              {/* OG Image row */}
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-20 rounded-adm-md border border-adm-border-default bg-adm-bg-sunken flex items-center justify-center overflow-hidden shrink-0">
+                  {form.ogImageUrl
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={form.ogImageUrl} alt="og" className="h-full w-full object-cover" />
+                    : <span className="text-xl">🖼️</span>}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-adm-text-primary">社群分享圖 (OG Image) <span className="font-normal text-adm-text-tertiary text-xs">（建議 1200×630px）</span></p>
+                  {form.ogImageUrl && <p className="text-xs text-adm-text-tertiary truncate mt-0.5">{form.ogImageUrl}</p>}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {form.ogImageUrl && (
+                    <button onClick={() => setForm((p) => ({ ...p, ogImageUrl: '' }))} className="text-adm-text-tertiary hover:text-adm-danger-500 transition-colors">
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                  <Button variant="secondary" size="sm" loading={uploading === 'ogImage'} onClick={() => ogImageRef.current?.click()}>
+                    <Upload className="h-3.5 w-3.5" /> 上傳
+                  </Button>
+                </div>
+                <input ref={ogImageRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleIconUpload(e, 'ogImageUrl')} />
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <SectionHeader title="聯絡資訊" />
             <CardContent className="p-5 space-y-4">
@@ -648,6 +740,60 @@ export function SiteSettingsForm({ initialData }: { initialData?: any }) {
                 ]}
               />
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Tab: 綠界 / ECPay ───────────────────────────────────── */}
+      {tab === 'payment' && (
+        <Card>
+          <SectionHeader
+            title="綠界 / ECPay 金流設定"
+            description="金流 API 金鑰由系統環境變數管理，如需修改請至 Zeabur 後台更新以下環境變數"
+          />
+          <CardContent className="p-5 space-y-5">
+            {/* Status indicator */}
+            <div className={cn(
+              'flex items-center gap-3 rounded-adm-lg border px-4 py-3',
+              ecpayInfo?.configured
+                ? 'border-adm-success-500/30 bg-adm-success-50'
+                : 'border-adm-warning-500/30 bg-adm-warning-50'
+            )}>
+              <span className={cn(
+                'h-2.5 w-2.5 rounded-full shrink-0',
+                ecpayInfo?.configured ? 'bg-adm-success-500' : 'bg-adm-warning-500'
+              )} />
+              <div>
+                <p className="text-sm font-medium text-adm-text-primary">
+                  {ecpayInfo?.configured ? '金流已設定' : '金流尚未設定'}
+                </p>
+                <p className="text-xs text-adm-text-tertiary mt-0.5">
+                  {ecpayInfo?.configured
+                    ? `Merchant ID: ${ecpayInfo.merchantId}　模式：${ecpayInfo.isTest ? '測試' : '正式'}`
+                    : '請在 Zeabur 設定 ECPAY_MERCHANT_ID、ECPAY_HASH_KEY、ECPAY_HASH_IV'}
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-adm-lg bg-adm-bg-sunken px-4 py-4 space-y-2">
+              <p className="text-xs font-semibold text-adm-text-secondary uppercase tracking-wider">需設定的環境變數</p>
+              {[
+                { key: 'ECPAY_MERCHANT_ID', desc: '綠界特店編號' },
+                { key: 'ECPAY_HASH_KEY', desc: '金鑰 HashKey' },
+                { key: 'ECPAY_HASH_IV', desc: '金鑰 HashIV' },
+                { key: 'ECPAY_IS_TEST', desc: '測試模式（true/false，測試用 true）' },
+                { key: 'ECPAY_LOGISTICS_MERCHANT_ID', desc: '綠界物流特店編號（出貨用，可與上方相同）' },
+              ].map(({ key, desc }) => (
+                <div key={key} className="flex items-start gap-3">
+                  <code className="font-mono text-xs bg-adm-bg-base border border-adm-border-default rounded px-1.5 py-0.5 text-adm-brand-600 shrink-0">{key}</code>
+                  <span className="text-xs text-adm-text-tertiary">{desc}</span>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-xs text-adm-text-tertiary">
+              修改環境變數後，請至 Zeabur 重新部署應用程式使設定生效。
+            </p>
           </CardContent>
         </Card>
       )}

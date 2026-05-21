@@ -36,17 +36,33 @@
     },
     "about": {
       "lede": "從沖繩海邊的清晨朝陽，到淡水漁港旁的傍晚霞光——一對夫婦用一碗職人刨冰，在異鄉築起了關於家與初心最溫柔的承諾。"
+    },
+    "lineup": {
+      "title": "本季菜單"
     }
   },
   "lineup": {
     "title": "產品介紹",
     "description": "以日本職人刨冰機將整塊冰刨成細如冬雪的冰晶，搭配全手工製作的天然醬料，不添加香精色素，每一道冰品都是沖繩技藝與台灣食材的相遇。",
-    "kakigori": { "title": "日式刨冰" },
-    "crepes": { "title": "日式可麗餅" },
-    "drinks": { "title": "飲品" },
-    "goods": { "title": "週邊商品" },
-    "addOns": { "title": "加點項目" },
-    "shavedIce": { "eyebrow": "SHAVED ICE", "title": "刨冰系列" }
+    "kakigori": {
+      "title": "日式刨冰"
+    },
+    "crepes": {
+      "title": "日式可麗餅"
+    },
+    "drinks": {
+      "title": "飲品"
+    },
+    "goods": {
+      "title": "週邊商品"
+    },
+    "addOns": {
+      "title": "加點項目"
+    },
+    "shavedIce": {
+      "eyebrow": "SHAVED ICE",
+      "title": "刨冰系列"
+    }
   },
   "menu": {
     "kakigori": {

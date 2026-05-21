@@ -34,5 +34,10 @@ export default async function SiteSettingsPage() {
   } catch {
     // DB not ready yet — render form with empty defaults
   }
-  return <SiteSettingsForm initialData={data} />
+  const ecpayInfo = {
+    merchantId: process.env.ECPAY_MERCHANT_ID ? `${process.env.ECPAY_MERCHANT_ID.slice(0, 4)}****` : '未設定',
+    isTest: process.env.ECPAY_IS_TEST !== 'false',
+    configured: !!(process.env.ECPAY_MERCHANT_ID && process.env.ECPAY_HASH_KEY && process.env.ECPAY_HASH_IV),
+  }
+  return <SiteSettingsForm initialData={data} ecpayInfo={ecpayInfo} />
 }

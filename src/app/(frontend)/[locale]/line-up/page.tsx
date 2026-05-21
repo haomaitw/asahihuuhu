@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
-import { useTranslations } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { PageHero } from '@/components/PageHero';
 import { WaveDivider } from '@/components/WaveDivider';
 import { MenuAnchorBar } from '@/components/MenuAnchorBar';
 import { MenuSection } from '@/components/MenuSection';
 import { menu } from '@/lib/menu-data';
+import { getMenuItems } from '@/lib/firestore/admin';
+import type { MenuCategory, MenuItem } from '@/lib/menu-data';
 
 export const dynamic = 'force-dynamic'
 
@@ -26,10 +28,39 @@ export default async function LineUpPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <LineUpContent />;
+
+  // Try Firestore CMS items first; fall back to static menu-data
+  let cmsItems: any[] = []
+  try {
+    cmsItems = await getMenuItems(locale as any)
+  } catch {
+    // fallback to static
+  }
+
+  // If CMS has items, build dynamic categories from them
+  let resolvedMenu: MenuCategory[] = menu
+  if (cmsItems.length > 0) {
+    const categoryOrder = ['kakigori', 'crepes', 'drinks', 'goods']
+    resolvedMenu = categoryOrder.map((catId) => {
+      const base = menu.find((c) => c.id === catId)
+      const items: MenuItem[] = cmsItems
+        .filter((i) => i.category === catId)
+        .map((i) => ({
+          id: i.id,
+          nameKey: i.name, // already localized string, handled below
+          image: i.image ?? undefined,
+          badge: i.badge ?? undefined,
+          _resolvedName: i.name, // stash for rendering
+        } as any))
+      if (!base) return null
+      return { ...base, items: items.length > 0 ? items : base.items }
+    }).filter(Boolean) as MenuCategory[]
+  }
+
+  return <LineUpContent resolvedMenu={resolvedMenu} />
 }
 
-function LineUpContent() {
+function LineUpContent({ resolvedMenu }: { resolvedMenu: MenuCategory[] }) {
   const t = useTranslations();
 
   return (
@@ -50,7 +81,7 @@ function LineUpContent() {
 
       <MenuAnchorBar />
 
-      {menu.map((cat, idx) => (
+      {resolvedMenu.map((cat, idx) => (
         <div
           key={cat.id}
           className={idx % 2 === 0 ? 'bg-paper-50' : 'bg-sea-100'}

@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Newspaper, HelpCircle, Home, Settings2,
   Package, ShoppingBag, Image as ImageIcon, Users,
   ChevronLeft, ChevronRight, Tag, FolderOpen, Lock,
-  Info, ShoppingCart, UserCircle, Sliders, Ticket,
+  Info, ShoppingCart, Sliders, Ticket, UtensilsCrossed,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -49,10 +49,10 @@ const NAV: NavGroup[] = [
     items: [
       { label: '最新消息', href: '/admin/collections/news', icon: Newspaper },
       { label: '常見問答', href: '/admin/collections/faqs', icon: HelpCircle },
+      { label: '菜單管理', href: '/admin/collections/menu-items', icon: UtensilsCrossed },
       { label: '首頁設定', href: '/admin/globals/home-page', icon: Home },
       { label: '關於頁面', href: '/admin/globals/about-page', icon: Info },
       { label: '商店頁面', href: '/admin/globals/shop-page', icon: ShoppingCart },
-      { label: '成員介紹', href: '/admin/collections/staff', icon: UserCircle },
     ],
   },
   {

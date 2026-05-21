@@ -36,17 +36,33 @@
     },
     "about": {
       "lede": "沖縄の海辺に昇る朝陽から、淡水漁港に沈む夕焼けへ——ひと組の夫婦が、一杯の職人かき氷に込めた故郷と初心の物語。"
+    },
+    "lineup": {
+      "title": "メニュー"
     }
   },
   "lineup": {
     "title": "メニュー",
     "description": "日本製かき氷機で丸ごとの氷を削り出した、冬の雪のような繊細な氷晶。すべて手作りの無添加ソースとあわせた、沖縄の技と台湾の食材の出会いをお楽しみください。",
-    "kakigori": { "title": "かき氷" },
-    "crepes": { "title": "クレープ" },
-    "drinks": { "title": "ドリンク" },
-    "goods": { "title": "グッズ" },
-    "addOns": { "title": "トッピング" },
-    "shavedIce": { "eyebrow": "SHAVED ICE", "title": "かき氷" }
+    "kakigori": {
+      "title": "かき氷"
+    },
+    "crepes": {
+      "title": "クレープ"
+    },
+    "drinks": {
+      "title": "ドリンク"
+    },
+    "goods": {
+      "title": "グッズ"
+    },
+    "addOns": {
+      "title": "トッピング"
+    },
+    "shavedIce": {
+      "eyebrow": "SHAVED ICE",
+      "title": "かき氷"
+    }
   },
   "menu": {
     "kakigori": {

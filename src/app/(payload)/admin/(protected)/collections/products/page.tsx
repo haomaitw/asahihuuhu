@@ -65,7 +65,7 @@ export default async function ProductsPage() {
                     </td>
                     <td className="px-5 py-3.5 text-sm text-adm-text-secondary font-mono">{p.slug}</td>
                     <td className="px-5 py-3.5 text-sm tabular-nums text-adm-text-primary">NT$ {Number(p.price ?? 0).toLocaleString()}</td>
-                    <td className="px-5 py-3.5 text-sm text-adm-text-secondary">{p.category === 'goods' ? 'Goods' : 'Seasonal'}</td>
+                    <td className="px-5 py-3.5 text-sm text-adm-text-secondary">{p.category ?? '—'}</td>
                     <td className="px-5 py-3.5">
                       <Badge variant={p.isAvailable ? 'success' : 'neutral'} size="sm">
                         {p.isAvailable ? '上架中' : '已下架'}

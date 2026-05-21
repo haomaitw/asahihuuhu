@@ -307,7 +307,7 @@ export function ProductForm({ initialData, id }: { initialData?: any; id?: strin
               >
                 <option value="">— 未分類 —</option>
                 {categories.map((c) => (
-                  <option key={c.id} value={String(c.id)}>
+                  <option key={c.id} value={c.slug}>
                     {getCategoryName(c)} ({c.slug})
                   </option>
                 ))}
